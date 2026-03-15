@@ -5,11 +5,12 @@
 
 -- ---- profiles (사용자 프로필) --------------------------------
 create table if not exists public.profiles (
-  id          uuid primary key references auth.users(id) on delete cascade,
-  name        text not null,
-  email       text not null,
-  role        text not null default 'member', -- 'admin' | 'member'
-  created_at  timestamptz not null default now()
+  id           uuid primary key references auth.users(id) on delete cascade,
+  name         text not null,
+  email        text not null,
+  phone_number text default '', -- 추가된 휴대폰 번호 컬럼
+  role         text not null default 'member', -- 'admin' | 'member'
+  created_at   timestamptz not null default now()
 );
 
 alter table public.profiles enable row level security;
@@ -26,11 +27,12 @@ create policy "프로필 수정" on public.profiles
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, name, email)
+  insert into public.profiles (id, name, email, phone_number)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', ''),
-    new.email
+    new.email,
+    coalesce(new.raw_user_meta_data->>'phone_number', '')  -- 회원가입 시 핸드폰 번호 저장
   );
   return new;
 end;

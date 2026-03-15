@@ -38,9 +38,13 @@ export default function Navbar() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow">
-                            <span className="text-white font-bold text-sm">✝</span>
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="relative w-10 h-10 overflow-hidden rounded-md shadow-sm transition-transform group-hover:scale-105">
+                            <img 
+                                src="/images/logo.svg" 
+                                alt="순천순동교회 로고" 
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                         <span className="font-bold text-gray-800 text-lg group-hover:text-blue-700 transition-colors">
                             순천순동교회
@@ -63,36 +67,49 @@ export default function Navbar() {
                         ))}
                     </nav>
 
-                    {/* Auth Buttons */}
-                    <div className="hidden md:flex items-center gap-2">
-                        {user ? (
-                            <>
-                                <span className="text-sm text-gray-500 mr-1 truncate max-w-xs">
-                                    {user.email}
-                                </span>
-                                <button
-                                    onClick={handleLogout}
-                                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-500 border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
-                                >
-                                    로그아웃
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link
-                                    href="/auth/login"
-                                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg hover:border-blue-200 transition-colors"
-                                >
-                                    로그인
-                                </Link>
-                                <Link
-                                    href="/auth/register"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
-                                >
-                                    회원가입
-                                </Link>
-                            </>
-                        )}
+                    {/* Desktop Right Side (Socials + Auth) */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {/* YouTube Link */}
+                        <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C" 
+                              target="_blank" rel="noopener noreferrer"
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                              aria-label="순천순동교회 유튜브 채널">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </Link>
+
+                        {/* Auth Buttons */}
+                        <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
+                            {user ? (
+                                <>
+                                    <span className="text-sm text-gray-500 mr-1 truncate max-w-xs">
+                                        {user.email}
+                                    </span>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-500 border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
+                                    >
+                                        로그아웃
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/auth/login"
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg hover:border-blue-200 transition-colors"
+                                    >
+                                        로그인
+                                    </Link>
+                                    <Link
+                                        href="/auth/register"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                                    >
+                                        회원가입
+                                    </Link>
+                                </>
+                            )}
+                        </div>
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -144,6 +161,16 @@ export default function Navbar() {
                                     </Link>
                                 </>
                             )}
+                        </div>
+                        <div className="pt-2 px-4 pb-2">
+                            <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C" 
+                                  target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center justify-center gap-2 w-full py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                </svg>
+                                유튜브 채널
+                            </Link>
                         </div>
                     </div>
                 )}

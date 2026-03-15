@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import HeroSlider from '@/components/HeroSlider'
 
 const worshipSchedule = [
   { day: '주일', time: '오전 11:00', name: '주일 예배', icon: '🛐' },
-  { day: '수요일', time: '오후 7:30', name: '수요 예배', icon: '✝️' },
+  { day: '수요일', time: '오후 6:30', name: '수요 예배', icon: '✝️' },
   { day: '매일', time: '오전 5:30', name: '새벽 기도회', icon: '🌅' },
   { day: '금요일', time: '오후 7:00', name: '구역 예배', icon: '🏠' },
 ]
@@ -30,32 +31,49 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-indigo-400 rounded-full opacity-20 blur-3xl" />
+      <section className="relative text-white overflow-hidden bg-gray-900 min-h-[90vh] flex items-center justify-center">
+        <HeroSlider />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-28 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-blue-100 text-sm font-medium px-4 py-2 rounded-full mb-6">
-            <span>✝</span>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center w-full z-10">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium px-5 py-2.5 rounded-full mb-8 shadow-xl">
+            <span className="text-amber-400">✝</span>
             <span>하나님의 은혜 안에서 함께 성장하는 교회</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-            순천순동교회에<br />
-            <span className="text-blue-300">오신 것을</span><br />
-            환영합니다
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8 leading-tight drop-shadow-2xl">
+            <span className="text-amber-400 drop-shadow-lg">하나님이</span> 기뻐하시는<br />
+            행복한 교회
           </h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-10 leading-relaxed">
-            예수 그리스도의 사랑으로 하나되어 섬기며,<br />
-            하나님의 말씀 위에 세워진 교회입니다.
-          </p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-xl md:text-2xl text-gray-100 max-w-4xl mx-auto mb-12 drop-shadow-md font-bold">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-2xl">✧</span>
+              <span>예배가 살아있는 교회</span>
+            </div>
+            <span className="hidden md:inline text-white/40">|</span>
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-2xl">✧</span>
+              <span>기도가 살아있는 교회</span>
+            </div>
+            <span className="hidden md:inline text-white/40">|</span>
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-2xl">✧</span>
+              <span>선교가 살아있는 교회</span>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
+              target="_blank" rel="noopener noreferrer"
+              className="px-8 py-4 bg-red-600/90 text-white hover:bg-red-600 font-bold rounded-xl shadow-[0_4px_14px_0_rgba(220,38,38,0.39)] hover:shadow-[0_6px_20px_rgba(220,38,38,0.23)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+              </svg>
+              순동교회 유튜브
+            </Link>
             <Link href="/events"
-              className="px-8 py-4 bg-white text-blue-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              className="px-8 py-4 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-0.5 transition-all flex items-center justify-center">
               예배 일정 보기
             </Link>
             <Link href="/auth/register"
-              className="px-8 py-4 bg-blue-600/50 border border-white/30 text-white font-bold rounded-xl hover:bg-blue-600 transition-all backdrop-blur-sm">
+              className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-md shadow-lg flex items-center justify-center">
               교인 등록하기
             </Link>
           </div>
