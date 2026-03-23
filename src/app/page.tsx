@@ -3,10 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import HeroSlider from '@/components/HeroSlider'
 
 const worshipSchedule = [
-  { day: '주일', time: '오전 11:00', name: '주일 예배', icon: '🛐' },
-  { day: '수요일', time: '오후 6:30', name: '수요 예배', icon: '✝️' },
-  { day: '매일', time: '오전 5:30', name: '새벽 기도회', icon: '🌅' },
-  { day: '금요일', time: '오후 7:00', name: '구역 예배', icon: '🏠' },
+  { day: '주일', time: '오전 11:00', name: '주일오전예배', icon: '🛐' },
+  { day: '주일', time: '오후 1:30', name: '주일오후예배', icon: '☀️' },
+  { day: '수요일', time: '오후 7:00', name: '수요밤예배', icon: '✝️' },
+  { day: '금요일', time: '오후 8:00', name: '금요기도회', icon: '🙏' },
+  { day: '매일', time: '오전 5:00', name: '새벽예배', icon: '🌅' },
 ]
 
 export default async function HomePage() {
@@ -189,9 +190,9 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: '📖', title: '말씀 중심', desc: '성경 말씀을 삶의 기준으로 삼고, 매일 말씀을 통해 하나님을 만나는 교회입니다.' },
-              { icon: '🙏', title: '기도하는 교회', desc: '쉬지 않고 기도하며 하나님의 뜻을 구하는 기도 운동이 살아있는 교회입니다.' },
-              { icon: '💕', title: '사랑의 공동체', desc: '이웃과 지역사회를 섬기며 그리스도의 사랑을 실천하는 공동체입니다.' },
+              { icon: '🛐', title: '예배가 살아있는 교회', desc: '하나님이 기뻐하시는 온전한 예배를 통해 영적 회복을 경험하는 공동체입니다.' },
+              { icon: '🙏', title: '기도가 살아있는 교회', desc: '쉬지 않고 깨어 기도하며 하나님의 뜻을 먼저 구하는 응답의 공동체입니다.' },
+              { icon: '🌍', title: '선교가 살아있는 교회', desc: '지역 사회를 섬기고 열방을 향해 복음을 전파하는 사명의 공동체입니다.' },
             ].map(({ icon, title, desc }) => (
               <div key={title} className="text-center p-8 rounded-2xl bg-gradient-to-b from-blue-50 to-white border border-blue-100 hover:shadow-lg transition-shadow">
                 <div className="text-5xl mb-4">{icon}</div>
