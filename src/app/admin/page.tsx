@@ -4,21 +4,15 @@ import Link from 'next/link'
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
 
-  // 총 교인 수
-  const { count: memberCount } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
+  // 병렬 실행 + 에러 시 0 fallback
+  const safe = (q: PromiseLike<{ count: number | null }>) =>
+    Promise.resolve(q).then(r => r.count ?? 0).catch(() => 0)
 
-  // 다가오는 행사 수 (오늘 이후)
-  const { count: upcomingEventsCount } = await supabase
-    .from('events')
-    .select('*', { count: 'exact', head: true })
-    .gte('event_date', new Date().toISOString().split('T')[0])
-
-  // 공지사항 수
-  const { count: noticeCount } = await supabase
-    .from('notices')
-    .select('*', { count: 'exact', head: true })
+  const [memberCount, upcomingEventsCount, noticeCount] = await Promise.all([
+    safe(supabase.from('profiles').select('*', { count: 'exact', head: true })),
+    safe(supabase.from('events').select('*', { count: 'exact', head: true }).gte('event_date', new Date().toISOString().split('T')[0])),
+    safe(supabase.from('notices').select('*', { count: 'exact', head: true })),
+  ])
 
   // 퀵 메뉴 카드 컴포넌트
   const QuickCard = ({ title, count, href, icon, color }: { title: string, count: number, href: string, icon: string, color: string }) => (

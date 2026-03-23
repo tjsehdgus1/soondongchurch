@@ -8,15 +8,29 @@ import type { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
     const [user, setUser] = useState<User | null>(null)
+    const [role, setRole] = useState('member')
     const [menuOpen, setMenuOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
     const supabase = createClient()
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => setUser(data.user))
-        const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
+        supabase.auth.getSession().then(async ({ data }) => {
+            const sessionUser = data.session?.user ?? null
+            setUser(sessionUser)
+            if (sessionUser) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', sessionUser.id).single()
+                if (profile) setRole(profile.role)
+            }
+        })
+        const { data: listener } = supabase.auth.onAuthStateChange(async (_e, session) => {
             setUser(session?.user ?? null)
+            if (session?.user) {
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
+                if (profile) setRole(profile.role)
+            } else {
+                setRole('member')
+            }
         })
         return () => listener.subscription.unsubscribe()
     }, [])
@@ -30,19 +44,20 @@ export default function Navbar() {
     const navLinks = [
         { href: '/', label: '홈' },
         { href: '/events', label: '예배/행사' },
+        { href: '/sermons', label: '설교' },
         { href: '/notices', label: '공지사항' },
     ]
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 shadow-sm">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
                         <div className="relative w-10 h-10 overflow-hidden rounded-md shadow-sm transition-transform group-hover:scale-105">
-                            <img 
-                                src="/images/logo.svg" 
-                                alt="순천순동교회 로고" 
+                            <img
+                                src="/images/logo.svg"
+                                alt="순천순동교회 로고"
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -65,15 +80,30 @@ export default function Navbar() {
                                 {label}
                             </Link>
                         ))}
+                        {/* 관리자 로그인 시 공지사항 옆에 관리자 홈 버튼 표출 */}
+                        {user && role === 'admin' && (
+                            <Link
+                                href="/admin"
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${pathname.startsWith('/admin')
+                                    ? 'bg-indigo-100 text-indigo-700'
+                                    : 'text-indigo-600 hover:bg-indigo-50 hover:text-indigo-800'
+                                    }`}
+                            >
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                </svg>
+                                관리자
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Desktop Right Side (Socials + Auth) */}
                     <div className="hidden md:flex items-center gap-4">
                         {/* YouTube Link */}
-                        <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C" 
-                              target="_blank" rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-red-600 transition-colors"
-                              aria-label="순천순동교회 유튜브 채널">
+                        <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
+                            target="_blank" rel="noopener noreferrer"
+                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            aria-label="순천순동교회 유튜브 채널">
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                             </svg>
@@ -83,7 +113,7 @@ export default function Navbar() {
                         <div className="flex items-center gap-2 border-l border-gray-200 pl-4">
                             {user ? (
                                 <>
-                                    <span className="text-sm text-gray-500 mr-1 truncate max-w-xs">
+                                    <span className="text-sm text-gray-500 mr-1 truncate max-w-[180px]">
                                         {user.email}
                                     </span>
                                     <button
@@ -141,14 +171,25 @@ export default function Navbar() {
                                 {label}
                             </Link>
                         ))}
+                        {user && role === 'admin' && (
+                            <Link href="/admin" onClick={() => setMenuOpen(false)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold ${pathname.startsWith('/admin') ? 'bg-indigo-100 text-indigo-700' : 'text-indigo-600 hover:bg-indigo-50'}`}>
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                </svg>
+                                관리자
+                            </Link>
+                        )}
                         <div className="pt-2 border-t border-gray-100 flex gap-2 px-2">
                             {user ? (
-                                <button
-                                    onClick={() => { handleLogout(); setMenuOpen(false) }}
-                                    className="w-full py-2 text-sm font-medium text-red-500 border border-red-200 rounded-lg"
-                                >
-                                    로그아웃
-                                </button>
+                                <div className="w-full flex flex-col gap-2">
+                                    <button
+                                        onClick={() => { handleLogout(); setMenuOpen(false) }}
+                                        className="w-full py-2 text-sm font-medium text-red-500 border border-red-200 rounded-lg"
+                                    >
+                                        로그아웃
+                                    </button>
+                                </div>
                             ) : (
                                 <>
                                     <Link href="/auth/login" onClick={() => setMenuOpen(false)}
@@ -163,9 +204,9 @@ export default function Navbar() {
                             )}
                         </div>
                         <div className="pt-2 px-4 pb-2">
-                            <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C" 
-                                  target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center justify-center gap-2 w-full py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                            <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
+                                target="_blank" rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                                 </svg>

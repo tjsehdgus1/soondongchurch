@@ -29,13 +29,21 @@ export default async function HomePage() {
     .order('event_date', { ascending: true })
     .limit(3)
 
+  // 최신 설교 2개 (공개된 것만)
+  const { data: sermons } = await supabase
+    .from('sermons')
+    .select('*')
+    .eq('status', 'published')
+    .order('sermon_date', { ascending: false })
+    .limit(2)
+
   return (
     <div>
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden bg-gray-900 min-h-[90vh] flex items-center justify-center">
         <HeroSlider />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center w-full z-10">
+        <div className="relative max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center w-full z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium px-5 py-2.5 rounded-full mb-8 shadow-xl">
             <span className="text-amber-400">✝</span>
             <span>하나님의 은혜 안에서 함께 성장하는 교회</span>
@@ -83,7 +91,7 @@ export default async function HomePage() {
 
       {/* Worship Schedule */}
       <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">예배 안내</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">정기 예배 시간</h2>
@@ -103,9 +111,63 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Recent Sermons Section */}
+      <section className="py-20 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">Sermons</span>
+              <h2 className="text-3xl font-bold text-gray-900 mt-2">목사님 설교</h2>
+            </div>
+            <Link href="/sermons" className="text-blue-600 font-medium hover:underline text-sm bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm transition-all hover:shadow-md">
+              전체 설교 보기 →
+            </Link>
+          </div>
+
+          {!sermons || sermons.length === 0 ? (
+            <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200 text-gray-400">
+              <p className="text-lg">설교 영상을 준비 중입니다.</p>
+              <p className="text-sm mt-1">관리자 페이지에서 첫 설교 요약을 등록해 보세요!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {sermons.map((s: any) => (
+                <Link key={s.id} href={`/sermons/${s.id}`} className="group bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col">
+                  {/* 썸네일 */}
+                  <div className="relative aspect-video overflow-hidden bg-gray-100">
+                    <img src={s.thumbnail_url} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all">
+                        <svg className="w-5 h-5 text-blue-600 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                  {/* 텍스트 */}
+                  <div className="p-5 flex flex-col flex-1">
+                    <p className="text-xs font-semibold text-blue-600 mb-2">
+                      {new Date(s.sermon_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                    <h3 className="font-bold text-gray-900 text-base line-clamp-2 leading-snug group-hover:text-blue-700 transition-colors mb-3">{s.title}</h3>
+                    {s.summary && (
+                      <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">{s.summary}</p>
+                    )}
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 group-hover:gap-2 transition-all">
+                      말씀 보기
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Upcoming Events + Notices */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-white">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
             {/* Upcoming Events */}
@@ -183,7 +245,7 @@ export default async function HomePage() {
 
       {/* Church Info / Vision */}
       <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">교회 소개</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">우리 교회의 비전</h2>
