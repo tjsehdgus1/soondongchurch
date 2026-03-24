@@ -26,26 +26,15 @@ export async function POST(req: NextRequest) {
         const { filePath } = await req.json()
         if (!filePath) return NextResponse.json({ error: 'filePath가 없습니다.' }, { status: 400 })
 
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-        if (!supabaseUrl || !serviceKey) {
-            console.error('[presign] 환경변수 누락:', { supabaseUrl: !!supabaseUrl, serviceKey: !!serviceKey })
-            return NextResponse.json({ error: '서버 환경변수가 설정되지 않았습니다.' }, { status: 500 })
-        }
-
         const supabase = getServiceClient()
         const { data, error } = await supabase.storage
             .from('bulletins')
             .createSignedUploadUrl(filePath)
 
-        if (error) {
-            console.error('[presign] Supabase 오류:', error)
-            return NextResponse.json({ error: `스토리지 오류: ${error.message}` }, { status: 500 })
-        }
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
         return NextResponse.json({ signedUrl: data.signedUrl, token: data.token, path: data.path })
     } catch (err) {
-        console.error('[presign] 예외 발생:', err)
-        return NextResponse.json({ error: `서버 오류: ${err instanceof Error ? err.message : String(err)}` }, { status: 500 })
+        return NextResponse.json({ error: err instanceof Error ? err.message : '서버 오류' }, { status: 500 })
     }
 }

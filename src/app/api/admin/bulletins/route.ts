@@ -51,14 +51,10 @@ export async function POST(req: NextRequest) {
             .select()
             .single()
 
-        if (dbError) {
-            console.error('[bulletins POST] DB 오류:', dbError)
-            return NextResponse.json({ error: `DB 오류: ${dbError.message}` }, { status: 500 })
-        }
+        if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
 
         return NextResponse.json({ bulletin: data })
     } catch (err) {
-        console.error('[bulletins POST] 예외 발생:', err)
-        return NextResponse.json({ error: `서버 오류: ${err instanceof Error ? err.message : String(err)}` }, { status: 500 })
+        return NextResponse.json({ error: err instanceof Error ? err.message : '서버 오류' }, { status: 500 })
     }
 }

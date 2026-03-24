@@ -19,7 +19,6 @@ export default function AdminBulletinsPage() {
     const [bulletins, setBulletins] = useState<Bulletin[]>([])
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
-    const [uploadStep, setUploadStep] = useState('')
     const [title, setTitle] = useState('')
     const [bulletinDate, setBulletinDate] = useState('')
     const [file, setFile] = useState<File | null>(null)
@@ -50,7 +49,6 @@ export default function AdminBulletinsPage() {
         setError(null)
         setSuccess(null)
         setUploading(true)
-        setUploadStep('URL 발급 중...')
 
         try {
             const filePath = `${bulletinDate}_${Date.now()}.pdf`
@@ -67,7 +65,6 @@ export default function AdminBulletinsPage() {
                 return
             }
 
-            setUploadStep('파일 업로드 중...')
             // 2단계: signed URL로 직접 PUT 업로드
             const uploadRes = await fetch(presignData.signedUrl, {
                 method: 'PUT',
@@ -80,7 +77,6 @@ export default function AdminBulletinsPage() {
                 return
             }
 
-            setUploadStep('DB 저장 중...')
             // 3단계: DB에 메타데이터 저장
             const res = await fetch('/api/admin/bulletins', {
                 method: 'POST',
@@ -103,7 +99,6 @@ export default function AdminBulletinsPage() {
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
         } finally {
             setUploading(false)
-            setUploadStep('')
         }
     }
 
@@ -161,7 +156,7 @@ export default function AdminBulletinsPage() {
                         disabled={uploading}
                         className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        {uploading ? (uploadStep || '업로드 중...') : '업로드'}
+                        {uploading ? '업로드 중...' : '업로드'}
                     </button>
                 </form>
             </div>
