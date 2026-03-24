@@ -6,10 +6,16 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
-export default function Navbar() {
-    const [user, setUser] = useState<User | null>(null)
-    const [role, setRole] = useState('member')
-    const [userName, setUserName] = useState('')
+interface NavbarProps {
+    initialUser: User | null
+    initialRole: string
+    initialUserName: string
+}
+
+export default function Navbar({ initialUser, initialRole, initialUserName }: NavbarProps) {
+    const [user, setUser] = useState<User | null>(initialUser)
+    const [role, setRole] = useState(initialRole)
+    const [userName, setUserName] = useState(initialUserName)
     const [menuOpen, setMenuOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
@@ -33,6 +39,7 @@ export default function Navbar() {
     const handleLogout = () => {
         supabase.auth.signOut()
         router.push('/auth/login')
+        router.refresh()
     }
 
     const navLinks = [

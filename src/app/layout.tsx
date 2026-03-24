@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { createClient } from '@/lib/supabase/server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,15 +13,36 @@ export const metadata: Metadata = {
   keywords: ['교회', '순천순동교회', '순천', '예배', '성경', '기도'],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let initialRole = 'member'
+  let initialUserName = ''
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, name')
+      .eq('id', user.id)
+      .single()
+    if (profile) {
+      initialRole = profile.role ?? 'member'
+      initialUserName = profile.name ?? ''
+    }
+  }
+
   return (
     <html lang="ko">
       <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
-        <Navbar />
+        <Navbar
+          initialUser={user}
+          initialRole={initialRole}
+          initialUserName={initialUserName}
+        />
         <main className="min-h-screen pt-16">
           {children}
         </main>

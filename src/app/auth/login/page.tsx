@@ -41,6 +41,7 @@ export default function LoginPage() {
             return
         }
 
+        router.refresh()
         router.push('/')
     }
 
