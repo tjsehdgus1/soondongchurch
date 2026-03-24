@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -17,7 +17,6 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
     const [role, setRole] = useState(initialRole)
     const [userName, setUserName] = useState(initialUserName)
     const [menuOpen, setMenuOpen] = useState(false)
-    const router = useRouter()
     const pathname = usePathname()
     const supabase = useRef(createClient()).current
 
@@ -36,10 +35,10 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
         return () => listener.subscription.unsubscribe()
     }, [])
 
-    const handleLogout = () => {
-        supabase.auth.signOut()
-        router.push('/auth/login')
-        router.refresh()
+    const handleLogout = async () => {
+        const timeout = new Promise<void>(resolve => setTimeout(resolve, 2000))
+        await Promise.race([supabase.auth.signOut(), timeout])
+        window.location.href = '/auth/login'
     }
 
     const navLinks = [
