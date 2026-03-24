@@ -29,6 +29,7 @@ type Profile = {
 export default function AdminGroupsPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -44,10 +45,18 @@ export default function AdminGroupsPage() {
 
   const fetchGroups = async () => {
     setLoading(true)
-    const { data: groupData } = await supabase
+    setFetchError(null)
+    const { data: groupData, error } = await supabase
       .from('groups')
       .select('*')
       .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('groups 조회 오류:', error)
+      setFetchError(error.message)
+      setLoading(false)
+      return
+    }
 
     if (groupData) {
       // 각 그룹의 멤버 수 조회
@@ -204,6 +213,14 @@ export default function AdminGroupsPage() {
           {loading ? (
             <div className="p-12 text-center text-gray-500 bg-white rounded-2xl border border-gray-100">
               목록을 불러오는 중...
+            </div>
+          ) : fetchError ? (
+            <div className="p-12 text-center bg-white rounded-2xl border border-red-100">
+              <p className="text-red-500 font-medium">데이터를 불러오지 못했습니다.</p>
+              <p className="text-sm text-gray-400 mt-1">{fetchError}</p>
+              <button onClick={fetchGroups} className="mt-4 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">
+                다시 시도
+              </button>
             </div>
           ) : groups.length === 0 ? (
             <div className="p-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
