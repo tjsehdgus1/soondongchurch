@@ -20,14 +20,16 @@ export default function Navbar() {
             const sessionUser = data.user ?? null
             setUser(sessionUser)
             if (sessionUser) {
-                const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', sessionUser.id).single()
+                const { data: profile, error } = await supabase.from('profiles').select('role, name').eq('id', sessionUser.id).single()
+                if (error) console.error('[Navbar] 프로필 조회 오류:', error)
                 if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
             }
         })
         const { data: listener } = supabase.auth.onAuthStateChange(async (_e, session) => {
             setUser(session?.user ?? null)
             if (session?.user) {
-                const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', session.user.id).single()
+                const { data: profile, error } = await supabase.from('profiles').select('role, name').eq('id', session.user.id).single()
+                if (error) console.error('[Navbar] 프로필 조회 오류:', error)
                 if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
             } else {
                 setRole('member')
@@ -38,7 +40,8 @@ export default function Navbar() {
     }, [])
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
+        const timeout = new Promise<void>(resolve => setTimeout(resolve, 2000))
+        await Promise.race([supabase.auth.signOut(), timeout])
         window.location.href = '/auth/login'
     }
 

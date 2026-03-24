@@ -19,7 +19,8 @@ export default function AdminSidebar({ name }: { name: string }) {
 
   const handleLogout = async () => {
     const supabase = createClient()
-    await supabase.auth.signOut()
+    const timeout = new Promise<void>(resolve => setTimeout(resolve, 2000))
+    await Promise.race([supabase.auth.signOut(), timeout])
     window.location.href = '/'
   }
 
