@@ -30,10 +30,9 @@ export default function Navbar() {
         return () => listener.subscription.unsubscribe()
     }, [])
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
+        supabase.auth.signOut()
         router.push('/auth/login')
-        router.refresh()
     }
 
     const navLinks = [
