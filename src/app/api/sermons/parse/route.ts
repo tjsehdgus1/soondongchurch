@@ -9,60 +9,57 @@ export const maxDuration = 60
 // Vercel은 AWS 데이터센터 IP를 사용하며, YouTube가 이 IP 대역을 봇으로 감지해 차단함.
 // 로컬(일반 ISP IP)에서는 정상 동작하지만 프로덕션에서 자막 취득 불가.
 // 해결: YouTube 내부 플레이어 데이터(ytInitialPlayerResponse)를 브라우저 헤더로 직접 파싱.
+// YouTube InnerTube API를 사용한 자막 추출
+// HTML 파싱 방식(ytInitialPlayerResponse 크롤링) 대신 YouTube 내부 API를 직접 호출
+// - HTML 파싱: 페이지 구조 변경에 취약, 대용량 HTML JSON 파싱 실패 위험
+// - InnerTube API: YouTube 프론트엔드가 실제로 사용하는 엔드포인트, 구조 안정적
+// - INNERTUBE_API_KEY는 YouTube 웹 클라이언트에 공개 내장된 키 (비밀 키 아님)
+const INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+
 async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promise<string> {
-    const headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Cookie': 'SOCS=CAISNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpX3YyMDIzMTIxMl8xMDA1OTBfcmMYAiIBICAD',
-    }
+    // 1단계: InnerTube /player API로 플레이어 데이터 취득 (HTML 파싱 없음)
+    const playerRes = await fetch(
+        `https://www.youtube.com/youtubei/v1/player?key=${INNERTUBE_API_KEY}`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'X-YouTube-Client-Name': '1',
+                'X-YouTube-Client-Version': '2.20231219.04.00',
+                'Origin': 'https://www.youtube.com',
+                'Referer': `https://www.youtube.com/watch?v=${videoId}`,
+            },
+            body: JSON.stringify({
+                videoId,
+                context: {
+                    client: {
+                        clientName: 'WEB',
+                        clientVersion: '2.20231219.04.00',
+                        hl: 'ko',
+                        gl: 'KR',
+                    },
+                },
+            }),
+        }
+    )
 
-    const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, { headers })
-    if (!res.ok) throw new Error(`YouTube 요청 실패 (${res.status})`)
+    if (!playerRes.ok) throw new Error(`InnerTube 플레이어 요청 실패 (${playerRes.status})`)
 
-    const html = await res.text()
-    console.log('[transcript] HTML 수신 길이:', html.length)
-
-    // JSON 문자열 내부의 { } 를 오판하지 않도록 문자열 구간을 건너뛰는 브레이스 카운팅
-    const marker = 'ytInitialPlayerResponse = '
-    const startIdx = html.indexOf(marker)
-    if (startIdx === -1) throw new Error('ytInitialPlayerResponse 마커를 찾을 수 없습니다')
-
-    const jsonStart = startIdx + marker.length
-    let depth = 0, jsonEnd = jsonStart
-    let inStr = false, escaped = false
-
-    for (let i = jsonStart; i < html.length; i++) {
-        const c = html[i]
-        if (escaped)          { escaped = false; continue }
-        if (c === '\\' && inStr) { escaped = true; continue }
-        if (c === '"')        { inStr = !inStr; continue }
-        if (inStr)            continue
-        if (c === '{')        depth++
-        else if (c === '}') { if (--depth === 0) { jsonEnd = i + 1; break } }
-    }
-
-    if (jsonEnd === jsonStart) throw new Error('ytInitialPlayerResponse JSON 경계 탐색 실패')
-
-    let playerData: Record<string, unknown>
-    try {
-        playerData = JSON.parse(html.slice(jsonStart, jsonEnd))
-    } catch (e) {
-        throw new Error(`ytInitialPlayerResponse JSON 파싱 실패: ${e}`)
-    }
-
+    const playerData = await playerRes.json()
     const tracks: Array<{ languageCode: string; baseUrl: string }> =
-        (playerData?.captions as { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ languageCode: string; baseUrl: string }> } })
-        ?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+        playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
 
-    console.log('[transcript] 자막 트랙 수:', tracks.length, '언어:', tracks.map(t => t.languageCode))
+    console.log('[transcript] 트랙 수:', tracks.length, '언어 목록:', tracks.map((t: { languageCode: string }) => t.languageCode))
 
     if (!tracks.length) throw new Error('이 영상에는 자막 트랙이 없습니다')
 
-    const track = tracks.find(t => t.languageCode === preferLang) ?? tracks[0]
-    console.log('[transcript] 선택된 트랙:', track.languageCode)
+    // 2단계: 선호 언어 → 첫 번째 트랙 순으로 자막 URL 선택
+    const track = (preferLang ? tracks.find(t => t.languageCode === preferLang) : null) ?? tracks[0]
+    console.log('[transcript] 선택 트랙:', track.languageCode)
 
-    const captionRes = await fetch(`${track.baseUrl}&fmt=json3`, { headers })
+    // 3단계: json3 포맷으로 자막 원문 요청
+    const captionRes = await fetch(`${track.baseUrl}&fmt=json3`)
     if (!captionRes.ok) throw new Error(`자막 데이터 요청 실패 (${captionRes.status})`)
 
     const captionJson = await captionRes.json()
@@ -74,7 +71,7 @@ async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promi
         .replace(/\s+/g, ' ')
         .trim()
 
-    console.log('[transcript] 추출된 텍스트 길이:', text.length)
+    console.log('[transcript] 텍스트 길이:', text.length)
     if (!text) throw new Error('자막 내용이 비어 있습니다')
     return text
 }
