@@ -22,6 +22,7 @@ export default function Navbar() {
             if (sessionUser) {
                 const { data: profile, error } = await supabase.from('profiles').select('role, name').eq('id', sessionUser.id).single()
                 if (error) console.error('[Navbar] 프로필 조회 오류:', error)
+                console.log('[Navbar] 프로필:', profile, '유저ID:', sessionUser.id)
                 if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
             }
         })
