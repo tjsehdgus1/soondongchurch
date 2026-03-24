@@ -1,22 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
-
-const PdfViewer = dynamic(() => import('@/components/PdfViewer'), {
-    ssr: false,
-    loading: () => (
-        <div className="flex items-center justify-center h-96 text-gray-400">
-            <div className="flex flex-col items-center gap-3">
-                <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <span className="text-sm">뷰어 로딩 중...</span>
-            </div>
-        </div>
-    ),
-})
+import PdfViewerClient from './PdfViewerClient'
 
 async function getBulletin(id: string) {
     const supabase = createClient(
@@ -55,7 +40,7 @@ export default async function BulletinViewerPage({ params }: { params: Promise<{
 
             {/* PDF 뷰어 */}
             <div className="max-w-4xl mx-auto px-4 py-6">
-                <PdfViewer fileUrl={bulletin.file_url} />
+                <PdfViewerClient fileUrl={bulletin.file_url} />
             </div>
         </div>
     )
