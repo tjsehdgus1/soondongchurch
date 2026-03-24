@@ -45,12 +45,36 @@ export default function AdminSermonPage() {
 
     const handleParseSermon = async () => {
         if (!youtubeUrl) return alert('유튜브 URL을 입력해주세요.')
+
+        const videoIdMatch = youtubeUrl.match(
+            /(?:https?:\/\/)?(?:www\.|m\.)?youtu(?:be\.com\/(?:watch\?v=|live\/|shorts\/)|\.be\/)([\w-]{11})/
+        )
+        if (!videoIdMatch) return alert('올바르지 않은 유튜브 URL입니다.')
+        const videoId = videoIdMatch[1]
+
         setLoading(true)
         try {
+            // 1단계: Edge 라우트에서 자막 먼저 가져오기
+            // Edge 함수는 AWS Lambda와 다른 IP 대역 사용 → YouTube IP 차단 우회
+            let transcript = ''
+            try {
+                const tRes = await fetch('/api/sermons/transcript', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoId, lang: 'ko' }),
+                })
+                const tData = await tRes.json()
+                if (tData.transcript) transcript = tData.transcript
+                else console.warn('[transcript] Edge 응답 오류:', tData.error)
+            } catch (e) {
+                console.warn('[transcript] Edge 요청 실패, 서버 사이드로 폴백:', e)
+            }
+
+            // 2단계: AI 요약 + DB 저장 (자막은 서버가 직접 가져오는 것 대신 전달)
             const res = await fetch('/api/sermons/parse', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ youtubeUrl, sermonDate })
+                body: JSON.stringify({ youtubeUrl, sermonDate, transcript }),
             })
             const result = await res.json()
             if (result.success) {

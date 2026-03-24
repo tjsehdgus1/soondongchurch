@@ -95,7 +95,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
         }
 
-        const { youtubeUrl, sermonDate } = await req.json()
+        const { youtubeUrl, sermonDate, transcript: clientTranscript } = await req.json()
 
         // 1. 유튜브 ID 추출 (일반/라이브/쇼츠/모바일/단축 URL 모두 지원)
         const videoIdMatch = youtubeUrl.match(
@@ -106,18 +106,22 @@ export async function POST(req: Request) {
         }
         const videoId = videoIdMatch[1]
 
-        // 2. 유튜브 자막 추출 (한국어 우선, 실패 시 첫 번째 트랙으로 재시도)
-        let transcriptText = ''
-        try {
-            transcriptText = await fetchYouTubeTranscript(videoId, 'ko')
-        } catch (firstErr) {
-            console.warn('[transcript] 한국어 자막 실패, 재시도:', firstErr)
+        // 2. 자막 취득
+        // - clientTranscript: 클라이언트(Edge /transcript 라우트)에서 미리 가져온 자막 (Vercel 프로덕션)
+        // - 없으면 서버에서 직접 시도 (로컬 개발 환경)
+        let transcriptText = clientTranscript || ''
+        if (!transcriptText) {
             try {
-                transcriptText = await fetchYouTubeTranscript(videoId, '')
-            } catch (err) {
-                console.error('[transcript] 자막 추출 최종 실패:', err)
-                const reason = err instanceof Error ? err.message : String(err)
-                return NextResponse.json({ error: `유튜브 자막을 가져올 수 없습니다. (${reason})` }, { status: 500 })
+                transcriptText = await fetchYouTubeTranscript(videoId, 'ko')
+            } catch (firstErr) {
+                console.warn('[transcript] 한국어 자막 실패, 재시도:', firstErr)
+                try {
+                    transcriptText = await fetchYouTubeTranscript(videoId, '')
+                } catch (err) {
+                    console.error('[transcript] 자막 추출 최종 실패:', err)
+                    const reason = err instanceof Error ? err.message : String(err)
+                    return NextResponse.json({ error: `유튜브 자막을 가져올 수 없습니다. (${reason})` }, { status: 500 })
+                }
             }
         }
 
