@@ -61,7 +61,7 @@ export default function AdminGroupsPage() {
     if (groupData) {
       // 각 그룹의 멤버 수 조회
       const groupsWithCount = await Promise.all(
-        groupData.map(async (g) => {
+        groupData.map(async (g: Group) => {
           const { count } = await supabase
             .from('group_members')
             .select('*', { count: 'exact', head: true })
