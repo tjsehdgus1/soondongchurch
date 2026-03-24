@@ -36,6 +36,11 @@ export default function AdminBulletinsPage() {
 
     useEffect(() => { fetchBulletins() }, [])
 
+    const safeJson = async (res: Response) => {
+        const text = await res.text()
+        try { return JSON.parse(text) } catch { throw new Error(`서버 응답 오류 (${res.status}): ${text.slice(0, 200)}`) }
+    }
+
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!file || !title || !bulletinDate) {
@@ -46,52 +51,55 @@ export default function AdminBulletinsPage() {
         setSuccess(null)
         setUploading(true)
 
-        const filePath = `${bulletinDate}_${Date.now()}.pdf`
+        try {
+            const filePath = `${bulletinDate}_${Date.now()}.pdf`
 
-        // 1단계: 서버에서 서명된 업로드 URL 발급
-        const presignRes = await fetch('/api/admin/bulletins/presign', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filePath }),
-        })
-        const presignData = await presignRes.json()
-        if (!presignRes.ok) {
-            setError(presignData.error || '업로드 URL 생성에 실패했습니다.')
+            // 1단계: 서버에서 서명된 업로드 URL 발급
+            const presignRes = await fetch('/api/admin/bulletins/presign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filePath }),
+            })
+            const presignData = await safeJson(presignRes)
+            if (!presignRes.ok) {
+                setError(presignData.error || '업로드 URL 생성에 실패했습니다.')
+                return
+            }
+
+            // 2단계: 브라우저에서 Supabase Storage로 직접 업로드
+            const supabase = createClient()
+            const { error: uploadError } = await supabase.storage
+                .from('bulletins')
+                .uploadToSignedUrl(filePath, presignData.token, file, { contentType: 'application/pdf' })
+
+            if (uploadError) {
+                setError(`스토리지 업로드 실패: ${uploadError.message}`)
+                return
+            }
+
+            // 3단계: DB에 메타데이터 저장
+            const res = await fetch('/api/admin/bulletins', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, bulletinDate, filePath }),
+            })
+            const data = await safeJson(res)
+
+            if (!res.ok) {
+                setError(data.error || 'DB 저장에 실패했습니다.')
+            } else {
+                setSuccess('주보가 업로드되었습니다.')
+                setTitle('')
+                setBulletinDate('')
+                setFile(null)
+                if (fileRef.current) fileRef.current.value = ''
+                fetchBulletins()
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
+        } finally {
             setUploading(false)
-            return
         }
-
-        // 2단계: 브라우저에서 Supabase Storage로 직접 업로드 (Vercel 크기/시간 제한 없음)
-        const supabase = createClient()
-        const { error: uploadError } = await supabase.storage
-            .from('bulletins')
-            .uploadToSignedUrl(filePath, presignData.token, file, { contentType: 'application/pdf' })
-
-        if (uploadError) {
-            setError(uploadError.message || '파일 업로드에 실패했습니다.')
-            setUploading(false)
-            return
-        }
-
-        // 3단계: DB에 메타데이터 저장
-        const res = await fetch('/api/admin/bulletins', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, bulletinDate, filePath }),
-        })
-        const data = await res.json()
-
-        if (!res.ok) {
-            setError(data.error || '저장에 실패했습니다.')
-        } else {
-            setSuccess('주보가 업로드되었습니다.')
-            setTitle('')
-            setBulletinDate('')
-            setFile(null)
-            if (fileRef.current) fileRef.current.value = ''
-            fetchBulletins()
-        }
-        setUploading(false)
     }
 
     const handleDelete = async (id: string, title: string) => {
