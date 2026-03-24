@@ -29,13 +29,18 @@ export default function AdminEventsPage() {
 
   const fetchEvents = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('events')
-      .select('*')
-      .order('event_date', { ascending: false })
-    
-    if (data) setEvents(data)
-    setLoading(false)
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: false })
+      if (error) throw error
+      if (data) setEvents(data)
+    } catch (e) {
+      console.error('일정 조회 오류:', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {

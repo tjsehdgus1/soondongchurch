@@ -46,32 +46,33 @@ export default function AdminGroupsPage() {
   const fetchGroups = async () => {
     setLoading(true)
     setFetchError(null)
-    const { data: groupData, error } = await supabase
-      .from('groups')
-      .select('*')
-      .order('created_at', { ascending: false })
+    try {
+      const { data: groupData, error } = await supabase
+        .from('groups')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error('groups 조회 오류:', error)
-      setFetchError(error.message)
+      if (error) throw error
+
+      if (groupData) {
+        const groupsWithCount = await Promise.all(
+          groupData.map(async (g: Group) => {
+            const { count } = await supabase
+              .from('group_members')
+              .select('*', { count: 'exact', head: true })
+              .eq('group_id', g.id)
+            return { ...g, member_count: count ?? 0 }
+          })
+        )
+        setGroups(groupsWithCount)
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      console.error('소그룹 조회 오류:', e)
+      setFetchError(msg)
+    } finally {
       setLoading(false)
-      return
     }
-
-    if (groupData) {
-      // 각 그룹의 멤버 수 조회
-      const groupsWithCount = await Promise.all(
-        groupData.map(async (g: Group) => {
-          const { count } = await supabase
-            .from('group_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('group_id', g.id)
-          return { ...g, member_count: count ?? 0 }
-        })
-      )
-      setGroups(groupsWithCount)
-    }
-    setLoading(false)
   }
 
   useEffect(() => {

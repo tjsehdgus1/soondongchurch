@@ -25,14 +25,19 @@ export default function AdminNoticesPage() {
 
   const fetchNotices = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('notices')
-      .select('*')
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
-    
-    if (data) setNotices(data)
-    setLoading(false)
+    try {
+      const { data, error } = await supabase
+        .from('notices')
+        .select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      if (data) setNotices(data)
+    } catch (e) {
+      console.error('공지사항 조회 오류:', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
