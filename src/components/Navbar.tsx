@@ -16,8 +16,8 @@ export default function Navbar() {
     const supabase = useRef(createClient()).current
 
     useEffect(() => {
-        supabase.auth.getSession().then(async ({ data }) => {
-            const sessionUser = data.session?.user ?? null
+        supabase.auth.getUser().then(async ({ data }) => {
+            const sessionUser = data.user ?? null
             setUser(sessionUser)
             if (sessionUser) {
                 const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', sessionUser.id).single()
