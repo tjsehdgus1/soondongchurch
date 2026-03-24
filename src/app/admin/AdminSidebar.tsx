@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 const adminNav = [
   { href: '/admin', label: '대시보드 홈', icon: '📊' },
@@ -18,9 +17,7 @@ export default function AdminSidebar({ name }: { name: string }) {
   const pathname = usePathname()
 
   const handleLogout = async () => {
-    const supabase = createClient()
-    const timeout = new Promise<void>(resolve => setTimeout(resolve, 2000))
-    await Promise.race([supabase.auth.signOut(), timeout])
+    await fetch('/api/auth/logout', { method: 'POST' })
     window.location.href = '/'
   }
 

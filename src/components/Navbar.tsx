@@ -36,8 +36,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
     }, [])
 
     const handleLogout = async () => {
-        const timeout = new Promise<void>(resolve => setTimeout(resolve, 2000))
-        await Promise.race([supabase.auth.signOut(), timeout])
+        await fetch('/api/auth/logout', { method: 'POST' })
         window.location.href = '/auth/login'
     }
 
