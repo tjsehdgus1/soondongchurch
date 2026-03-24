@@ -41,17 +41,21 @@ export async function middleware(request: NextRequest) {
 
     // 차단된 유저가 인증이 필요한 경로 접근 시 차단
     if (user && (pathname.startsWith('/admin') || pathname.startsWith('/groups'))) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_blocked')
-            .eq('id', user.id)
-            .single()
+        try {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_blocked')
+                .eq('id', user.id)
+                .single()
 
-        if (profile?.is_blocked) {
-            const blockedUrl = request.nextUrl.clone()
-            blockedUrl.pathname = '/auth/login'
-            blockedUrl.searchParams.set('blocked', '1')
-            return NextResponse.redirect(blockedUrl)
+            if (profile?.is_blocked) {
+                const blockedUrl = request.nextUrl.clone()
+                blockedUrl.pathname = '/auth/login'
+                blockedUrl.searchParams.set('blocked', '1')
+                return NextResponse.redirect(blockedUrl)
+            }
+        } catch {
+            // profiles 조회 실패 시 차단 여부 확인 생략하고 통과
         }
     }
 
