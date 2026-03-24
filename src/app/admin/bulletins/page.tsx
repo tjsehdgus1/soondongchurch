@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 interface Bulletin {
     id: string
@@ -69,14 +68,15 @@ export default function AdminBulletinsPage() {
             }
 
             setUploadStep('파일 업로드 중...')
-            // 2단계: 브라우저에서 Supabase Storage로 직접 업로드
-            const supabase = createClient()
-            const { error: uploadError } = await supabase.storage
-                .from('bulletins')
-                .uploadToSignedUrl(filePath, presignData.token, file, { contentType: 'application/pdf' })
-
-            if (uploadError) {
-                setError(`스토리지 업로드 실패: ${uploadError.message}`)
+            // 2단계: signed URL로 직접 PUT 업로드
+            const uploadRes = await fetch(presignData.signedUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/pdf' },
+                body: file,
+            })
+            if (!uploadRes.ok) {
+                const uploadErrText = await uploadRes.text().catch(() => uploadRes.statusText)
+                setError(`스토리지 업로드 실패 (${uploadRes.status}): ${uploadErrText.slice(0, 200)}`)
                 return
             }
 
