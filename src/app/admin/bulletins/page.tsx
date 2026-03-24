@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface Bulletin {
     id: string
@@ -45,16 +46,43 @@ export default function AdminBulletinsPage() {
         setSuccess(null)
         setUploading(true)
 
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('title', title)
-        formData.append('bulletinDate', bulletinDate)
+        const filePath = `${bulletinDate}_${Date.now()}.pdf`
 
-        const res = await fetch('/api/admin/bulletins', { method: 'POST', body: formData })
+        // 1단계: 서버에서 서명된 업로드 URL 발급
+        const presignRes = await fetch('/api/admin/bulletins/presign', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filePath }),
+        })
+        const presignData = await presignRes.json()
+        if (!presignRes.ok) {
+            setError(presignData.error || '업로드 URL 생성에 실패했습니다.')
+            setUploading(false)
+            return
+        }
+
+        // 2단계: 브라우저에서 Supabase Storage로 직접 업로드 (Vercel 크기/시간 제한 없음)
+        const supabase = createClient()
+        const { error: uploadError } = await supabase.storage
+            .from('bulletins')
+            .uploadToSignedUrl(filePath, presignData.token, file, { contentType: 'application/pdf' })
+
+        if (uploadError) {
+            setError(uploadError.message || '파일 업로드에 실패했습니다.')
+            setUploading(false)
+            return
+        }
+
+        // 3단계: DB에 메타데이터 저장
+        const res = await fetch('/api/admin/bulletins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, bulletinDate, filePath }),
+        })
         const data = await res.json()
 
         if (!res.ok) {
-            setError(data.error || '업로드에 실패했습니다.')
+            setError(data.error || '저장에 실패했습니다.')
         } else {
             setSuccess('주보가 업로드되었습니다.')
             setTitle('')

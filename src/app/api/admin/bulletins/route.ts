@@ -30,29 +30,18 @@ export async function GET() {
     return NextResponse.json({ bulletins: data })
 }
 
-// 주보 업로드
+// 주보 메타데이터 저장 (파일은 클라이언트에서 직접 업로드)
 export async function POST(req: NextRequest) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
 
-    const formData = await req.formData()
-    const file = formData.get('file') as File
-    const title = formData.get('title') as string
-    const bulletinDate = formData.get('bulletinDate') as string
+    const { title, bulletinDate, filePath } = await req.json()
 
-    if (!file || !title || !bulletinDate) {
+    if (!title || !bulletinDate || !filePath) {
         return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
     }
 
     const supabase = getServiceClient()
-    const filePath = `${bulletinDate}_${Date.now()}.pdf`
-
-    const { error: uploadError } = await supabase.storage
-        .from('bulletins')
-        .upload(filePath, file, { contentType: 'application/pdf', upsert: false })
-
-    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
-
     const { data: { publicUrl } } = supabase.storage.from('bulletins').getPublicUrl(filePath)
 
     const { data, error: dbError } = await supabase
