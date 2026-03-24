@@ -10,7 +10,6 @@ export const maxDuration = 60
 // 로컬(일반 ISP IP)에서는 정상 동작하지만 프로덕션에서 자막 취득 불가.
 // 해결: YouTube 내부 플레이어 데이터(ytInitialPlayerResponse)를 브라우저 헤더로 직접 파싱.
 async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promise<string> {
-    // SOCS 쿠키: EU/GDPR 동의 페이지 우회 (동의 없이 리다이렉트되면 HTML 파싱 불가)
     const headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8',
@@ -22,33 +21,47 @@ async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promi
     if (!res.ok) throw new Error(`YouTube 요청 실패 (${res.status})`)
 
     const html = await res.text()
+    console.log('[transcript] HTML 수신 길이:', html.length)
 
-    // ytInitialPlayerResponse JSON 경계 직접 탐색 (regex보다 안정적)
+    // JSON 문자열 내부의 { } 를 오판하지 않도록 문자열 구간을 건너뛰는 브레이스 카운팅
     const marker = 'ytInitialPlayerResponse = '
     const startIdx = html.indexOf(marker)
-    if (startIdx === -1) throw new Error('YouTube 플레이어 데이터를 찾을 수 없습니다')
+    if (startIdx === -1) throw new Error('ytInitialPlayerResponse 마커를 찾을 수 없습니다')
 
     const jsonStart = startIdx + marker.length
-    let depth = 0
-    let jsonEnd = jsonStart
+    let depth = 0, jsonEnd = jsonStart
+    let inStr = false, escaped = false
+
     for (let i = jsonStart; i < html.length; i++) {
-        if (html[i] === '{') depth++
-        else if (html[i] === '}') {
-            depth--
-            if (depth === 0) { jsonEnd = i + 1; break }
-        }
+        const c = html[i]
+        if (escaped)          { escaped = false; continue }
+        if (c === '\\' && inStr) { escaped = true; continue }
+        if (c === '"')        { inStr = !inStr; continue }
+        if (inStr)            continue
+        if (c === '{')        depth++
+        else if (c === '}') { if (--depth === 0) { jsonEnd = i + 1; break } }
     }
 
-    const playerData = JSON.parse(html.slice(jsonStart, jsonEnd))
+    if (jsonEnd === jsonStart) throw new Error('ytInitialPlayerResponse JSON 경계 탐색 실패')
+
+    let playerData: Record<string, unknown>
+    try {
+        playerData = JSON.parse(html.slice(jsonStart, jsonEnd))
+    } catch (e) {
+        throw new Error(`ytInitialPlayerResponse JSON 파싱 실패: ${e}`)
+    }
+
     const tracks: Array<{ languageCode: string; baseUrl: string }> =
-        playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+        (playerData?.captions as { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ languageCode: string; baseUrl: string }> } })
+        ?.playerCaptionsTracklistRenderer?.captionTracks ?? []
 
-    if (!tracks.length) throw new Error('이 영상에는 자막이 없습니다')
+    console.log('[transcript] 자막 트랙 수:', tracks.length, '언어:', tracks.map(t => t.languageCode))
 
-    // 선호 언어 → 첫 번째 트랙 순으로 선택
+    if (!tracks.length) throw new Error('이 영상에는 자막 트랙이 없습니다')
+
     const track = tracks.find(t => t.languageCode === preferLang) ?? tracks[0]
+    console.log('[transcript] 선택된 트랙:', track.languageCode)
 
-    // json3 포맷으로 자막 데이터 요청 (XML보다 파싱 간단)
     const captionRes = await fetch(`${track.baseUrl}&fmt=json3`, { headers })
     if (!captionRes.ok) throw new Error(`자막 데이터 요청 실패 (${captionRes.status})`)
 
@@ -61,6 +74,7 @@ async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promi
         .replace(/\s+/g, ' ')
         .trim()
 
+    console.log('[transcript] 추출된 텍스트 길이:', text.length)
     if (!text) throw new Error('자막 내용이 비어 있습니다')
     return text
 }
@@ -93,12 +107,14 @@ export async function POST(req: Request) {
         let transcriptText = ''
         try {
             transcriptText = await fetchYouTubeTranscript(videoId, 'ko')
-        } catch {
+        } catch (firstErr) {
+            console.warn('[transcript] 한국어 자막 실패, 재시도:', firstErr)
             try {
                 transcriptText = await fetchYouTubeTranscript(videoId, '')
             } catch (err) {
-                console.error('자막 추출 실패:', err)
-                return NextResponse.json({ error: '유튜브 자막을 가져올 수 없습니다. 영상의 자막(CC) 설정을 확인해주세요.' }, { status: 500 })
+                console.error('[transcript] 자막 추출 최종 실패:', err)
+                const reason = err instanceof Error ? err.message : String(err)
+                return NextResponse.json({ error: `유튜브 자막을 가져올 수 없습니다. (${reason})` }, { status: 500 })
             }
         }
 
