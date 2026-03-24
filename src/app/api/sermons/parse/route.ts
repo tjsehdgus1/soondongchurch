@@ -9,85 +9,70 @@ export const maxDuration = 60
 // Vercel은 AWS 데이터센터 IP를 사용하며, YouTube가 이 IP 대역을 봇으로 감지해 차단함.
 // 로컬(일반 ISP IP)에서는 정상 동작하지만 프로덕션에서 자막 취득 불가.
 // 해결: YouTube 내부 플레이어 데이터(ytInitialPlayerResponse)를 브라우저 헤더로 직접 파싱.
-// WEB 클라이언트는 서버 환경에서 YouTube가 봇으로 인식해 captionTracks를 숨김
-// ANDROID 클라이언트는 앱 트래픽으로 인식되어 자막 포함 전체 응답을 반환함
-const INNERTUBE_CLIENTS = [
-    {
-        // 1순위: ANDROID — 자막 데이터 포함 응답이 안정적
-        apiKey: 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w',
-        headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
-            'X-YouTube-Client-Name': '3',
-            'X-YouTube-Client-Version': '19.09.37',
-        },
-        body: (videoId: string) => ({
-            videoId,
-            context: {
-                client: {
-                    clientName: 'ANDROID',
-                    clientVersion: '19.09.37',
-                    androidSdkVersion: 30,
-                    hl: 'ko', gl: 'KR',
-                },
-            },
-        }),
-    },
-    {
-        // 2순위: TVHTML5_SIMPLY_EMBEDDED_PLAYER — 임베드 플레이어, 봇 감지 낮음
-        apiKey: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
-        headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (SMART-TV; LINUX; Tizen 6.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/6.0 TV Safari/538.1',
-            'X-YouTube-Client-Name': '85',
-            'X-YouTube-Client-Version': '2.0',
-        },
-        body: (videoId: string) => ({
-            videoId,
-            context: {
-                client: {
-                    clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
-                    clientVersion: '2.0',
-                    hl: 'ko', gl: 'KR',
-                },
-            },
-        }),
-    },
-]
+// youtube-transcript 라이브러리 소스 분석 결과:
+// - API 키 없이 ?prettyPrint=false 만 사용
+// - 클라이언트 버전 20.10.38 (최신)
+// - 자막 URL 요청 시 반드시 User-Agent 헤더 포함 (없으면 0 bytes 반환)
+const ANDROID_UA = 'com.google.android.youtube/20.10.38 (Linux; U; Android 14)'
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36,gzip(gfe)'
 
 async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promise<string> {
-    let tracks: Array<{ languageCode: string; baseUrl: string }> = []
+    // 1단계: InnerTube ANDROID 클라이언트로 captionTracks 취득
+    const playerRes = await fetch(
+        'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'User-Agent': ANDROID_UA },
+            body: JSON.stringify({
+                context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38' } },
+                videoId,
+            }),
+        }
+    )
 
-    // 클라이언트 타입을 순서대로 시도해 captionTracks가 있는 응답을 찾음
-    for (const client of INNERTUBE_CLIENTS) {
-        const res = await fetch(
-            `https://www.youtube.com/youtubei/v1/player?key=${client.apiKey}`,
-            { method: 'POST', headers: client.headers, body: JSON.stringify(client.body(videoId)) }
-        )
-        if (!res.ok) { console.warn(`[transcript] 클라이언트 요청 실패 (${res.status})`); continue }
+    if (!playerRes.ok) throw new Error(`InnerTube 요청 실패 (${playerRes.status})`)
 
-        const data = await res.json()
-        const found: Array<{ languageCode: string; baseUrl: string }> =
-            data?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+    const playerData = await playerRes.json()
+    const tracks: Array<{ languageCode: string; baseUrl: string }> =
+        playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
 
-        console.log(`[transcript] 클라이언트 시도 → 트랙 ${found.length}개:`, found.map((t: { languageCode: string }) => t.languageCode))
-
-        if (found.length > 0) { tracks = found; break }
-    }
+    console.log('[transcript] 트랙 수:', tracks.length, '언어:', tracks.map((t: { languageCode: string }) => t.languageCode))
 
     if (!tracks.length) throw new Error('이 영상에는 자막 트랙이 없습니다')
 
+    // 2단계: 선호 언어 → 첫 번째 트랙 선택
     const track = (preferLang ? tracks.find(t => t.languageCode === preferLang) : null) ?? tracks[0]
     console.log('[transcript] 선택 트랙:', track.languageCode)
 
-    const captionRes = await fetch(`${track.baseUrl}&fmt=json3`)
+    // 3단계: 자막 URL 요청 — User-Agent 없으면 YouTube가 0 bytes 반환
+    const captionRes = await fetch(track.baseUrl, {
+        headers: { 'User-Agent': BROWSER_UA, 'Accept-Language': preferLang || 'ko' },
+    })
     if (!captionRes.ok) throw new Error(`자막 데이터 요청 실패 (${captionRes.status})`)
 
-    const captionJson = await captionRes.json()
-    const text = (captionJson.events ?? [])
-        .filter((e: { segs?: Array<{ utf8?: string }> }) => e.segs)
-        .flatMap((e: { segs: Array<{ utf8?: string }> }) => e.segs.map((s: { utf8?: string }) => s.utf8 ?? ''))
-        .filter((s: string) => s.trim() !== '' && s !== '\n')
+    const xml = await captionRes.text()
+    console.log('[transcript] XML 길이:', xml.length)
+
+    // XML에서 텍스트 추출 (<text> 또는 <p><s> 두 가지 포맷 처리)
+    const texts: string[] = []
+    const tagRegex = /<text[^>]*>([^<]*)<\/text>|<p[^>]*>[\s\S]*?<\/p>/g
+    const segRegex = /<s[^>]*>([^<]*)<\/s>/g
+    let m: RegExpExecArray | null
+
+    while ((m = tagRegex.exec(xml)) !== null) {
+        if (m[1] !== undefined) {
+            // <text> 포맷
+            texts.push(m[1])
+        } else {
+            // <p><s> 포맷
+            let seg: RegExpExecArray | null
+            while ((seg = segRegex.exec(m[0])) !== null) texts.push(seg[1])
+        }
+    }
+
+    const text = texts
+        .map(t => t.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim())
+        .filter(t => t)
         .join(' ')
         .replace(/\s+/g, ' ')
         .trim()
