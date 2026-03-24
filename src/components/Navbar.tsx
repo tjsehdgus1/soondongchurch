@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
+import type { User, AuthChangeEvent } from '@supabase/supabase-js'
 
 interface NavbarProps {
     initialUser: User | null
@@ -21,7 +21,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
     const supabase = useRef(createClient()).current
 
     useEffect(() => {
-        const { data: listener } = supabase.auth.onAuthStateChange(async (_e, session) => {
+        const { data: listener } = supabase.auth.onAuthStateChange(async (_e: AuthChangeEvent, session) => {
             const sessionUser = session?.user ?? null
             setUser(sessionUser)
             if (sessionUser) {
