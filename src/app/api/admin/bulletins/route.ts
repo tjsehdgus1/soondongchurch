@@ -32,25 +32,33 @@ export async function GET() {
 
 // 주보 메타데이터 저장 (파일은 클라이언트에서 직접 업로드)
 export async function POST(req: NextRequest) {
-    const admin = await verifyAdmin()
-    if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
+    try {
+        const admin = await verifyAdmin()
+        if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
 
-    const { title, bulletinDate, filePath } = await req.json()
+        const { title, bulletinDate, filePath } = await req.json()
 
-    if (!title || !bulletinDate || !filePath) {
-        return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
+        if (!title || !bulletinDate || !filePath) {
+            return NextResponse.json({ error: '필수 항목이 누락되었습니다.' }, { status: 400 })
+        }
+
+        const supabase = getServiceClient()
+        const { data: { publicUrl } } = supabase.storage.from('bulletins').getPublicUrl(filePath)
+
+        const { data, error: dbError } = await supabase
+            .from('bulletins')
+            .insert({ title, bulletin_date: bulletinDate, file_url: publicUrl, file_path: filePath })
+            .select()
+            .single()
+
+        if (dbError) {
+            console.error('[bulletins POST] DB 오류:', dbError)
+            return NextResponse.json({ error: `DB 오류: ${dbError.message}` }, { status: 500 })
+        }
+
+        return NextResponse.json({ bulletin: data })
+    } catch (err) {
+        console.error('[bulletins POST] 예외 발생:', err)
+        return NextResponse.json({ error: `서버 오류: ${err instanceof Error ? err.message : String(err)}` }, { status: 500 })
     }
-
-    const supabase = getServiceClient()
-    const { data: { publicUrl } } = supabase.storage.from('bulletins').getPublicUrl(filePath)
-
-    const { data, error: dbError } = await supabase
-        .from('bulletins')
-        .insert({ title, bulletin_date: bulletinDate, file_url: publicUrl, file_path: filePath })
-        .select()
-        .single()
-
-    if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-
-    return NextResponse.json({ bulletin: data })
 }
