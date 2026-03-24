@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -9,27 +9,29 @@ import type { User } from '@supabase/supabase-js'
 export default function Navbar() {
     const [user, setUser] = useState<User | null>(null)
     const [role, setRole] = useState('member')
+    const [userName, setUserName] = useState('')
     const [menuOpen, setMenuOpen] = useState(false)
     const router = useRouter()
     const pathname = usePathname()
-    const supabase = createClient()
+    const supabase = useRef(createClient()).current
 
     useEffect(() => {
         supabase.auth.getSession().then(async ({ data }) => {
             const sessionUser = data.session?.user ?? null
             setUser(sessionUser)
             if (sessionUser) {
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', sessionUser.id).single()
-                if (profile) setRole(profile.role)
+                const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', sessionUser.id).single()
+                if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
             }
         })
         const { data: listener } = supabase.auth.onAuthStateChange(async (_e, session) => {
             setUser(session?.user ?? null)
             if (session?.user) {
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
-                if (profile) setRole(profile.role)
+                const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', session.user.id).single()
+                if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
             } else {
                 setRole('member')
+                setUserName('')
             }
         })
         return () => listener.subscription.unsubscribe()
@@ -37,8 +39,7 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
-        router.push('/')
-        router.refresh()
+        window.location.href = '/auth/login'
     }
 
     const navLinks = [
@@ -46,6 +47,7 @@ export default function Navbar() {
         { href: '/events', label: '예배/행사' },
         { href: '/sermons', label: '설교' },
         { href: '/notices', label: '공지사항' },
+        { href: '/bulletins', label: '주간예배일정(주보)' },
     ]
 
     return (
@@ -80,6 +82,18 @@ export default function Navbar() {
                                 {label}
                             </Link>
                         ))}
+                        {/* 로그인 시 소그룹 메뉴 표출 */}
+                        {user && (
+                            <Link
+                                href="/groups"
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname.startsWith('/groups')
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                            >
+                                소그룹
+                            </Link>
+                        )}
                         {/* 관리자 로그인 시 공지사항 옆에 관리자 홈 버튼 표출 */}
                         {user && role === 'admin' && (
                             <Link
@@ -114,7 +128,7 @@ export default function Navbar() {
                             {user ? (
                                 <>
                                     <span className="text-sm text-gray-500 mr-1 truncate max-w-[180px]">
-                                        {user.email}
+                                        {userName || user.email}
                                     </span>
                                     <button
                                         onClick={handleLogout}
@@ -171,6 +185,15 @@ export default function Navbar() {
                                 {label}
                             </Link>
                         ))}
+                        {user && (
+                            <Link
+                                href="/groups"
+                                onClick={() => setMenuOpen(false)}
+                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith('/groups') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                            >
+                                소그룹
+                            </Link>
+                        )}
                         {user && role === 'admin' && (
                             <Link href="/admin" onClick={() => setMenuOpen(false)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold ${pathname.startsWith('/admin') ? 'bg-indigo-100 text-indigo-700' : 'text-indigo-600 hover:bg-indigo-50'}`}>

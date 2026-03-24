@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
     return (
@@ -8,8 +9,8 @@ export default function Footer() {
                     {/* Church Info */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-xs">✝</span>
+                            <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0">
+                                <Image src="/images/logo.svg" alt="순천순동교회 로고" width={36} height={36} className="w-full h-full object-cover" />
                             </div>
                             <span className="font-bold text-white text-lg">순천순동교회</span>
                         </div>

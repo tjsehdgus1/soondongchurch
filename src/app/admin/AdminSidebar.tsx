@@ -10,6 +10,8 @@ const adminNav = [
   { href: '/admin/sermons', label: '설교 요약 관리', icon: '📽️' },
   { href: '/admin/events', label: '일정 관리', icon: '📅' },
   { href: '/admin/notices', label: '공지사항 관리', icon: '📢' },
+  { href: '/admin/groups', label: '소그룹 관리', icon: '🏘️' },
+  { href: '/admin/bulletins', label: '주보 관리', icon: '📄' },
 ]
 
 export default function AdminSidebar({ email }: { email: string }) {

@@ -1,12 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+function BlockedBanner() {
+    const params = useSearchParams()
+    if (!params.get('blocked')) return null
+    return (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 flex items-center gap-2 mb-4">
+            <span className="text-base">🚫</span>
+            이 계정은 관리자에 의해 차단되었습니다. 문의사항은 교회로 연락해주세요.
+        </div>
+    )
+}
+
 export default function LoginPage() {
-    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
@@ -18,10 +29,13 @@ export default function LoginPage() {
         setLoading(true)
         setError(null)
 
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        // 아이디로 내부 이메일 생성
+        const internalEmail = `${username.trim().toLowerCase()}@internal.church`
+
+        const { error } = await supabase.auth.signInWithPassword({ email: internalEmail, password })
 
         if (error) {
-            setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+            setError('아이디 또는 비밀번호가 올바르지 않습니다.')
             setLoading(false)
             return
         }
@@ -36,26 +50,30 @@ export default function LoginPage() {
                 <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
                     {/* Logo */}
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                            <span className="text-white text-2xl">✝</span>
+                        <div className="w-16 h-16 rounded-md overflow-hidden mx-auto mb-4 shadow-lg">
+                            <img src="/images/logo.svg" alt="순천순동교회 로고" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-extrabold text-gray-900">로그인</h1>
                         <p className="text-gray-500 text-sm mt-1">순천순동교회 교인 계정으로 로그인하세요</p>
                     </div>
 
+                    <Suspense>
+                        <BlockedBanner />
+                    </Suspense>
+
                     <form onSubmit={handleLogin} className="space-y-5">
-                        {/* Email */}
+                        {/* Username */}
                         <div>
-                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                이메일
+                            <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                아이디
                             </label>
                             <input
-                                id="email"
-                                type="email"
+                                id="username"
+                                type="text"
                                 required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="you@example.com"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="아이디를 입력하세요"
                                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
                             />
                         </div>

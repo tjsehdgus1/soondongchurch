@@ -1,91 +1,336 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
 
-export const revalidate = 0 // 항상 최신 데이터 불러오기
+import { useState, useEffect } from 'react'
 
-export default async function AdminMembersPage() {
-  const supabase = await createClient()
+type GroupInfo = { id: number; name: string }
 
-  const { data: members, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false })
+type Member = {
+  id: string
+  username: string
+  name: string
+  email: string
+  phone_number: string
+  role: string
+  is_blocked: boolean
+  created_at: string
+  group_members: { groups: GroupInfo }[]
+}
 
-  if (error) {
-    return <div className="p-4 text-red-500 text-center">교인 목록을 불러오지 못했습니다.</div>
+type EditForm = {
+  name: string
+  email: string
+  phone_number: string
+  role: string
+}
+
+export default function AdminMembersPage() {
+  const [members, setMembers] = useState<Member[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+
+  // 수정 모달
+  const [editTarget, setEditTarget] = useState<Member | null>(null)
+  const [editForm, setEditForm] = useState<EditForm>({ name: '', email: '', phone_number: '', role: 'member' })
+  const [saving, setSaving] = useState(false)
+
+  const fetchMembers = async () => {
+    setLoading(true)
+    const res = await fetch('/api/admin/members')
+    const json = await res.json()
+    if (json.data) setMembers(json.data)
+    setLoading(false)
   }
 
+  useEffect(() => { fetchMembers() }, [])
+
+  const openEdit = (member: Member) => {
+    setEditTarget(member)
+    setEditForm({
+      name: member.name,
+      email: member.email || '',
+      phone_number: member.phone_number || '',
+      role: member.role,
+    })
+  }
+
+  const handleSave = async () => {
+    if (!editTarget) return
+    setSaving(true)
+    const res = await fetch('/api/admin/members', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editTarget.id, ...editForm }),
+    })
+    const json = await res.json()
+    if (json.error) {
+      alert('오류: ' + json.error)
+    } else {
+      setEditTarget(null)
+      fetchMembers()
+    }
+    setSaving(false)
+  }
+
+  const handleToggleBlock = async (member: Member) => {
+    const action = member.is_blocked ? '차단을 해제' : '차단'
+    if (!confirm(`${member.name} 교인을 ${action}하시겠습니까?`)) return
+    const res = await fetch('/api/admin/members', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: member.id, is_blocked: !member.is_blocked }),
+    })
+    const json = await res.json()
+    if (json.error) alert('오류: ' + json.error)
+    else fetchMembers()
+  }
+
+  const filtered = members.filter((m) =>
+    m.name.includes(search) ||
+    m.username?.includes(search) ||
+    m.email?.includes(search) ||
+    m.phone_number?.includes(search)
+  )
+
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-6xl mx-auto">
+      {/* 헤더 */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">교인 관리</h1>
-          <p className="mt-1 text-gray-500">웹사이트에 가입된 신도 목록을 조회합니다.</p>
+          <p className="mt-1 text-gray-500">교인 정보 수정, 소그룹 확인, 차단 관리를 할 수 있습니다.</p>
         </div>
-        <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold border border-blue-100">
-          총 {members?.length || 0} 명
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="이름·아이디·전화번호 검색"
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 w-56"
+          />
+          <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold border border-blue-100 text-sm whitespace-nowrap">
+            총 {members.length}명
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
-              <tr>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider">이름</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider">이메일</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider">휴대폰 번호</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider">권한</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider">가입일</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {members?.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900 border-r border-gray-100/50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                        {member.name.charAt(0)}
-                      </div>
-                      {member.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {member.email}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 font-medium">
-                    {member.phone_number || <span className="text-gray-400 text-sm">미등록</span>}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                      ${member.role === 'admin' 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'bg-green-100 text-green-700'
-                      }`}>
-                      {member.role === 'admin' ? '관리자' : '일반 교인'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    {new Date(member.created_at).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                </tr>
-              ))}
-              {(!members || members.length === 0) && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                    등록된 교인이 없습니다.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {loading ? (
+        <div className="py-24 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
+          불러오는 중...
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
+                <tr>
+                  <th className="px-5 py-4 font-semibold">이름</th>
+                  <th className="px-5 py-4 font-semibold">아이디</th>
+                  <th className="px-5 py-4 font-semibold">이메일</th>
+                  <th className="px-5 py-4 font-semibold">휴대폰</th>
+                  <th className="px-5 py-4 font-semibold">권한</th>
+                  <th className="px-5 py-4 font-semibold">소속 소그룹</th>
+                  <th className="px-5 py-4 font-semibold">상태</th>
+                  <th className="px-5 py-4 font-semibold">가입일</th>
+                  <th className="px-5 py-4 font-semibold">관리</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
+                      {search ? '검색 결과가 없습니다.' : '등록된 교인이 없습니다.'}
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((member) => {
+                    const groups = member.group_members?.map((gm) => gm.groups) ?? []
+                    return (
+                      <tr
+                        key={member.id}
+                        className={`hover:bg-gray-50 transition-colors ${member.is_blocked ? 'opacity-50' : ''}`}
+                      >
+                        {/* 이름 */}
+                        <td className="px-5 py-4 font-medium text-gray-900 whitespace-nowrap">
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${member.is_blocked ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-600'}`}>
+                              {member.name.charAt(0)}
+                            </div>
+                            {member.name}
+                          </div>
+                        </td>
+
+                        {/* 아이디 */}
+                        <td className="px-5 py-4 text-gray-600 whitespace-nowrap font-mono text-xs">
+                          {member.username || <span className="text-gray-400">-</span>}
+                        </td>
+
+                        {/* 이메일 */}
+                        <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
+                          {member.email || <span className="text-gray-400">미등록</span>}
+                        </td>
+
+                        {/* 휴대폰 */}
+                        <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
+                          {member.phone_number || <span className="text-gray-400">미등록</span>}
+                        </td>
+
+                        {/* 권한 */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            member.role === 'admin'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {member.role === 'admin' ? '관리자' : '일반 교인'}
+                          </span>
+                        </td>
+
+                        {/* 소속 그룹 */}
+                        <td className="px-5 py-4">
+                          {groups.length === 0 ? (
+                            <span className="text-gray-400 text-xs">없음</span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {groups.map((g) => (
+                                <span key={g.id} className="inline-block bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-md font-medium whitespace-nowrap">
+                                  {g.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* 상태 */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          {member.is_blocked ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
+                              🚫 차단됨
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                              ✅ 정상
+                            </span>
+                          )}
+                        </td>
+
+                        {/* 가입일 */}
+                        <td className="px-5 py-4 text-gray-500 whitespace-nowrap text-xs">
+                          {new Date(member.created_at).toLocaleDateString('ko-KR', {
+                            year: 'numeric', month: 'short', day: 'numeric',
+                          })}
+                        </td>
+
+                        {/* 관리 버튼 */}
+                        <td className="px-5 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => openEdit(member)}
+                              className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleToggleBlock(member)}
+                              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                member.is_blocked
+                                  ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                                  : 'text-red-500 bg-red-50 hover:bg-red-100'
+                              }`}
+                            >
+                              {member.is_blocked ? '차단 해제' : '차단'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 수정 모달 */}
+      {editTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setEditTarget(null) }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">교인 정보 수정</h2>
+              <button onClick={() => setEditTarget(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100">✕</button>
+            </div>
+
+            <p className="text-sm text-gray-500 -mt-2">아이디: <span className="font-mono font-medium text-gray-700">{editTarget.username}</span></p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  이메일 <span className="text-gray-400 font-normal">(선택)</span>
+                </label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">휴대폰 번호</label>
+                <input
+                  type="text"
+                  value={editForm.phone_number}
+                  onChange={(e) => setEditForm({ ...editForm, phone_number: e.target.value })}
+                  placeholder="010-0000-0000"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">권한</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  <option value="member">일반 교인</option>
+                  <option value="admin">관리자</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setEditTarget(null)}
+                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !editForm.name.trim()}
+                className="flex-1 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {saving ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

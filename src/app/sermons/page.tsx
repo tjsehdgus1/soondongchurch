@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
   title: '목사님 설교 | 순천순동교회',
-  description: '순천순동교회 김광선 목사님의 설교를 확인하세요.',
+  description: '순천순동교회 목사님의 설교를 확인하세요.',
 }
 
 export default async function SermonsPage() {
@@ -22,7 +22,7 @@ export default async function SermonsPage() {
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">Sermons</span>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">목사님 설교</h1>
-          <p className="text-gray-500 mt-2">김광선 목사님의 말씀을 영상과 요약으로 만나보세요.</p>
+          <p className="text-gray-500 mt-2">목사님의 말씀을 영상과 요약으로 만나보세요.</p>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ export default async function SermonsPage() {
                     </p>
                   )}
                   <div className="mt-4 flex items-center text-blue-600 text-xs font-semibold gap-1 group-hover:gap-2 transition-all">
-                    설교 자세히 보기
+                    말씀 보기
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                     </svg>

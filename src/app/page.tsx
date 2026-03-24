@@ -3,11 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import HeroSlider from '@/components/HeroSlider'
 
 const worshipSchedule = [
-  { day: '주일', time: '오전 11:00', name: '주일오전예배', icon: '🛐' },
-  { day: '주일', time: '오후 1:30', name: '주일오후예배', icon: '☀️' },
-  { day: '수요일', time: '오후 7:00', name: '수요밤예배', icon: '✝️' },
-  { day: '금요일', time: '오후 8:00', name: '금요기도회', icon: '🙏' },
-  { day: '매일', time: '오전 5:00', name: '새벽예배', icon: '🌅' },
+  { day: '주일', time: '오전 11:00', name: '주일오전예배', gradient: ['#3b82f6', '#1d4ed8'], image: '/images/worships/sun_morning.png' },
+  { day: '주일', time: '오후 1:30', name: '주일오후예배', gradient: ['#f59e0b', '#b45309'], image: '/images/worships/sun_afternoon.png' },
+  { day: '수요일', time: '오후 7:00', name: '수요밤예배', gradient: ['#6366f1', '#3730a3'], image: '/images/worships/wed_night.png' },
+  { day: '금요일', time: '오후 8:00', name: '금요기도회', gradient: ['#8b5cf6', '#5b21b6'], image: '/images/worships/fri_prayer.png' },
+  { day: '매일', time: '오전 5:00', name: '새벽예배', gradient: ['#1e3a5f', '#0f172a'], image: '/images/worships/dawn_prayer.png' },
 ]
 
 export default async function HomePage() {
@@ -90,21 +90,40 @@ export default async function HomePage() {
       </section>
 
       {/* Worship Schedule */}
-      <section className="py-20 bg-white">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 bg-white overflow-hidden">
+        {/* Background Image Container */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat mix-blend-multiply opacity-[0.05]"
+          style={{ backgroundImage: "url('/images/worship_schedule_bg.png')" }}
+        />
+        <div className="relative max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 z-10">
           <div className="text-center mb-12">
             <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">예배 안내</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">정기 예배 시간</h2>
             <p className="text-gray-500 mt-3 max-w-lg mx-auto">함께 드리는 예배는 가장 큰 기쁨입니다</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {worshipSchedule.map((w) => (
               <div key={w.name}
-                className="group bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-100 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-default">
-                <div className="text-4xl mb-4">{w.icon}</div>
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">{w.day}</p>
-                <h3 className="font-bold text-gray-900 text-lg mb-1">{w.name}</h3>
-                <p className="text-2xl font-extrabold text-blue-700">{w.time}</p>
+                className="group relative overflow-hidden rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all cursor-default min-h-[160px] flex flex-col justify-end"
+              >
+                {/* 배경 이미지 */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundImage: `url('${w.image}')` }}
+                />
+                {/* 어두운 오버레이 (글씨 가독성) */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 transition-opacity"
+                />
+
+                {/* 콘텐츠 */}
+                <div className="relative p-6 flex flex-col justify-end h-full z-10">
+                  {/* 텍스트 */}
+                  <p className="text-xs font-semibold text-white/90 uppercase tracking-widest mb-1">{w.day}</p>
+                  <h3 className="font-bold text-white text-base leading-tight mb-2 drop-shadow-md">{w.name}</h3>
+                  <p className="text-xl font-extrabold text-white drop-shadow-lg">{w.time}</p>
+                </div>
               </div>
             ))}
           </div>
