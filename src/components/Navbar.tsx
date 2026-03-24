@@ -128,7 +128,7 @@ export default function Navbar() {
                             {user ? (
                                 <>
                                     <span className="text-sm text-gray-500 mr-1 truncate max-w-[180px]">
-                                        {userName || user.email}
+                                        {userName}
                                     </span>
                                     <button
                                         onClick={handleLogout}

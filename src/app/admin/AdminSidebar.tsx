@@ -14,7 +14,7 @@ const adminNav = [
   { href: '/admin/bulletins', label: '주보 관리', icon: '📄' },
 ]
 
-export default function AdminSidebar({ email }: { email: string }) {
+export default function AdminSidebar({ name }: { name: string }) {
   const pathname = usePathname()
 
   const handleLogout = async () => {
@@ -30,7 +30,7 @@ export default function AdminSidebar({ email }: { email: string }) {
           <span className="text-blue-600">⚙️</span>
           관리자 메뉴
         </h2>
-        <p className="text-sm text-gray-500 mt-1 truncate">{email}</p>
+        <p className="text-sm text-gray-500 mt-1 truncate">{name}</p>
       </div>
       <nav className="p-4 space-y-1">
         {adminNav.map((nav) => (
