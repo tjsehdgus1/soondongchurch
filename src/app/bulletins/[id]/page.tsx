@@ -1,13 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import PdfViewerClient from './PdfViewerClient'
 
 async function getBulletin(id: string) {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    )
+    const supabase = await createClient()
     const { data } = await supabase.from('bulletins').select('*').eq('id', id).single()
     return data
 }

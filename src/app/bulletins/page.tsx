@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 interface Bulletin {
     id: string
@@ -10,10 +10,7 @@ interface Bulletin {
 }
 
 async function getBulletins(): Promise<Bulletin[]> {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    )
+    const supabase = await createClient()
     const { data } = await supabase
         .from('bulletins')
         .select('*')
