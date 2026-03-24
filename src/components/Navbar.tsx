@@ -67,7 +67,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden md:flex items-center gap-1">
+                    <nav className="hidden lg:flex items-center gap-1">
                         {navLinks.map(({ href, label }) => (
                             <Link
                                 key={href}
@@ -110,7 +110,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                     </nav>
 
                     {/* Desktop Right Side (Socials + Auth) */}
-                    <div className="hidden md:flex items-center gap-4">
+                    <div className="hidden lg:flex items-center gap-4">
                         {/* YouTube Link */}
                         <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
                             target="_blank" rel="noopener noreferrer"
@@ -156,7 +156,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                        className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
                         onClick={() => setMenuOpen(!menuOpen)}
                         aria-label="메뉴 열기"
                     >
@@ -171,7 +171,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
 
                 {/* Mobile Menu */}
                 {menuOpen && (
-                    <div className="md:hidden border-t border-gray-100 py-3 space-y-1">
+                    <div className="lg:hidden border-t border-gray-100 py-3 space-y-1">
                         {navLinks.map(({ href, label }) => (
                             <Link
                                 key={href}

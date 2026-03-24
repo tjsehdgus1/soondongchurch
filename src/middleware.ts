@@ -29,18 +29,21 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     const pathname = request.nextUrl.pathname
+    const isProtected = pathname.startsWith('/admin') || pathname.startsWith('/groups')
 
-    // 관리자 전용 경로 보호
-    if (pathname.startsWith('/admin')) {
+    // [리팩토링] 인증 필요 경로 통합 처리
+    // 기존: /admin 미인증만 redirect, is_blocked는 별도 조건으로 분리
+    // 변경: isProtected 하나의 조건으로 통합 → /groups도 미인증 redirect 적용
+    if (isProtected) {
         if (!user) {
             const loginUrl = request.nextUrl.clone()
             loginUrl.pathname = '/auth/login'
             return NextResponse.redirect(loginUrl)
         }
-    }
 
-    // 차단된 유저가 인증이 필요한 경로 접근 시 차단
-    if (user && (pathname.startsWith('/admin') || pathname.startsWith('/groups'))) {
+        // [리팩토링] is_blocked 조회를 인증 검사 블록 안으로 이동
+        // 기존: 두 개의 분리된 if문으로 getUser() 후 다시 조건 평가
+        // 변경: 인증된 사용자에 대해서만 1회 DB 조회 — 불필요한 조건 재평가 제거
         try {
             const { data: profile } = await supabase
                 .from('profiles')

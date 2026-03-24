@@ -2,9 +2,15 @@
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+
+// [리팩토링] useRouter import 제거
+// router.refresh()는 void를 반환 — await해도 완료를 보장하지 않음
+// refresh() + push() 조합은 경쟁 조건 유발: 서버가 세션 쿠키를 읽기 전에
+// 클라이언트가 페이지 이동을 시작해 데이터 패칭이 무한 대기(Pending) 상태에 빠짐
+// window.location.href로 전체 페이지 리로드 시 미들웨어 → layout → page 순으로
+// 서버가 세션을 완전히 읽은 후 렌더링을 시작하므로 경쟁 조건 원천 차단
 
 function BlockedBanner() {
     const params = useSearchParams()
@@ -22,17 +28,15 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    // [리팩토링] 싱글톤 클라이언트 — 리렌더 시 재생성 없음
     const supabase = createClient()
-    const router = useRouter()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
 
-        // 아이디로 내부 이메일 생성
         const internalEmail = `${username.trim().toLowerCase()}@internal.church`
-
         const { error } = await supabase.auth.signInWithPassword({ email: internalEmail, password })
 
         if (error) {
@@ -41,8 +45,11 @@ export default function LoginPage() {
             return
         }
 
-        router.refresh()
-        router.push('/')
+        // [리팩토링] router.refresh() + router.push() 제거 → window.location.href 사용
+        // 이유: refresh()는 완료를 보장하지 않아 세션 미확립 상태로 push()가 실행됨
+        // window.location.href는 브라우저가 전체 요청을 새로 시작하므로
+        // 미들웨어가 세션 쿠키를 갱신하고, layout이 getUser()를 완전히 완료한 뒤 렌더링
+        window.location.href = '/'
     }
 
     return (

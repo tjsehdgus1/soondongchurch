@@ -37,6 +37,9 @@ export default async function HomePage() {
     .order('sermon_date', { ascending: false })
     .limit(2)
 
+  // 로그인 여부 확인
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div>
       {/* Hero Section */}
@@ -81,10 +84,12 @@ export default async function HomePage() {
               className="px-8 py-4 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-0.5 transition-all flex items-center justify-center">
               예배 일정 보기
             </Link>
-            <Link href="/auth/register"
-              className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-md shadow-lg flex items-center justify-center">
-              교인 등록하기
-            </Link>
+            {!user && (
+              <Link href="/auth/register"
+                className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-md shadow-lg flex items-center justify-center">
+                교인 등록하기
+              </Link>
+            )}
           </div>
         </div>
       </section>
