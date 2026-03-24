@@ -109,7 +109,7 @@ export default function AdminGroupsPage() {
         .order('name'),
     ])
 
-    setMembers((memberData as GroupMember[]) ?? [])
+    setMembers((memberData as unknown as GroupMember[]) ?? [])
     setAllProfiles(profileData ?? [])
     setSelectedUserId('')
     setMemberLoading(false)
