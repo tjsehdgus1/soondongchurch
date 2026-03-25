@@ -45,6 +45,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
         { href: '/bulletins', label: '주간예배일정' },
         { href: '/events', label: '행사일정' },
         { href: '/notices', label: '공지사항' },
+        { href: '/directions', label: '오시는길' },
     ]
 
     return (
