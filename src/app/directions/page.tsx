@@ -19,29 +19,26 @@ declare global {
 
 export default function DirectionsPage() {
     useEffect(() => {
+        let tries = 0
+
         const renderMap = () => {
-            if (window.daum?.roughmap?.Lander) {
+            if (typeof window.daum?.roughmap?.Lander === 'function') {
                 new window.daum.roughmap.Lander({
                     timestamp: '1774420501501',
                     key: '295z2gf8banv',
                     mapWidth: '640',
                     mapHeight: '360',
                 }).render()
-            } else {
-                setTimeout(renderMap, 200)
+            } else if (tries++ < 30) {
+                setTimeout(renderMap, 300)
             }
-        }
-
-        if (document.querySelector('.daum_roughmap_loader_script')) {
-            renderMap()
-            return
         }
 
         const script = document.createElement('script')
         script.src = 'https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js'
         script.charset = 'UTF-8'
         script.className = 'daum_roughmap_loader_script'
-        script.onload = renderMap
+        script.onload = () => setTimeout(renderMap, 300)
         document.body.appendChild(script)
     }, [])
 
