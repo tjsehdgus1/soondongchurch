@@ -1,33 +1,76 @@
 'use client'
 
 import { useEffect } from 'react'
-import Script from 'next/script'
+
+declare global {
+    interface Window {
+        daum: {
+            roughmap: {
+                phase?: string
+                cdn?: string
+                URL_KEY_DATA_LOAD_PRE?: string
+                url_protocal?: string
+                url_cdn_domain?: string
+                Lander?: new (options: {
+                    timestamp: string
+                    key: string
+                    mapWidth: string
+                    mapHeight: string
+                }) => { render: () => void }
+            }
+        }
+    }
+}
 
 export default function DirectionsPage() {
-    // 지도를 초기화하는 함수
-    const initMap = () => {
-        if (window.daum && window.daum.roughmap) {
-            // 중복 렌더링 방지를 위해 컨테이너 내부를 비워줍니다.
-            const container = document.getElementById('daumRoughmapContainer1774420501501');
-            if (container) container.innerHTML = "";
+    useEffect(() => {
+        if (document.getElementById('kakao-lander-script')) return
 
-            new window.daum.roughmap.Lander({
-                "timestamp" : "1774449776199",
-                "key" : "295mucbtjocc",
-                // 고정 수치 대신 100%를 주거나 반응형 설정을 권장합니다.
-                "mapWidth" : "100%", 
-                "mapHeight" : "450"
-            }).render();
+        const protocol = location.protocol === 'https:' ? 'https:' : 'http:'
+        const cdnKey = '207038f2_1774248312945'
+        const phase = 'prod'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        window.daum = (window.daum || {}) as any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        window.daum.roughmap = {
+            phase,
+            cdn: cdnKey,
+            URL_KEY_DATA_LOAD_PRE: `${protocol}//t1.kakaocdn.net/roughmap/`,
+            url_protocal: protocol,
+            url_cdn_domain: '//t1.kakaocdn.net',
+        } as any
+
+        const landerScript = document.createElement('script')
+        landerScript.id = 'kakao-lander-script'
+        landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
+        landerScript.charset = 'UTF-8'
+        landerScript.onload = () => {
+            // 컨테이너의 실제 너비를 mapWidth로 사용
+            const container = document.getElementById('daumRoughmapContainer1774420501501')
+            const mapWidth = String(container?.clientWidth || Math.min(window.innerWidth - 32, 1268))
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            new (window.daum.roughmap as any).Lander({
+                timestamp: '1774420501501',
+                key: '295z2gf8banv',
+                mapWidth,
+                mapHeight: '400',
+            }).render()
+
+            // 렌더링 후 컨테이너 자체의 width만 100%로 재설정
+            setTimeout(() => {
+                if (container) container.style.width = '100%'
+            }, 100)
         }
-    };
+        document.body.appendChild(landerScript)
+
+        return () => {
+            document.getElementById('kakao-lander-script')?.remove()
+        }
+    }, [])
+
     return (
         <div className="min-h-screen bg-gray-50">
-            <Script 
-                src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js" 
-                strategy="afterInteractive"
-                onLoad={initMap} 
-            />
-            
             {/* 헤더 */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -45,7 +88,7 @@ export default function DirectionsPage() {
                     <div
                         id="daumRoughmapContainer1774420501501"
                         className="root_daum_roughmap root_daum_roughmap_landing w-full"
-                    ></div>
+                    />
                 </div>
 
                 {/* 교회 정보 */}
