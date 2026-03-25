@@ -11,7 +11,7 @@ declare global {
                 URL_KEY_DATA_LOAD_PRE?: string
                 url_protocal?: string
                 url_cdn_domain?: string
-                Lander: new (options: {
+                Lander?: new (options: {
                     timestamp: string
                     key: string
                     mapWidth: string
@@ -33,20 +33,22 @@ export default function DirectionsPage() {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum = (window.daum || {}) as any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum.roughmap = {
             phase,
             cdn: cdnKey,
             URL_KEY_DATA_LOAD_PRE: `${protocol}//t1.kakaocdn.net/roughmap/`,
             url_protocal: protocol,
             url_cdn_domain: '//t1.kakaocdn.net',
-        }
+        } as any
 
         const landerScript = document.createElement('script')
         landerScript.id = 'kakao-lander-script'
         landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
         landerScript.charset = 'UTF-8'
         landerScript.onload = () => {
-            new window.daum.roughmap.Lander({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            new (window.daum.roughmap as any).Lander({
                 timestamp: '1774420501501',
                 key: '295z2gf8banv',
                 mapWidth,
