@@ -19,7 +19,7 @@ export default function PdfViewer({ fileUrl }: PdfViewerProps) {
     const [containerWidth, setContainerWidth] = useState(800)
 
     useEffect(() => {
-        const update = () => setContainerWidth(Math.min(window.innerWidth - 32, 800))
+        const update = () => setContainerWidth(Math.min(window.innerWidth - 32, 1300))
         update()
         window.addEventListener('resize', update)
         return () => window.removeEventListener('resize', update)
@@ -33,7 +33,7 @@ export default function PdfViewer({ fileUrl }: PdfViewerProps) {
     return (
         <div className="flex flex-col items-center w-full">
             {/* 컨트롤 바 */}
-            <div className="sticky top-16 z-10 w-full max-w-3xl bg-white/90 backdrop-blur border border-gray-200 rounded-xl shadow-sm px-4 py-2.5 mb-4 flex items-center justify-between gap-2">
+            <div className="sticky top-16 z-10 w-full max-w-[1300px] bg-white/90 backdrop-blur border border-gray-200 rounded-xl shadow-sm px-4 py-2.5 mb-4 flex items-center justify-between gap-2">
                 {/* 페이지 이동 */}
                 <div className="flex items-center gap-2">
                     <button
@@ -95,7 +95,7 @@ export default function PdfViewer({ fileUrl }: PdfViewerProps) {
             </div>
 
             {/* PDF 렌더링 */}
-            <div className="w-full max-w-3xl overflow-x-auto">
+            <div className="w-full max-w-[1300px] overflow-x-auto">
                 <Document
                     file={fileUrl}
                     onLoadSuccess={onDocumentLoadSuccess}
