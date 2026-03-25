@@ -1,6 +1,6 @@
 'use client'
 
-import Script from 'next/script'
+import { useEffect } from 'react'
 
 declare global {
     interface Window {
@@ -18,21 +18,34 @@ declare global {
 }
 
 export default function DirectionsPage() {
+    useEffect(() => {
+        const renderMap = () => {
+            if (window.daum?.roughmap?.Lander) {
+                new window.daum.roughmap.Lander({
+                    timestamp: '1774420501501',
+                    key: '295z2gf8banv',
+                    mapWidth: '640',
+                    mapHeight: '360',
+                }).render()
+            } else {
+                setTimeout(renderMap, 200)
+            }
+        }
+
+        if (document.querySelector('.daum_roughmap_loader_script')) {
+            renderMap()
+            return
+        }
+
+        const script = document.createElement('script')
+        script.src = 'https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js'
+        script.charset = 'UTF-8'
+        script.className = 'daum_roughmap_loader_script'
+        script.onload = renderMap
+        document.body.appendChild(script)
+    }, [])
+
     return (
-        <div className="min-h-screen bg-gray-50">
-            <Script
-                src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"
-                className="daum_roughmap_loader_script"
-                strategy="afterInteractive"
-                onLoad={() => {
-                    new window.daum.roughmap.Lander({
-                        timestamp: '1774420501501',
-                        key: '295z2gf8banv',
-                        mapWidth: '640',
-                        mapHeight: '360',
-                    }).render()
-                }}
-            />
 
             {/* 헤더 */}
             <div className="bg-white border-b border-gray-100">
