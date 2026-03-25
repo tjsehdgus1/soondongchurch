@@ -24,43 +24,34 @@ declare global {
 
 export default function DirectionsPage() {
     useEffect(() => {
-        // roughmapLoader.js 내부가 document.write()를 사용하므로 동적 로드 불가.
-        // 대신 fetch로 소스를 읽어 roughmapLander.js URL을 추출한 뒤 직접 로드.
+        // roughmapLoader.js는 내부에서 document.write()를 사용해 CORS/동적로드 불가.
+        // roughmapLoader.js 소스에서 확인한 CDN 키로 roughmapLander.js 직접 로드.
         const protocol = location.protocol === 'https:' ? 'https:' : 'http:'
+        const cdnKey = '207038f2_1774248312945'
+        const phase = 'prod'
 
-        fetch(`${protocol}//ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js`)
-            .then(r => r.text())
-            .then(code => {
-                const aMatch = code.match(/var a="([^"]+)"/)
-                const pMatch = code.match(/var p="([^"]+)"/)
-                if (!aMatch || !pMatch) return
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        window.daum = (window.daum || {}) as any
+        window.daum.roughmap = {
+            phase,
+            cdn: cdnKey,
+            URL_KEY_DATA_LOAD_PRE: `${protocol}//t1.kakaocdn.net/roughmap/`,
+            url_protocal: protocol,
+            url_cdn_domain: '//t1.kakaocdn.net',
+        }
 
-                const cdnKey = aMatch[1]
-                const phase = pMatch[1]
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                window.daum = (window.daum || {}) as any
-                window.daum.roughmap = {
-                    phase,
-                    cdn: cdnKey,
-                    URL_KEY_DATA_LOAD_PRE: `${protocol}//t1.kakaocdn.net/roughmap/`,
-                    url_protocal: protocol,
-                    url_cdn_domain: '//t1.kakaocdn.net',
-                }
-
-                const landerScript = document.createElement('script')
-                landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
-                landerScript.charset = 'UTF-8'
-                landerScript.onload = () => {
-                    new window.daum.roughmap.Lander({
-                        timestamp: '1774420501501',
-                        key: '295z2gf8banv',
-                        mapWidth: '640',
-                        mapHeight: '360',
-                    }).render()
-                }
-                document.body.appendChild(landerScript)
-            })
+        const landerScript = document.createElement('script')
+        landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
+        landerScript.charset = 'UTF-8'
+        landerScript.onload = () => {
+            new window.daum.roughmap.Lander({
+                timestamp: '1774420501501',
+                key: '295z2gf8banv',
+                mapWidth: '640',
+                mapHeight: '360',
+            }).render()
+        }
+        document.body.appendChild(landerScript)
     }, [])
 
     return (
