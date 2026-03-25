@@ -46,7 +46,7 @@ export default function DirectionsPage() {
     }, [])
 
     return (
-
+        <div className="min-h-screen bg-gray-50">
             {/* 헤더 */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
