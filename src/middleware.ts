@@ -17,9 +17,11 @@ export async function middleware(request: NextRequest) {
                         request.cookies.set(name, value)
                     )
                     supabaseResponse = NextResponse.next({ request })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        // maxAge/expires 제거 → 브라우저 종료 시 자동 삭제되는 세션 쿠키
+                        const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
+                        supabaseResponse.cookies.set(name, value, sessionOptions)
+                    })
                 },
             },
         }

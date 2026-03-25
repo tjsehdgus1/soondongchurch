@@ -14,9 +14,11 @@ export async function createClient() {
                 },
                 setAll(cookiesToSet) {
                     try {
-                        cookiesToSet.forEach(({ name, value, options }) =>
-                            cookieStore.set(name, value, options)
-                        )
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            // maxAge/expires 제거 → 브라우저 종료 시 자동 삭제되는 세션 쿠키
+                            const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
+                            cookieStore.set(name, value, sessionOptions)
+                        })
                     } catch {
                         // Server Component에서 set 호출 — middleware에서 처리
                     }
