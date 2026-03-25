@@ -1,5 +1,7 @@
 // Edge 런타임: AWS Lambda와 다른 IP 대역 사용
 // Vercel Edge는 YouTube의 서버리스(AWS) IP 차단과 별개로 동작할 가능성이 높음
+import { createServerClient } from '@supabase/ssr'
+
 export const runtime = 'edge'
 
 const ANDROID_UA = 'com.google.android.youtube/20.10.38 (Linux; U; Android 14)'
@@ -7,6 +9,22 @@ const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/
 
 export async function POST(req: Request) {
     try {
+        // Edge 런타임에서 쿠키 기반 관리자 인증
+        const cookieHeader = req.headers.get('cookie') || ''
+        const cookieEntries = cookieHeader.split('; ').filter(Boolean).map(c => {
+            const idx = c.indexOf('=')
+            return { name: c.slice(0, idx), value: c.slice(idx + 1) }
+        })
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll: () => cookieEntries, setAll: () => {} } }
+        )
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return Response.json({ error: '로그인이 필요합니다.' }, { status: 401 })
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        if (profile?.role !== 'admin') return Response.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
+
         const { videoId, lang = 'ko' } = await req.json()
         if (!videoId) return Response.json({ error: 'videoId 필요' }, { status: 400 })
 

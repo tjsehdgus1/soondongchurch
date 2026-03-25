@@ -65,9 +65,9 @@ export default function GroupsPage() {
         )
 
         setMyGroups(withCount as GroupRow[])
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error('소그룹 페이지 오류:', e)
-        setError(e.message ?? '데이터를 불러오는 중 오류가 발생했습니다.')
+        setError(e instanceof Error ? e.message : '데이터를 불러오는 중 오류가 발생했습니다.')
       } finally {
         setLoading(false)
       }

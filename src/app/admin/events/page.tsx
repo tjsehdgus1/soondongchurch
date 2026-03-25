@@ -113,7 +113,7 @@ export default function AdminEventsPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">분류</label>
-                <select value={eventType} onChange={e => setEventType(e.target.value as any)} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <select value={eventType} onChange={e => setEventType(e.target.value as 'worship' | 'event' | 'meeting')} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
                   <option value="worship">정규 예배</option>
                   <option value="event">특별 행사</option>
                   <option value="meeting">모임/회의</option>

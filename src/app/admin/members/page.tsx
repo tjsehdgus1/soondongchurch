@@ -26,6 +26,7 @@ type EditForm = {
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
   // 수정 모달
@@ -35,10 +36,17 @@ export default function AdminMembersPage() {
 
   const fetchMembers = async () => {
     setLoading(true)
-    const res = await fetch('/api/admin/members')
-    const json = await res.json()
-    if (json.data) setMembers(json.data)
-    setLoading(false)
+    setFetchError(null)
+    try {
+      const res = await fetch('/api/admin/members')
+      if (!res.ok) throw new Error(`서버 오류 (${res.status})`)
+      const json = await res.json()
+      if (json.data) setMembers(json.data)
+    } catch (e: unknown) {
+      setFetchError(e instanceof Error ? e.message : '데이터를 불러오지 못했습니다.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchMembers() }, [])
@@ -116,6 +124,14 @@ export default function AdminMembersPage() {
       {loading ? (
         <div className="py-24 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
           불러오는 중...
+        </div>
+      ) : fetchError ? (
+        <div className="py-12 text-center bg-white rounded-2xl border border-red-100">
+          <p className="text-red-500 font-medium">데이터를 불러오지 못했습니다.</p>
+          <p className="text-sm text-gray-400 mt-1">{fetchError}</p>
+          <button onClick={fetchMembers} className="mt-4 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">
+            다시 시도
+          </button>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

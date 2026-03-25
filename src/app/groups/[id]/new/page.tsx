@@ -79,8 +79,8 @@ export default function NewPostPage() {
       } else {
         router.push(`/groups/${groupId}`)
       }
-    } catch (e: any) {
-      alert('오류가 발생했습니다: ' + (e.message ?? e))
+    } catch (e: unknown) {
+      alert('오류가 발생했습니다: ' + (e instanceof Error ? e.message : String(e)))
     } finally {
       setSubmitting(false)
     }

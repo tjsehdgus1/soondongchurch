@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getServiceClient } from '@/lib/admin'
 
 const PROJECT_REF = process.env.NEXT_PUBLIC_SUPABASE_URL!
     .replace('https://', '')
     .split('.')[0]
-
-function getServiceClient() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    )
-}
 
 async function runSQL(query: string) {
     const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`, {

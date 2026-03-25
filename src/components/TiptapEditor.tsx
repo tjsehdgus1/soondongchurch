@@ -95,8 +95,8 @@ export default function TiptapEditor({ content, onChange, onSizeError }: TiptapE
                 )
               )
               editor?.chain().focus().setImage({ src: urlData.publicUrl }).run()
-            } catch (e: any) {
-              alert('이미지 처리 오류: ' + (e.message ?? e))
+            } catch (e: unknown) {
+              alert('이미지 처리 오류: ' + (e instanceof Error ? e.message : String(e)))
             } finally {
               setUploading(false)
             }

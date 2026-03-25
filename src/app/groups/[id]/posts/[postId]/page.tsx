@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import DOMPurify from 'isomorphic-dompurify'
 
 type Post = {
   id: number
@@ -114,8 +115,8 @@ export default function PostDetailPage() {
         setCommentText('')
         await fetchData(supabase)
       }
-    } catch (e: any) {
-      alert('오류: ' + (e.message ?? e))
+    } catch (e: unknown) {
+      alert('오류: ' + (e instanceof Error ? e.message : String(e)))
     } finally {
       setCommentLoading(false)
     }
@@ -228,7 +229,7 @@ export default function PostDetailPage() {
 
           <div
             className="prose prose-lg max-w-none text-gray-700 mt-5"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
         </div>
 

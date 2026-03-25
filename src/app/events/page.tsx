@@ -7,7 +7,7 @@ const eventTypeMap: Record<string, { label: string; color: string; bg: string }>
 }
 
 function formatDate(dateStr: string) {
-    const d = new Date(dateStr)
+    const d = new Date(dateStr + 'T00:00:00')
     return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })
 }
 
@@ -62,13 +62,13 @@ export default async function EventsPage() {
                                     {/* Date badge */}
                                     <div className="flex-shrink-0 text-center bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl px-4 py-3 min-w-[64px]">
                                         <p className="text-xs font-bold text-blue-500 uppercase">
-                                            {new Date(ev.event_date).toLocaleDateString('ko-KR', { month: 'short' })}
+                                            {new Date(ev.event_date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'short' })}
                                         </p>
                                         <p className="text-3xl font-extrabold text-blue-700 leading-none">
-                                            {new Date(ev.event_date).getDate()}
+                                            {new Date(ev.event_date + 'T00:00:00').getDate()}
                                         </p>
                                         <p className="text-xs text-blue-400 mt-0.5">
-                                            {new Date(ev.event_date).toLocaleDateString('ko-KR', { weekday: 'short' })}
+                                            {new Date(ev.event_date + 'T00:00:00').toLocaleDateString('ko-KR', { weekday: 'short' })}
                                         </p>
                                     </div>
                                     {/* Info */}
@@ -127,8 +127,8 @@ export default async function EventsPage() {
                             return (
                                 <div key={ev.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 opacity-60">
                                     <div className="text-center min-w-[52px]">
-                                        <p className="text-xs text-gray-400">{new Date(ev.event_date).toLocaleDateString('ko-KR', { month: 'short' })}</p>
-                                        <p className="text-xl font-bold text-gray-500">{new Date(ev.event_date).getDate()}</p>
+                                        <p className="text-xs text-gray-400">{new Date(ev.event_date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'short' })}</p>
+                                        <p className="text-xl font-bold text-gray-500">{new Date(ev.event_date + 'T00:00:00').getDate()}</p>
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mr-2 ${type.bg} ${type.color}`}>{type.label}</span>

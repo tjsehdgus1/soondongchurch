@@ -66,6 +66,7 @@ async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promi
         } else {
             // <p><s> 포맷
             let seg: RegExpExecArray | null
+            segRegex.lastIndex = 0
             while ((seg = segRegex.exec(m[0])) !== null) texts.push(seg[1])
         }
     }
@@ -179,8 +180,8 @@ ${transcriptText}`
 
         return NextResponse.json({ success: true, data: data[0] })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("서버 내부 오류:", error)
-        return NextResponse.json({ error: error.message || '서버 오류가 발생했습니다.' }, { status: 500 })
+        return NextResponse.json({ error: error instanceof Error ? error.message : '서버 오류가 발생했습니다.' }, { status: 500 })
     }
 }

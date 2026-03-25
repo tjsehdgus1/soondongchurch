@@ -1,17 +1,14 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-// [리팩토링] 모듈 레벨 싱글톤 패턴 적용
-// 기존: createClient() 호출마다 새 인스턴스 생성 → 리렌더 시 불필요한 객체 생성 반복
-// 변경: 첫 호출 시 한 번만 생성, 이후 동일 인스턴스 재사용
-// createBrowserClient 내부도 캐싱을 지원하지만 명시적 싱글톤이 더 안전
-let clientInstance: ReturnType<typeof createBrowserClient> | null = null
-
+// 모듈 레벨 싱글톤 제거
+// 이유: Next.js App Router는 'use client' 컴포넌트도 서버에서 SSR 프리렌더링함
+// 컴포넌트 레벨에서 createClient()를 호출하면 서버 환경에서도 실행되어
+// 브라우저 전용인 createBrowserClient가 비정상 인스턴스를 반환함
+// 이 인스턴스가 싱글톤으로 캐싱되면 브라우저에서 재사용 → 모든 쿼리 무한 pending
+// createBrowserClient 자체가 내부적으로 브라우저 환경 캐싱을 처리하므로 위임
 export function createClient() {
-  if (!clientInstance) {
-    clientInstance = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
-  return clientInstance
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 }

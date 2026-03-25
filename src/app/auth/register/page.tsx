@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
@@ -22,19 +21,12 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
-    const router = useRouter()
     const supabase = createClient()
 
+    // 컴포넌트 언마운트 시 타이머 정리
     useEffect(() => {
-        if (timeLeft <= 0) {
-            if (timerRef.current) clearInterval(timerRef.current)
-            return
-        }
-        timerRef.current = setInterval(() => {
-            setTimeLeft(prev => prev - 1)
-        }, 1000)
         return () => { if (timerRef.current) clearInterval(timerRef.current) }
-    }, [timeLeft])
+    }, [])
 
     const formatTime = (sec: number) => {
         const m = Math.floor(sec / 60).toString().padStart(2, '0')
@@ -60,8 +52,18 @@ export default function RegisterPage() {
                 setError(data.error || 'SMS 발송에 실패했습니다.')
             } else {
                 setShowSmsInput(true)
-                setTimeLeft(300)
                 setSmsCode('')
+                if (timerRef.current) clearInterval(timerRef.current)
+                setTimeLeft(300)
+                timerRef.current = setInterval(() => {
+                    setTimeLeft(prev => {
+                        if (prev <= 1) {
+                            if (timerRef.current) clearInterval(timerRef.current)
+                            return 0
+                        }
+                        return prev - 1
+                    })
+                }, 1000)
             }
         } catch {
             setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.')
@@ -151,7 +153,7 @@ export default function RegisterPage() {
         }
 
         if (data.session) {
-            router.push('/')
+            window.location.href = '/'
         } else {
             setSuccess(true)
         }

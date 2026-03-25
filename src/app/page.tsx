@@ -2,6 +2,14 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import HeroSlider from '@/components/HeroSlider'
 
+type Sermon = {
+  id: number
+  title: string
+  sermon_date: string
+  thumbnail_url: string | null
+  summary: string | null
+}
+
 const worshipSchedule = [
   { day: '주일', time: '오전 11:00', name: '주일오전예배', gradient: ['#3b82f6', '#1d4ed8'], image: '/images/worships/sun_morning.png' },
   { day: '주일', time: '오후 1:30', name: '주일오후예배', gradient: ['#f59e0b', '#b45309'], image: '/images/worships/sun_afternoon.png' },
@@ -155,11 +163,11 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sermons.map((s: any) => (
+              {(sermons as Sermon[]).map((s) => (
                 <Link key={s.id} href={`/sermons/${s.id}`} className="group bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col">
                   {/* 썸네일 */}
                   <div className="relative aspect-video overflow-hidden bg-gray-100">
-                    <img src={s.thumbnail_url} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img src={s.thumbnail_url ?? undefined} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
                       <div className="w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all">
                         <svg className="w-5 h-5 text-blue-600 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
@@ -214,10 +222,10 @@ export default async function HomePage() {
                     <div key={ev.id} className="flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                       <div className="text-center bg-blue-50 rounded-xl px-3 py-2 min-w-[56px]">
                         <p className="text-xs text-blue-500 font-medium">
-                          {new Date(ev.event_date).toLocaleDateString('ko-KR', { month: 'short' })}
+                          {new Date(ev.event_date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'short' })}
                         </p>
                         <p className="text-xl font-extrabold text-blue-700">
-                          {new Date(ev.event_date).getDate()}
+                          {new Date(ev.event_date + 'T00:00:00').getDate()}
                         </p>
                       </div>
                       <div className="flex-1 min-w-0">

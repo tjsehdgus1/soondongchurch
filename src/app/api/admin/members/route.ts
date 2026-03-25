@@ -1,24 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
-
-// 서비스 롤 클라이언트 - RLS 우회 (관리자 전용 작업)
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-}
-
-// 호출자가 admin인지 확인
-async function verifyAdmin() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return null
-  return user
-}
+import { getServiceClient, verifyAdmin } from '@/lib/admin'
 
 // GET: 전체 교인 목록 + 소속 그룹 + 차단 여부
 export async function GET() {

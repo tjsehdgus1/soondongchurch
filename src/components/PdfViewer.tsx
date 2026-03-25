@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
@@ -16,15 +16,19 @@ export default function PdfViewer({ fileUrl }: PdfViewerProps) {
     const [pageNumber, setPageNumber] = useState(1)
     const [scale, setScale] = useState(1.0)
     const [loading, setLoading] = useState(true)
+    const [containerWidth, setContainerWidth] = useState(800)
+
+    useEffect(() => {
+        const update = () => setContainerWidth(Math.min(window.innerWidth - 32, 800))
+        update()
+        window.addEventListener('resize', update)
+        return () => window.removeEventListener('resize', update)
+    }, [])
 
     const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
         setNumPages(numPages)
         setLoading(false)
     }, [])
-
-    const containerWidth = typeof window !== 'undefined'
-        ? Math.min(window.innerWidth - 32, 800)
-        : 800
 
     return (
         <div className="flex flex-col items-center w-full">

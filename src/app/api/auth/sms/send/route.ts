@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { SolapiMessageService } from 'solapi'
-
-function getServiceClient() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    )
-}
+import { getServiceClient } from '@/lib/admin'
 
 export async function POST(req: NextRequest) {
     const { phone } = await req.json()

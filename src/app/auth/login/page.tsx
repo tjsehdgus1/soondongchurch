@@ -23,6 +23,17 @@ function BlockedBanner() {
     )
 }
 
+function ErrorBanner() {
+    const params = useSearchParams()
+    if (!params.get('error')) return null
+    return (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 flex items-center gap-2 mb-4">
+            <span className="text-base">⚠️</span>
+            로그인 인증 처리 중 오류가 발생했습니다. 다시 시도해주세요.
+        </div>
+    )
+}
+
 export default function LoginPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -68,6 +79,7 @@ export default function LoginPage() {
 
                     <Suspense>
                         <BlockedBanner />
+                        <ErrorBanner />
                     </Suspense>
 
                     <form onSubmit={handleLogin} className="space-y-5">
