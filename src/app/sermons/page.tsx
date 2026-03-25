@@ -23,7 +23,7 @@ export default async function SermonsPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">Sermons</span>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">목사님 설교</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">설교영상</h1>
           <p className="text-gray-500 mt-2">목사님의 말씀을 영상과 요약으로 만나보세요.</p>
         </div>
       </div>

@@ -34,7 +34,9 @@
       "Bash(node -e \":*)",
       "Bash(node test_transcript.mjs)",
       "Bash(node test_yt.mjs)",
-      "Bash(node test_yt.cjs)"
+      "Bash(node test_yt.cjs)",
+      "Bash(for file:*)",
+      "Bash(do echo:*)"
     ]
   }
 }

@@ -90,10 +90,6 @@ export default async function HomePage() {
               </svg>
               순동교회 유튜브
             </Link>
-            <Link href="/events"
-              className="px-8 py-4 bg-amber-500 text-white hover:bg-amber-600 font-bold rounded-xl shadow-[0_4px_14px_0_rgba(245,158,11,0.39)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.23)] hover:-translate-y-0.5 transition-all flex items-center justify-center">
-              예배 일정 보기
-            </Link>
             {!user && (
               <Link href="/auth/register"
                 className="px-8 py-4 bg-white/10 border border-white/30 text-white font-bold rounded-xl hover:bg-white/20 transition-all backdrop-blur-md shadow-lg flex items-center justify-center">

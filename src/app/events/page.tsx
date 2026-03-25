@@ -46,7 +46,7 @@ export default async function EventsPage() {
             {/* Header */}
             <div className="mb-10">
                 <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">Schedule</span>
-                <h1 className="text-4xl font-extrabold text-gray-900 mt-1">예배 / 행사 일정</h1>
+                <h1 className="text-4xl font-extrabold text-gray-900 mt-1">행사일정</h1>
                 <p className="text-gray-500 mt-2">순천순동교회의 예배 및 다양한 행사 일정을 안내합니다.</p>
             </div>
 
