@@ -1,10 +1,33 @@
 'use client'
 
 import { useEffect } from 'react'
+import Script from 'next/script'
 
 export default function DirectionsPage() {
+    // 지도를 초기화하는 함수
+    const initMap = () => {
+        if (window.daum && window.daum.roughmap) {
+            // 중복 렌더링 방지를 위해 컨테이너 내부를 비워줍니다.
+            const container = document.getElementById('daumRoughmapContainer1774420501501');
+            if (container) container.innerHTML = "";
+
+            new window.daum.roughmap.Lander({
+                "timestamp" : "1774449776199",
+                "key" : "295mucbtjocc",
+                // 고정 수치 대신 100%를 주거나 반응형 설정을 권장합니다.
+                "mapWidth" : "100%", 
+                "mapHeight" : "450"
+            }).render();
+        }
+    };
     return (
         <div className="min-h-screen bg-gray-50">
+            <Script 
+                src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js" 
+                strategy="afterInteractive"
+                onLoad={initMap} 
+            />
+            
             {/* 헤더 */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,15 +46,6 @@ export default function DirectionsPage() {
                         id="daumRoughmapContainer1774420501501"
                         className="root_daum_roughmap root_daum_roughmap_landing w-full"
                     ></div>
-                    <script charset="UTF-8" class="daum_roughmap_loader_script" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
-                    <script charset="UTF-8">
-                    	new daum.roughmap.Lander({
-                    		"timestamp" : "1774449776199",
-                    		"key" : "295mucbtjocc",
-                    		"mapWidth" : "640",
-                    		"mapHeight" : "360"
-                    	}).render();
-                    </script>
                 </div>
 
                 {/* 교회 정보 */}
