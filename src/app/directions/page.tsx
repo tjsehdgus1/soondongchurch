@@ -24,11 +24,12 @@ declare global {
 
 export default function DirectionsPage() {
     useEffect(() => {
-        // roughmapLoader.js는 내부에서 document.write()를 사용해 CORS/동적로드 불가.
-        // roughmapLoader.js 소스에서 확인한 CDN 키로 roughmapLander.js 직접 로드.
+        if (document.getElementById('kakao-lander-script')) return
+
         const protocol = location.protocol === 'https:' ? 'https:' : 'http:'
         const cdnKey = '207038f2_1774248312945'
         const phase = 'prod'
+        const mapWidth = String(Math.min(window.innerWidth - 32, 1268))
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum = (window.daum || {}) as any
@@ -41,17 +42,22 @@ export default function DirectionsPage() {
         }
 
         const landerScript = document.createElement('script')
+        landerScript.id = 'kakao-lander-script'
         landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
         landerScript.charset = 'UTF-8'
         landerScript.onload = () => {
             new window.daum.roughmap.Lander({
                 timestamp: '1774420501501',
                 key: '295z2gf8banv',
-                mapWidth: '640',
-                mapHeight: '360',
+                mapWidth,
+                mapHeight: '400',
             }).render()
         }
         document.body.appendChild(landerScript)
+
+        return () => {
+            document.getElementById('kakao-lander-script')?.remove()
+        }
     }, [])
 
     return (
@@ -66,70 +72,67 @@ export default function DirectionsPage() {
             </div>
 
             {/* 콘텐츠 */}
-            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-                    {/* 지도 */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div
-                            id="daumRoughmapContainer1774420501501"
-                            className="root_daum_roughmap root_daum_roughmap_landing w-full"
-                        />
-                    </div>
+            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
 
-                    {/* 교회 정보 */}
-                    <div className="space-y-6">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-xl font-bold text-gray-900 mb-5">교회 정보</h2>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">주소</p>
-                                        <p className="text-gray-800 font-medium">전라남도 순천시 남신월 4길 3-13</p>
-                                    </div>
-                                </div>
+                {/* 지도 */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
+                    <div
+                        id="daumRoughmapContainer1774420501501"
+                        className="root_daum_roughmap root_daum_roughmap_landing w-full"
+                    />
+                </div>
 
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">전화</p>
-                                        <p className="text-gray-800 font-medium">061-721-6707</p>
-                                        <p className="text-gray-500 text-sm">FAX: 061-725-3927</p>
-                                    </div>
-                                </div>
+                {/* 교회 정보 */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">교회 정보</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">주소</p>
+                                <p className="text-gray-800 font-medium text-sm">전라남도 순천시 남신월 4길 3-13</p>
+                            </div>
+                        </div>
 
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">담임목사</p>
-                                        <p className="text-gray-800 font-medium">김광선 목사</p>
-                                    </div>
-                                </div>
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">전화</p>
+                                <p className="text-gray-800 font-medium text-sm">061-721-6707</p>
+                                <p className="text-gray-500 text-sm">FAX: 061-725-3927</p>
+                            </div>
+                        </div>
 
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">주일 예배</p>
-                                        <p className="text-gray-800 font-medium">오전 11:00 · 오후 1:30</p>
-                                    </div>
-                                </div>
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">담임목사</p>
+                                <p className="text-gray-800 font-medium text-sm">김광선 목사</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">주일 예배</p>
+                                <p className="text-gray-800 font-medium text-sm">오전 11:00 · 오후 1:30</p>
                             </div>
                         </div>
                     </div>
