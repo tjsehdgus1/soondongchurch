@@ -8,7 +8,6 @@ type GroupRow = {
   id: number
   name: string
   description: string
-  member_count: number
 }
 
 export default function GroupsPage() {
@@ -53,18 +52,7 @@ export default function GroupsPage() {
 
         if (gErr) throw new Error('그룹 정보 조회 실패: ' + gErr.message)
 
-        // 3단계: 각 그룹의 멤버 수
-        const withCount = await Promise.all(
-          (groupData ?? []).map(async (g: any) => {
-            const { count } = await supabase
-              .from('group_members')
-              .select('*', { count: 'exact', head: true })
-              .eq('group_id', g.id)
-            return { ...g, member_count: count ?? 0 }
-          })
-        )
-
-        setMyGroups(withCount as GroupRow[])
+        setMyGroups((groupData ?? []) as GroupRow[])
       } catch (e: unknown) {
         console.error('소그룹 페이지 오류:', e)
         setError(e instanceof Error ? e.message : '데이터를 불러오는 중 오류가 발생했습니다.')
@@ -123,7 +111,6 @@ export default function GroupsPage() {
                     {g.description && (
                       <p className="text-sm text-gray-500 mt-1 line-clamp-2">{g.description}</p>
                     )}
-                    <p className="text-xs text-gray-400 mt-3">👥 멤버 {g.member_count}명</p>
                   </div>
                 </div>
               </Link>

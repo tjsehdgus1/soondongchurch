@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 type Group = {
   id: number
   name: string
   description: string
   created_at: string
-  member_count?: number
+  member_count: number
 }
 
 type GroupMember = {
@@ -40,35 +39,18 @@ export default function AdminGroupsPage() {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([])
   const [selectedUserId, setSelectedUserId] = useState('')
   const [memberLoading, setMemberLoading] = useState(false)
-
-  const supabase = createClient()
+  const [memberError, setMemberError] = useState<string | null>(null)
 
   const fetchGroups = async () => {
     setLoading(true)
     setFetchError(null)
     try {
-      // group_members(count)로 단일 쿼리에서 멤버 수 집계 (N+1 제거)
-      const { data: groupData, error } = await supabase
-        .from('groups')
-        .select('id, name, description, created_at, group_members(count)')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      if (groupData) {
-        const groupsWithCount = groupData.map((g: { id: number; name: string; description: string; created_at: string; group_members: { count: number }[] }) => ({
-          id: g.id,
-          name: g.name,
-          description: g.description,
-          created_at: g.created_at,
-          member_count: g.group_members?.[0]?.count ?? 0,
-        }))
-        setGroups(groupsWithCount)
-      }
+      const res = await fetch('/api/admin/groups')
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '소그룹 목록 조회 실패')
+      setGroups(json.groups)
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e)
-      console.error('소그룹 조회 오류:', e)
-      setFetchError(msg)
+      setFetchError(e instanceof Error ? e.message : '알 수 없는 오류')
     } finally {
       setLoading(false)
     }
@@ -82,46 +64,59 @@ export default function AdminGroupsPage() {
     e.preventDefault()
     if (!name) return
     setFormLoading(true)
-    const { error } = await supabase.from('groups').insert([{ name, description }])
-    if (error) {
-      alert('오류가 발생했습니다: ' + error.message)
-    } else {
+    try {
+      const res = await fetch('/api/admin/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '소그룹 생성 실패')
       setName('')
       setDescription('')
       fetchGroups()
+    } catch (e: unknown) {
+      alert('오류가 발생했습니다: ' + (e instanceof Error ? e.message : String(e)))
+    } finally {
+      setFormLoading(false)
     }
-    setFormLoading(false)
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('이 소그룹을 삭제하시겠습니까?\n게시글과 멤버십이 모두 삭제됩니다.')) return
-    const { error } = await supabase.from('groups').delete().eq('id', id)
-    if (error) {
-      alert('삭제 중 오류 발생: ' + error.message)
-    } else {
+    try {
+      const res = await fetch(`/api/admin/groups?id=${id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '삭제 실패')
       fetchGroups()
+    } catch (e: unknown) {
+      alert('삭제 중 오류: ' + (e instanceof Error ? e.message : String(e)))
     }
   }
 
   const openMemberModal = async (group: Group) => {
     setModalGroup(group)
     setMemberLoading(true)
-
-    const [{ data: memberData }, { data: profileData }] = await Promise.all([
-      supabase
-        .from('group_members')
-        .select('id, user_id, profiles(name, email)')
-        .eq('group_id', group.id),
-      supabase
-        .from('profiles')
-        .select('id, name, email')
-        .order('name'),
-    ])
-
-    setMembers((memberData as unknown as GroupMember[]) ?? [])
-    setAllProfiles(profileData ?? [])
-    setSelectedUserId('')
-    setMemberLoading(false)
+    setMemberError(null)
+    try {
+      const [membersRes, profilesRes] = await Promise.all([
+        fetch(`/api/admin/groups/members?group_id=${group.id}`),
+        fetch('/api/admin/groups/members?all=1'),
+      ])
+      const [membersJson, profilesJson] = await Promise.all([
+        membersRes.json(),
+        profilesRes.json(),
+      ])
+      if (!membersRes.ok) throw new Error(membersJson.error ?? '멤버 목록 조회 실패')
+      if (!profilesRes.ok) throw new Error(profilesJson.error ?? '교인 목록 조회 실패')
+      setMembers(membersJson.members)
+      setAllProfiles(profilesJson.profiles)
+      setSelectedUserId('')
+    } catch (e: unknown) {
+      setMemberError(e instanceof Error ? e.message : '데이터 조회 실패')
+    } finally {
+      setMemberLoading(false)
+    }
   }
 
   const handleAddMember = async () => {
@@ -131,26 +126,34 @@ export default function AdminGroupsPage() {
       alert('이미 소속된 멤버입니다.')
       return
     }
-    const { error } = await supabase
-      .from('group_members')
-      .insert([{ group_id: modalGroup.id, user_id: selectedUserId }])
-    if (error) {
-      alert('추가 중 오류 발생: ' + error.message)
-    } else {
+    try {
+      const res = await fetch('/api/admin/groups/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group_id: modalGroup.id, user_id: selectedUserId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '멤버 추가 실패')
       setSelectedUserId('')
       await openMemberModal(modalGroup)
       fetchGroups()
+    } catch (e: unknown) {
+      alert('추가 중 오류: ' + (e instanceof Error ? e.message : String(e)))
     }
   }
 
   const handleRemoveMember = async (memberId: number) => {
     if (!confirm('이 멤버를 소그룹에서 제외하시겠습니까?')) return
-    const { error } = await supabase.from('group_members').delete().eq('id', memberId)
-    if (error) {
-      alert('삭제 중 오류 발생: ' + error.message)
-    } else if (modalGroup) {
-      await openMemberModal(modalGroup)
-      fetchGroups()
+    try {
+      const res = await fetch(`/api/admin/groups/members?id=${memberId}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '멤버 제거 실패')
+      if (modalGroup) {
+        await openMemberModal(modalGroup)
+        fetchGroups()
+      }
+    } catch (e: unknown) {
+      alert('삭제 중 오류: ' + (e instanceof Error ? e.message : String(e)))
     }
   }
 
@@ -285,64 +288,78 @@ export default function AdminGroupsPage() {
               </button>
             </div>
 
-            {/* 멤버 추가 */}
-            <div className="flex gap-2">
-              <select
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">교인 선택...</option>
-                {availableProfiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.email})
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleAddMember}
-                disabled={!selectedUserId}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-40 transition-colors"
-              >
-                추가
-              </button>
-            </div>
-
-            {/* 현재 멤버 목록 */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">
-                현재 멤버 ({members.length}명)
-              </p>
-              {memberLoading ? (
-                <p className="text-sm text-gray-400 py-4 text-center">불러오는 중...</p>
-              ) : members.length === 0 ? (
-                <p className="text-sm text-gray-400 py-4 text-center">
-                  소속된 멤버가 없습니다.
-                </p>
-              ) : (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {members.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg"
-                    >
-                      <div>
-                        <span className="text-sm font-medium text-gray-800">
-                          {m.profiles.name}
-                        </span>
-                        <span className="text-xs text-gray-400 ml-2">{m.profiles.email}</span>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveMember(m.id)}
-                        className="text-red-400 hover:text-red-600 text-sm px-2 py-0.5 rounded hover:bg-red-50 transition-colors"
-                      >
-                        제거
-                      </button>
-                    </div>
-                  ))}
+            {memberError ? (
+              <div className="py-6 text-center">
+                <p className="text-red-500 text-sm">{memberError}</p>
+                <button
+                  onClick={() => openMemberModal(modalGroup)}
+                  className="mt-3 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
+                >
+                  다시 시도
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* 멤버 추가 */}
+                <div className="flex gap-2">
+                  <select
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">교인 선택...</option>
+                    {availableProfiles.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.email})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleAddMember}
+                    disabled={!selectedUserId}
+                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-40 transition-colors"
+                  >
+                    추가
+                  </button>
                 </div>
-              )}
-            </div>
+
+                {/* 현재 멤버 목록 */}
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    현재 멤버 ({members.length}명)
+                  </p>
+                  {memberLoading ? (
+                    <p className="text-sm text-gray-400 py-4 text-center">불러오는 중...</p>
+                  ) : members.length === 0 ? (
+                    <p className="text-sm text-gray-400 py-4 text-center">
+                      소속된 멤버가 없습니다.
+                    </p>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {members.map((m) => (
+                        <div
+                          key={m.id}
+                          className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg"
+                        >
+                          <div>
+                            <span className="text-sm font-medium text-gray-800">
+                              {m.profiles.name}
+                            </span>
+                            <span className="text-xs text-gray-400 ml-2">{m.profiles.email}</span>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveMember(m.id)}
+                            className="text-red-400 hover:text-red-600 text-sm px-2 py-0.5 rounded hover:bg-red-50 transition-colors"
+                          >
+                            제거
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

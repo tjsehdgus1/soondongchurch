@@ -160,11 +160,16 @@ export async function POST(req: NextRequest) {
     await runSQL(`ALTER TABLE public.group_members ENABLE ROW LEVEL SECURITY;`)
     await runSQL(`
         DO $$ BEGIN
+          DROP POLICY IF EXISTS "소그룹멤버 조회" ON public.group_members;
           CREATE POLICY "소그룹멤버 조회" ON public.group_members FOR SELECT USING (
             user_id = auth.uid()
+            OR EXISTS (
+              SELECT 1 FROM public.group_members gm
+              WHERE gm.group_id = group_members.group_id AND gm.user_id = auth.uid()
+            )
             OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
           );
-        EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+        END $$;
     `)
     await runSQL(`
         DO $$ BEGIN

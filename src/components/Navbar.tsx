@@ -41,11 +41,10 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
     }
 
     const navLinks = [
-        { href: '/', label: '홈' },
-        { href: '/events', label: '예배/행사' },
-        { href: '/sermons', label: '설교' },
+        { href: '/sermons', label: '설교영상' },
+        { href: '/bulletins', label: '주간예배일정' },
+        { href: '/events', label: '행사일정' },
         { href: '/notices', label: '공지사항' },
-        { href: '/bulletins', label: '주간예배일정(주보)' },
     ]
 
     return (

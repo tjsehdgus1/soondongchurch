@@ -22,7 +22,7 @@ export default function HeroSlider() {
       {images.map((img, index) => (
         <div
           key={img}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out bg-cover bg-center bg-no-repeat ${
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out bg-[length:auto_100%] sm:bg-cover bg-center bg-no-repeat ${
             index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ backgroundImage: `url('${img}')` }}
