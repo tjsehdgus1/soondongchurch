@@ -29,8 +29,6 @@ export default function DirectionsPage() {
         const protocol = location.protocol === 'https:' ? 'https:' : 'http:'
         const cdnKey = '207038f2_1774248312945'
         const phase = 'prod'
-        const mapWidth = String(Math.min(window.innerWidth - 32, 1268))
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum = (window.daum || {}) as any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +45,10 @@ export default function DirectionsPage() {
         landerScript.src = `${protocol}//t1.kakaocdn.net/kakaomapweb/roughmap/place/${phase}/${cdnKey}/roughmapLander.js`
         landerScript.charset = 'UTF-8'
         landerScript.onload = () => {
+            // 컨테이너의 실제 너비를 mapWidth로 사용
+            const container = document.getElementById('daumRoughmapContainer1774420501501')
+            const mapWidth = String(container?.clientWidth || Math.min(window.innerWidth - 32, 1268))
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             new (window.daum.roughmap as any).Lander({
                 timestamp: '1774420501501',
@@ -54,16 +56,11 @@ export default function DirectionsPage() {
                 mapWidth,
                 mapHeight: '400',
             }).render()
-            // 렌더링 후 고정 width를 100%로 덮어쓰기
+
+            // 렌더링 후 컨테이너 자체의 width만 100%로 재설정
             setTimeout(() => {
-                const container = document.getElementById('daumRoughmapContainer1774420501501')
-                if (!container) return
-                container.querySelectorAll<HTMLElement>('[style*="width"]').forEach(el => {
-                    el.style.width = '100%'
-                })
-                const iframe = container.querySelector<HTMLIFrameElement>('iframe')
-                if (iframe) iframe.style.width = '100%'
-            }, 500)
+                if (container) container.style.width = '100%'
+            }, 100)
         }
         document.body.appendChild(landerScript)
 
