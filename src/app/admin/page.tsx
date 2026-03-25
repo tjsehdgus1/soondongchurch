@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
   )
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-[1300px] mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
         <p className="mt-2 text-gray-600">순천순동교회 홈페이지 관리자 센터입니다.</p>

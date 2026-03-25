@@ -91,7 +91,7 @@ export default function AdminEventsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-[1300px] mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">예배 및 행사 일정 관리</h1>
         <p className="mt-1 text-gray-500">교회의 다가오는 일정이나 예배 스케줄을 추가하고 관리합니다.</p>

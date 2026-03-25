@@ -175,7 +175,7 @@ export default function AdminSermonPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-8">
+        <div className="max-w-[1300px] mx-auto p-8">
             <h1 className="text-3xl font-bold mb-8">📽️ 설교 자동 요약 및 관리</h1>
 
             {/* 신규 등록 섹션 */}

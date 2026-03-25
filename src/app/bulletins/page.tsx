@@ -34,13 +34,13 @@ export default async function BulletinsPage() {
         <div className="min-h-screen bg-gray-50">
             {/* 헤더 */}
             <div className="bg-white border-b border-gray-100">
-                <div className="max-w-4xl mx-auto px-4 py-10">
+                <div className="max-w-[1300px] mx-auto px-4 py-10">
                     <h1 className="text-3xl font-extrabold text-gray-900">주간예배일정 (주보)</h1>
                     <p className="text-gray-500 mt-2 text-sm">매주 주보를 확인하세요</p>
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+            <div className="max-w-[1300px] mx-auto px-4 py-8 space-y-8">
                 {bulletins.length === 0 ? (
                     <div className="text-center py-24 text-gray-400">
                         <svg className="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">

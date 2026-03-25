@@ -162,7 +162,7 @@ export default function AdminGroupsPage() {
   )
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-[1300px] mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">소그룹 관리</h1>
         <p className="mt-1 text-gray-500">소그룹을 만들고 교인을 배정합니다.</p>

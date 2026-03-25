@@ -22,7 +22,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
     if (!notice) notFound()
 
     return (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Back */}
             <Link href="/notices"
                 className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-8 transition-colors group">

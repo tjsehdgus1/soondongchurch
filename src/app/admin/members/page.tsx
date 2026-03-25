@@ -100,7 +100,7 @@ export default function AdminMembersPage() {
   )
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-[1300px] mx-auto">
       {/* 헤더 */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>

@@ -65,7 +65,7 @@ export default async function HomePage() {
             <span className="text-amber-400 drop-shadow-lg">하나님이</span> 기뻐하시는<br />
             행복한 교회
           </h1>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-base md:text-2xl text-gray-100 max-w-4xl mx-auto mb-12 drop-shadow-md font-bold">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-base md:text-2xl text-gray-100 max-w-[1300px] mx-auto mb-12 drop-shadow-md font-bold">
             <div className="flex items-center gap-2">
               <span className="text-amber-400 text-2xl">✧</span>
               <span>예배가 살아있는 교회</span>
