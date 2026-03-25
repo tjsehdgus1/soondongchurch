@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
+
+export const revalidate = 60 // 1분 캐시
 
 export const metadata = {
     title: '공지사항 | 순천순동교회',
@@ -7,7 +9,7 @@ export const metadata = {
 }
 
 export default async function NoticesPage() {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data: notices } = await supabase
         .from('notices')

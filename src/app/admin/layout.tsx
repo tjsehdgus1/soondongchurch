@@ -9,19 +9,23 @@ export default async function AdminLayout({
 }) {
   const supabase = await createClient()
 
-  // 서버에서 인증 확인 — 실패 시 즉시 redirect (스피너 없음)
-  const { data: { user } } = await supabase.auth.getUser()
+  // middleware가 이미 getUser()로 세션 검증 → getSession()으로 쿠키 읽기 (네트워크 호출 없음)
+  const { data: { session } } = await supabase.auth.getSession()
 
-  if (!user) {
+  if (!session) {
     redirect('/auth/login')
   }
 
-  // role 확인
+  // role + is_blocked 1회 쿼리로 통합 (middleware profiles 쿼리 제거 대응)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, name')
-    .eq('id', user.id)
+    .select('role, name, is_blocked')
+    .eq('id', session.user.id)
     .single()
+
+  if (profile?.is_blocked) {
+    redirect('/auth/login?blocked=1')
+  }
 
   if (profile?.role !== 'admin') {
     redirect('/')
@@ -29,7 +33,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      <AdminSidebar name={profile?.name ?? user.email ?? ''} />
+      <AdminSidebar name={profile?.name ?? session.user.email ?? ''} />
       <main className="flex-1 p-6 md:p-8 lg:p-10">
         {children}
       </main>

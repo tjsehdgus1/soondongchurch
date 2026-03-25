@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 
 interface Bulletin {
     id: string
@@ -9,11 +9,13 @@ interface Bulletin {
     created_at: string
 }
 
+export const revalidate = 300 // 5분 캐시 — 주보는 주 1회 업로드
+
 async function getBulletins(): Promise<Bulletin[]> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
     const { data } = await supabase
         .from('bulletins')
-        .select('*')
+        .select('id, title, bulletin_date, file_url, created_at')
         .order('bulletin_date', { ascending: false })
     return data ?? []
 }

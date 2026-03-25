@@ -26,40 +26,17 @@ export async function middleware(request: NextRequest) {
     )
 
     // IMPORTANT: getUser()는 반드시 호출 — 세션 토큰 갱신 담당
+    // profiles 쿼리는 middleware에서 제거 (모든 요청마다 DB 왕복 방지)
+    // is_blocked 체크는 admin/layout.tsx, groups/layout.tsx에서 처리
     const { data: { user } } = await supabase.auth.getUser()
 
     const pathname = request.nextUrl.pathname
     const isProtected = pathname.startsWith('/admin') || pathname.startsWith('/groups')
 
-    // [리팩토링] 인증 필요 경로 통합 처리
-    // 기존: /admin 미인증만 redirect, is_blocked는 별도 조건으로 분리
-    // 변경: isProtected 하나의 조건으로 통합 → /groups도 미인증 redirect 적용
-    if (isProtected) {
-        if (!user) {
-            const loginUrl = request.nextUrl.clone()
-            loginUrl.pathname = '/auth/login'
-            return NextResponse.redirect(loginUrl)
-        }
-
-        // [리팩토링] is_blocked 조회를 인증 검사 블록 안으로 이동
-        // 기존: 두 개의 분리된 if문으로 getUser() 후 다시 조건 평가
-        // 변경: 인증된 사용자에 대해서만 1회 DB 조회 — 불필요한 조건 재평가 제거
-        try {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('is_blocked')
-                .eq('id', user.id)
-                .single()
-
-            if (profile?.is_blocked) {
-                const blockedUrl = request.nextUrl.clone()
-                blockedUrl.pathname = '/auth/login'
-                blockedUrl.searchParams.set('blocked', '1')
-                return NextResponse.redirect(blockedUrl)
-            }
-        } catch {
-            // profiles 조회 실패 시 차단 여부 확인 생략하고 통과
-        }
+    if (isProtected && !user) {
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = '/auth/login'
+        return NextResponse.redirect(loginUrl)
     }
 
     return supabaseResponse

@@ -20,33 +20,35 @@ const worshipSchedule = [
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const today = new Date().toISOString().split('T')[0]
 
-  // 최신 공지사항 3개
-  const { data: notices } = await supabase
-    .from('notices')
-    .select('id, title, created_at, is_pinned')
-    .order('is_pinned', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(3)
-
-  // 다가오는 행사 3개
-  const { data: events } = await supabase
-    .from('events')
-    .select('id, title, event_date, event_time, event_type, location')
-    .gte('event_date', new Date().toISOString().split('T')[0])
-    .order('event_date', { ascending: true })
-    .limit(3)
-
-  // 최신 설교 2개 (공개된 것만)
-  const { data: sermons } = await supabase
-    .from('sermons')
-    .select('*')
-    .eq('status', 'published')
-    .order('sermon_date', { ascending: false })
-    .limit(2)
-
-  // 로그인 여부 확인
-  const { data: { user } } = await supabase.auth.getUser()
+  // 4개 쿼리 병렬 실행 (직렬 → Promise.all)
+  const [
+    { data: notices },
+    { data: events },
+    { data: sermons },
+    { data: { user } },
+  ] = await Promise.all([
+    supabase
+      .from('notices')
+      .select('id, title, created_at, is_pinned')
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(3),
+    supabase
+      .from('events')
+      .select('id, title, event_date, event_time, event_type, location')
+      .gte('event_date', today)
+      .order('event_date', { ascending: true })
+      .limit(3),
+    supabase
+      .from('sermons')
+      .select('id, title, sermon_date, thumbnail_url, summary')
+      .eq('status', 'published')
+      .order('sermon_date', { ascending: false })
+      .limit(2),
+    supabase.auth.getUser(),
+  ])
 
   return (
     <div>

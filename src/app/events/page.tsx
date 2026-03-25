@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 
 const eventTypeMap: Record<string, { label: string; color: string; bg: string }> = {
     worship: { label: '예배', color: 'text-blue-700', bg: 'bg-blue-100' },
@@ -16,26 +16,30 @@ function formatTime(timeStr: string | null) {
     return timeStr.slice(0, 5)
 }
 
+export const revalidate = 300 // 5분 캐시 — 행사 일정은 자주 바뀌지 않음
+
 export const metadata = {
     title: '예배/행사 일정 | 순천순동교회',
     description: '순천순동교회의 예배 및 행사 일정 안내',
 }
 
 export default async function EventsPage() {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
-    const { data: upcoming } = await supabase
-        .from('events')
-        .select('*')
-        .gte('event_date', new Date().toISOString().split('T')[0])
-        .order('event_date', { ascending: true })
-
-    const { data: past } = await supabase
-        .from('events')
-        .select('*')
-        .lt('event_date', new Date().toISOString().split('T')[0])
-        .order('event_date', { ascending: false })
-        .limit(5)
+    const today = new Date().toISOString().split('T')[0]
+    const [{ data: upcoming }, { data: past }] = await Promise.all([
+        supabase
+            .from('events')
+            .select('id, title, event_date, event_time, event_type, location, description')
+            .gte('event_date', today)
+            .order('event_date', { ascending: true }),
+        supabase
+            .from('events')
+            .select('id, title, event_date, event_time, event_type, location, description')
+            .lt('event_date', today)
+            .order('event_date', { ascending: false })
+            .limit(5),
+    ])
 
     return (
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">

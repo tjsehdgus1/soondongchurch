@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
+
+export const revalidate = 300 // 5분 캐시 — 설교는 자주 바뀌지 않음
 
 export const metadata = {
   title: '목사님 설교 | 순천순동교회',
@@ -7,7 +9,7 @@ export const metadata = {
 }
 
 export default async function SermonsPage() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: sermons } = await supabase
     .from('sermons')

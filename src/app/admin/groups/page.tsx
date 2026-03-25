@@ -47,23 +47,22 @@ export default function AdminGroupsPage() {
     setLoading(true)
     setFetchError(null)
     try {
+      // group_members(count)로 단일 쿼리에서 멤버 수 집계 (N+1 제거)
       const { data: groupData, error } = await supabase
         .from('groups')
-        .select('*')
+        .select('id, name, description, created_at, group_members(count)')
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
       if (groupData) {
-        const groupsWithCount = await Promise.all(
-          groupData.map(async (g: Group) => {
-            const { count } = await supabase
-              .from('group_members')
-              .select('*', { count: 'exact', head: true })
-              .eq('group_id', g.id)
-            return { ...g, member_count: count ?? 0 }
-          })
-        )
+        const groupsWithCount = groupData.map((g: { id: number; name: string; description: string; created_at: string; group_members: { count: number }[] }) => ({
+          id: g.id,
+          name: g.name,
+          description: g.description,
+          created_at: g.created_at,
+          member_count: g.group_members?.[0]?.count ?? 0,
+        }))
         setGroups(groupsWithCount)
       }
     } catch (e: unknown) {

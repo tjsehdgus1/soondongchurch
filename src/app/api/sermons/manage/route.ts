@@ -1,23 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
 
-async function getAdminClient() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { supabase: null, error: '로그인이 필요합니다.' }
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') return { supabase: null, error: '관리자 권한이 필요합니다.' }
-    return { supabase, error: null }
-}
-
-// GET: 관리자용 전체 설교 목록 (draft 포함)
+// GET: 관리자용 전체 설교 목록 (draft 포함) — raw_transcript 제외 (대용량 필드)
 export async function GET() {
-    const { supabase, error } = await getAdminClient()
-    if (!supabase) return NextResponse.json({ error }, { status: 401 })
+    const admin = await verifyAdmin()
+    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
+    const supabase = await createClient()
     const { data, error: dbError } = await supabase
         .from('sermons')
-        .select('*')
+        .select('id, youtube_id, title, sermon_date, summary, thumbnail_url, status, created_at')
         .order('sermon_date', { ascending: false })
 
     if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
@@ -26,9 +19,10 @@ export async function GET() {
 
 // PUT: 설교 내용 수정
 export async function PUT(req: Request) {
-    const { supabase, error } = await getAdminClient()
-    if (!supabase) return NextResponse.json({ error }, { status: 401 })
+    const admin = await verifyAdmin()
+    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
+    const supabase = await createClient()
     const { id, title, sermon_date, summary } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
@@ -41,9 +35,10 @@ export async function PUT(req: Request) {
 
 // PATCH: 발행 상태 토글
 export async function PATCH(req: Request) {
-    const { supabase, error } = await getAdminClient()
-    if (!supabase) return NextResponse.json({ error }, { status: 401 })
+    const admin = await verifyAdmin()
+    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
+    const supabase = await createClient()
     const { id, status } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
@@ -56,9 +51,10 @@ export async function PATCH(req: Request) {
 
 // DELETE: 설교 삭제
 export async function DELETE(req: Request) {
-    const { supabase, error } = await getAdminClient()
-    if (!supabase) return NextResponse.json({ error }, { status: 401 })
+    const admin = await verifyAdmin()
+    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
+    const supabase = await createClient()
     const { id } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
