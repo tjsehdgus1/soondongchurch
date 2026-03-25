@@ -54,6 +54,16 @@ export default function DirectionsPage() {
                 mapWidth,
                 mapHeight: '400',
             }).render()
+            // 렌더링 후 고정 width를 100%로 덮어쓰기
+            setTimeout(() => {
+                const container = document.getElementById('daumRoughmapContainer1774420501501')
+                if (!container) return
+                container.querySelectorAll<HTMLElement>('[style*="width"]').forEach(el => {
+                    el.style.width = '100%'
+                })
+                const iframe = container.querySelector<HTMLIFrameElement>('iframe')
+                if (iframe) iframe.style.width = '100%'
+            }, 500)
         }
         document.body.appendChild(landerScript)
 
