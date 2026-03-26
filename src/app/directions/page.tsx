@@ -57,10 +57,24 @@ export default function DirectionsPage() {
                 mapHeight: '400',
             }).render()
 
-            // 렌더링 후 컨테이너 자체의 width만 100%로 재설정
+            // 컨테이너 width 100% 재설정
             setTimeout(() => {
                 if (container) container.style.width = '100%'
             }, 100)
+
+            // MutationObserver로 info 박스가 추가되는 즉시 숨김
+            if (container) {
+                const observer = new MutationObserver(() => {
+                    Array.from(container.children).forEach((child) => {
+                        const text = child.textContent ?? ''
+                        if (text.includes('주소') && text.includes('전화')) {
+                            (child as HTMLElement).style.display = 'none'
+                            observer.disconnect()
+                        }
+                    })
+                })
+                observer.observe(container, { childList: true, subtree: true })
+            }
         }
         document.body.appendChild(landerScript)
 
