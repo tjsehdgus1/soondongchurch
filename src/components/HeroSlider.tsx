@@ -29,9 +29,9 @@ export default function HeroSlider() {
         />
       ))}
       
-      {/* Dark Overlay for Text Readability - 따뜻하고 세련된 느낌을 위한 그라데이션 오버레이 */}
-      <div className="absolute inset-0 bg-black/40 backdrop-brightness-75 z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-black/30 z-[1]" />
+      {/* Warm dark overlay */}
+      <div className="absolute inset-0 bg-[#2D2A26]/45 backdrop-brightness-75 z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#2D2A26] via-[#2D2A26]/45 to-[#2D2A26]/20 z-[1]" />
     </>
   )
 }

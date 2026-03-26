@@ -21,13 +21,16 @@ export default async function NoticesPage() {
     const regular = notices?.filter((n) => !n.is_pinned) ?? []
 
     return (
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {/* Header */}
-            <div className="mb-10">
-                <span className="text-blue-600 font-semibold text-sm uppercase tracking-wider">Notice</span>
-                <h1 className="text-4xl font-extrabold text-gray-900 mt-1">공지사항</h1>
-                <p className="text-gray-500 mt-2">순천순동교회의 새로운 소식을 확인하세요.</p>
+        <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+        {/* 헤더 */}
+        <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
+            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: '#B8860B' }}>Notice</span>
+                <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>공지사항</h1>
+                <p className="mt-2" style={{ color: '#8B7355' }}>순천순동교회의 새로운 소식을 확인하세요.</p>
             </div>
+        </div>
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
             {/* Pinned Notices */}
             {pinned.length > 0 && (
@@ -63,7 +66,7 @@ export default async function NoticesPage() {
                 )}
 
                 {/* Table header */}
-                <div className="hidden sm:grid grid-cols-[auto_1fr_auto_auto] gap-4 px-5 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-200">
+                <div className="hidden sm:grid grid-cols-[auto_1fr_auto_auto] gap-4 px-5 pb-2 text-xs font-semibold uppercase tracking-wider border-b" style={{ color: '#8B7355', borderColor: '#E8E4DE' }}>
                     <span>번호</span>
                     <span>제목</span>
                     <span>작성자</span>
@@ -71,17 +74,17 @@ export default async function NoticesPage() {
                 </div>
 
                 {regular.length > 0 ? (
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y" style={{ borderColor: '#E8E4DE' }}>
                         {regular.map((n, idx) => (
                             <Link
                                 key={n.id}
                                 href={`/notices/${n.id}`}
-                                className="group flex flex-col sm:grid sm:grid-cols-[auto_1fr_auto_auto] gap-1 sm:gap-4 px-5 py-4 hover:bg-blue-50 transition-colors"
+                                className="group flex flex-col sm:grid sm:grid-cols-[auto_1fr_auto_auto] gap-1 sm:gap-4 px-5 py-4 transition-colors hover:bg-[#B8860B0D]"
                             >
-                                <span className="text-sm text-gray-400 hidden sm:block">{regular.length - idx}</span>
-                                <span className="font-medium text-gray-800 group-hover:text-blue-700 transition-colors truncate">{n.title}</span>
-                                <span className="text-sm text-gray-500">{n.author_name}</span>
-                                <span className="text-sm text-gray-400">{new Date(n.created_at).toLocaleDateString('ko-KR')}</span>
+                                <span className="text-sm hidden sm:block" style={{ color: '#8B7355' }}>{regular.length - idx}</span>
+                                <span className="font-medium truncate" style={{ color: '#2D2A26' }}>{n.title}</span>
+                                <span className="text-sm" style={{ color: '#8B7355' }}>{n.author_name}</span>
+                                <span className="text-sm" style={{ color: '#8B7355' }}>{new Date(n.created_at).toLocaleDateString('ko-KR')}</span>
                             </Link>
                         ))}
                     </div>
@@ -92,6 +95,7 @@ export default async function NoticesPage() {
                     </div>
                 )}
             </section>
+        </div>
         </div>
     )
 }

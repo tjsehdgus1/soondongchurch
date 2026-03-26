@@ -23,24 +23,23 @@ type Post = {
 export default function GroupBoardPage() {
   const { id } = useParams<{ id: string }>()
   const groupId = Number(id)
+  const supabase = createClient()
 
   const [group, setGroup] = useState<Group | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [access, setAccess] = useState<'checking' | 'allowed' | 'denied' | 'notLoggedIn' | 'error'>('checking')
 
-  const fetchAll = useCallback(async (supabase: ReturnType<typeof createClient>) => {
+  const fetchAll = useCallback(async () => {
     const [{ data: groupData }, { data: postData }] = await Promise.all([
       supabase.from('groups').select('id, name, description').eq('id', groupId).single(),
       supabase.from('group_posts').select('*').eq('group_id', groupId).order('created_at', { ascending: false }),
     ])
     if (groupData) setGroup(groupData as Group)
     if (postData) setPosts(postData as Post[])
-  }, [groupId])
+  }, [groupId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const supabase = createClient()
-
     const init = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
@@ -74,7 +73,7 @@ export default function GroupBoardPage() {
         }
 
         setAccess('allowed')
-        await fetchAll(supabase)
+        await fetchAll()
       } catch (e) {
         console.error('그룹 게시판 오류:', e)
         setAccess('error')
@@ -84,83 +83,91 @@ export default function GroupBoardPage() {
     }
 
     init()
-  }, [groupId, fetchAll])
+  }, [groupId, fetchAll]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16 flex items-center justify-center">
-        <p className="text-gray-400">불러오는 중...</p>
-      </main>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#FAF8F5' }}>
+        <p style={{ color: '#A09890' }}>불러오는 중...</p>
+      </div>
     )
   }
 
   if (access === 'notLoggedIn') {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-gray-500 mb-4">로그인 후 소그룹 게시판을 이용할 수 있습니다.</p>
-          <Link href="/auth/login" className="inline-block px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          <p className="mb-4" style={{ color: '#8B7355' }}>로그인 후 소그룹 게시판을 이용할 수 있습니다.</p>
+          <Link href="/auth/login" className="inline-block px-6 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors" style={{ background: '#B8860B' }}>
             로그인
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (access === 'denied') {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-gray-500 mb-2">이 소그룹에 소속되어 있지 않습니다.</p>
-          <p className="text-sm text-gray-400 mb-6">관리자에게 문의하세요.</p>
-          <Link href="/groups" className="inline-block px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+          <p className="mb-2" style={{ color: '#8B7355' }}>이 소그룹에 소속되어 있지 않습니다.</p>
+          <p className="text-sm mb-6" style={{ color: '#A09890' }}>관리자에게 문의하세요.</p>
+          <Link href="/groups" className="inline-block px-6 py-2.5 text-sm font-medium rounded-xl border transition-colors" style={{ background: '#FAF8F5', color: '#5C5650', borderColor: '#E8E4DE' }}>
             내 소그룹으로 돌아가기
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (access === 'error') {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-red-500 mb-2">데이터를 불러오는 중 오류가 발생했습니다.</p>
-          <Link href="/groups" className="inline-block mt-4 px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+          <p className="text-red-500 mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
+          <Link href="/groups" className="inline-block px-6 py-2.5 text-sm font-medium rounded-xl border transition-colors" style={{ background: '#FAF8F5', color: '#5C5650', borderColor: '#E8E4DE' }}>
             돌아가기
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-20 pb-16">
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 헤더 */}
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <Link href="/groups" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-              ← 내 소그룹
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900 mt-2">{group?.name}</h1>
-            {group?.description && (
-              <p className="mt-1 text-gray-500">{group.description}</p>
-            )}
-          </div>
+    <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+      {/* 헤더 */}
+      <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <Link href="/groups" className="text-sm font-medium transition-colors" style={{ color: '#B8860B' }}>
+            ← 소그룹 목록
+          </Link>
+          <h1 className="text-3xl font-bold mt-3" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{group?.name}</h1>
+          {group?.description && (
+            <p className="mt-1" style={{ color: '#8B7355' }}>{group.description}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 글쓰기 버튼 */}
+        <div className="flex justify-end mb-5">
           <Link
             href={`/groups/${groupId}/new`}
-            className="mt-7 flex-shrink-0 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            style={{ background: '#B8860B' }}
           >
-            ✍️ 글쓰기
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            글쓰기
           </Link>
         </div>
 
         {/* 게시글 목록 */}
         {posts.length === 0 ? (
-          <div className="py-24 text-center bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <p className="text-gray-400">아직 게시글이 없습니다.</p>
-            <p className="text-sm text-gray-400 mt-1">첫 번째 글을 작성해보세요!</p>
+          <div className="py-24 text-center bg-white rounded-2xl border shadow-sm" style={{ borderColor: '#E8E4DE' }}>
+            <p style={{ color: '#8B7355' }}>아직 게시글이 없습니다.</p>
+            <p className="text-sm mt-1" style={{ color: '#A09890' }}>첫 번째 글을 작성해보세요!</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -168,31 +175,35 @@ export default function GroupBoardPage() {
               <Link
                 key={post.id}
                 href={`/groups/${groupId}/posts/${post.id}`}
-                className="block bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 hover:shadow-md hover:border-indigo-100 transition-all"
+                className="block bg-white rounded-2xl shadow-sm border px-6 py-4 hover:shadow-md transition-all"
+                style={{ borderColor: '#E8E4DE' }}
               >
                 <div className="flex items-center gap-4">
                   {post.image_url && (
                     <img
                       src={post.image_url}
                       alt=""
-                      className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                      className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border"
+                      style={{ borderColor: '#E8E4DE' }}
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-gray-900 truncate">{post.title}</h3>
-                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{stripHtml(post.content)}</p>
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
-                      <span>👤 {post.author_name}</span>
+                    <h3 className="text-base font-semibold truncate" style={{ color: '#2D2A26' }}>{post.title}</h3>
+                    <p className="text-sm mt-0.5 line-clamp-1" style={{ color: '#8B7355' }}>{stripHtml(post.content)}</p>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs" style={{ color: '#A09890' }}>
+                      <span>{post.author_name}</span>
                       <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                     </div>
                   </div>
-                  <span className="text-gray-300 flex-shrink-0 text-lg">›</span>
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#C8C2B8' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

@@ -64,17 +64,17 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#FAF8F5' }}>
             <div className="w-full max-w-md">
                 {/* Card */}
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+                <div className="bg-white rounded-3xl shadow-xl border p-8" style={{ borderColor: '#E8E4DE' }}>
                     {/* Logo */}
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 rounded-md overflow-hidden mx-auto mb-4 shadow-lg">
                             <img src="/images/logo.svg" alt="순천순동교회 로고" className="w-full h-full object-cover" />
                         </div>
-                        <h1 className="text-2xl font-extrabold text-gray-900">로그인</h1>
-                        <p className="text-gray-500 text-sm mt-1">순천순동교회 교인 계정으로 로그인하세요</p>
+                        <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>로그인</h1>
+                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 교인 계정으로 로그인하세요</p>
                     </div>
 
                     <Suspense>
@@ -85,7 +85,7 @@ export default function LoginPage() {
                     <form onSubmit={handleLogin} className="space-y-5">
                         {/* Username */}
                         <div>
-                            <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="username" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 아이디
                             </label>
                             <input
@@ -95,13 +95,14 @@ export default function LoginPage() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="아이디를 입력하세요"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow"
+                                style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="password" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 비밀번호
                             </label>
                             <input
@@ -111,7 +112,8 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="비밀번호를 입력하세요"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow"
+                                style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
@@ -129,7 +131,8 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                            className="w-full py-3.5 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                            style={{ background: '#B8860B' }}
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -143,9 +146,9 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    <p className="text-center text-sm text-gray-500 mt-6">
+                    <p className="text-center text-sm mt-6" style={{ color: '#8B7355' }}>
                         계정이 없으신가요?{' '}
-                        <Link href="/auth/register" className="text-blue-600 font-semibold hover:underline">
+                        <Link href="/auth/register" className="font-semibold hover:underline" style={{ color: '#B8860B' }}>
                             회원가입
                         </Link>
                     </p>

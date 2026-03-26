@@ -49,7 +49,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
     ]
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E4DE] shadow-sm">
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
@@ -61,7 +61,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        <span className="font-bold text-gray-800 text-lg group-hover:text-blue-700 transition-colors">
+                        <span className="font-bold text-[#2D2A26] text-lg group-hover:text-[#B8860B] transition-colors" style={{ fontFamily: 'var(--font-serif)' }}>
                             순천순동교회
                         </span>
                     </Link>
@@ -73,8 +73,8 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                                 key={href}
                                 href={href}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname === href
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-[#B8860B]/10 text-[#B8860B]'
+                                    : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
                                     }`}
                             >
                                 {label}
@@ -85,8 +85,8 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                             <Link
                                 href="/groups"
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname.startsWith('/groups')
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-[#B8860B]/10 text-[#B8860B]'
+                                    : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
                                     }`}
                             >
                                 소그룹
@@ -130,7 +130,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                                     </span>
                                     <button
                                         onClick={handleLogout}
-                                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-500 border border-gray-200 rounded-lg hover:border-red-200 transition-colors cursor-pointer"
+                                        className="px-4 py-2 text-sm font-medium text-[#5C5650] hover:text-red-500 border border-[#E8E4DE] rounded-lg hover:border-red-200 transition-colors cursor-pointer"
                                     >
                                         로그아웃
                                     </button>
@@ -139,13 +139,13 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                                 <>
                                     <Link
                                         href="/auth/login"
-                                        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg hover:border-blue-200 transition-colors"
+                                        className="px-4 py-2 text-sm font-medium text-[#5C5650] hover:text-[#B8860B] border border-[#E8E4DE] rounded-lg hover:border-[#B8860B]/40 transition-colors"
                                     >
                                         로그인
                                     </Link>
                                     <Link
                                         href="/auth/register"
-                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-[#B8860B] hover:bg-[#9A7209] rounded-lg shadow-sm transition-colors"
                                     >
                                         회원가입
                                     </Link>
@@ -171,13 +171,13 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
 
                 {/* Mobile Menu */}
                 {menuOpen && (
-                    <div className="lg:hidden border-t border-gray-100 py-3 space-y-1">
+                    <div className="lg:hidden border-t border-[#E8E4DE] py-3 space-y-1">
                         {navLinks.map(({ href, label }) => (
                             <Link
                                 key={href}
                                 href={href}
                                 onClick={() => setMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === href ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === href ? 'bg-[#B8860B]/10 text-[#B8860B]' : 'text-[#5C5650] hover:bg-[#F2EFE9]'
                                     }`}
                             >
                                 {label}
@@ -187,7 +187,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                             <Link
                                 href="/groups"
                                 onClick={() => setMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith('/groups') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith('/groups') ? 'bg-[#B8860B]/10 text-[#B8860B]' : 'text-[#5C5650] hover:bg-[#F2EFE9]'}`}
                             >
                                 소그룹
                             </Link>
@@ -201,7 +201,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                                 관리자
                             </Link>
                         )}
-                        <div className="pt-2 border-t border-gray-100 flex gap-2 px-2">
+                        <div className="pt-2 border-t border-[#E8E4DE] flex gap-2 px-2">
                             {user ? (
                                 <div className="w-full flex flex-col gap-2">
                                     <button
@@ -214,11 +214,11 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                             ) : (
                                 <>
                                     <Link href="/auth/login" onClick={() => setMenuOpen(false)}
-                                        className="flex-1 py-2 text-center text-sm font-medium text-gray-600 border border-gray-200 rounded-lg">
+                                        className="flex-1 py-2 text-center text-sm font-medium text-[#5C5650] border border-[#E8E4DE] rounded-lg">
                                         로그인
                                     </Link>
                                     <Link href="/auth/register" onClick={() => setMenuOpen(false)}
-                                        className="flex-1 py-2 text-center text-sm font-medium text-white bg-blue-600 rounded-lg">
+                                        className="flex-1 py-2 text-center text-sm font-medium text-white bg-[#B8860B] rounded-lg">
                                         회원가입
                                     </Link>
                                 </>

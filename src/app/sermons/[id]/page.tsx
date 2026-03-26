@@ -25,8 +25,8 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="min-h-screen bg-white">
       {/* 모바일 상단 뒤로가기 */}
-      <div className="sticky top-16 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100 px-4 py-3 md:hidden">
-        <Link href="/sermons" className="inline-flex items-center gap-1.5 text-sm text-gray-600 font-medium">
+      <div className="sticky top-16 z-10 backdrop-blur-sm border-b px-4 py-3 md:hidden" style={{ background: 'rgba(250,248,245,0.9)', borderColor: '#E8E4DE' }}>
+        <Link href="/sermons" className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: '#5C5650' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -38,7 +38,8 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
         {/* 데스크톱 뒤로가기 */}
         <Link
           href="/sermons"
-          className="hidden md:inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 font-medium mb-8 transition-colors"
+          className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium mb-8 transition-colors"
+          style={{ color: '#8B7355' }}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -48,11 +49,11 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
 
         {/* 메타 정보 */}
         <div className="mb-5">
-          <p className="text-blue-600 text-sm font-semibold mb-2">{formattedDate}</p>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
+          <p className="text-sm font-semibold mb-2" style={{ color: '#B8860B' }}>{formattedDate}</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold leading-tight" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>
             {sermon.title}
           </h1>
-          <p className="text-gray-400 text-sm mt-2">김광선 목사 · 순천순동교회</p>
+          <p className="text-sm mt-2" style={{ color: '#8B7355' }}>김광선 목사 · 순천순동교회</p>
         </div>
 
         {/* 유튜브 영상 임베드 */}
@@ -70,16 +71,16 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
 
         {/* 핵심 요약 */}
         {sermon.summary && (
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 md:p-8 mb-8">
+          <div className="rounded-2xl p-6 md:p-8 mb-8 border" style={{ background: '#B8860B08', borderColor: '#B8860B33' }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#B8860B' }}>
                 <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h2 className="font-bold text-blue-900 text-base">이 설교의 핵심</h2>
+              <h2 className="font-bold text-base" style={{ color: '#2D2A26' }}>이 설교의 핵심</h2>
             </div>
-            <p className="text-blue-800 leading-relaxed text-[15px] whitespace-pre-wrap">
+            <p className="leading-relaxed text-[15px] whitespace-pre-wrap" style={{ color: '#5C5650' }}>
               {sermon.summary}
             </p>
           </div>
@@ -100,7 +101,8 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
           </a>
           <Link
             href="/sermons"
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 font-bold rounded-xl transition-colors border"
+            style={{ background: '#FAF8F5', color: '#5C5650', borderColor: '#E8E4DE' }}
           >
             다른 설교 보기
           </Link>

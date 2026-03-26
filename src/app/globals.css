@@ -1,17 +1,76 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ─────────────────────────────────────────
+   Design System — Warm Editorial
+───────────────────────────────────────── */
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  /* Backgrounds */
+  --bg-base:     #FAF8F5;   /* warm cream */
+  --bg-card:     #FFFFFF;
+  --bg-subtle:   #F2EFE9;   /* warm gray-50 */
+
+  /* Text */
+  --text-primary:   #2D2A26;   /* warm charcoal */
+  --text-secondary: #5C5650;   /* warm muted */
+  --text-tertiary:  #8B7355;   /* muted bronze */
+
+  /* Accent */
+  --accent:       #B8860B;   /* deep amber/gold */
+  --accent-light: #B8860B1A; /* 10% opacity */
+  --accent-vivid: #D4A843;   /* bright gold (hero text) */
+
+  /* Borders */
+  --border:       #E8E4DE;   /* warm gray */
+  --border-strong:#C8C2B8;
+
+  /* Legacy fallbacks for Tailwind utilities */
+  --background: #FAF8F5;
+  --foreground: #2D2A26;
+
+  /* Fonts */
+  --font-sans:  'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif, 'Noto Serif KR', Georgia, serif);
 }
 
+/* ─────────────────────────────────────────
+   Base
+───────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
 }
 
-/* Tiptap editor */
+/* Korean text — no awkward line breaks */
+* {
+  word-break: keep-all;
+}
+
+/* ─────────────────────────────────────────
+   Scroll animations (IntersectionObserver)
+───────────────────────────────────────── */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.animate-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delays for child items */
+.stagger-children > *:nth-child(1) { transition-delay: 0ms; }
+.stagger-children > *:nth-child(2) { transition-delay: 70ms; }
+.stagger-children > *:nth-child(3) { transition-delay: 140ms; }
+.stagger-children > *:nth-child(4) { transition-delay: 210ms; }
+.stagger-children > *:nth-child(5) { transition-delay: 280ms; }
+
+/* ─────────────────────────────────────────
+   Tiptap editor
+───────────────────────────────────────── */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -24,17 +83,19 @@ body {
   max-width: 100%;
   border-radius: 0.75rem;
   margin: 0.75rem 0;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
 }
 
 .prose img {
   max-width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
 }
 
-/* Custom scrollbar */
+/* ─────────────────────────────────────────
+   Custom scrollbar — warm tone
+───────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #64748b; }
+::-webkit-scrollbar-track { background: var(--bg-subtle); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }

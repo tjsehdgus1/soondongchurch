@@ -29,6 +29,7 @@ export default function PostDetailPage() {
   const groupId = Number(id)
   const postIdNum = Number(postId)
   const router = useRouter()
+  const supabase = createClient()
 
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -40,17 +41,16 @@ export default function PostDetailPage() {
   const [commentText, setCommentText] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
 
-  const fetchData = useCallback(async (supabase: ReturnType<typeof createClient>) => {
+  const fetchData = useCallback(async () => {
     const [{ data: postData }, { data: commentData }] = await Promise.all([
       supabase.from('group_posts').select('*').eq('id', postIdNum).single(),
       supabase.from('group_post_comments').select('*').eq('post_id', postIdNum).order('created_at', { ascending: true }),
     ])
     if (postData) setPost(postData as Post)
     if (commentData) setComments(commentData as Comment[])
-  }, [postIdNum])
+  }, [postIdNum]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const supabase = createClient()
     const init = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
@@ -69,7 +69,7 @@ export default function PostDetailPage() {
         }
 
         setAccess('allowed')
-        await fetchData(supabase)
+        await fetchData()
       } catch (e) {
         console.error(e)
         setAccess('error')
@@ -78,11 +78,10 @@ export default function PostDetailPage() {
       }
     }
     init()
-  }, [groupId, postIdNum, fetchData])
+  }, [groupId, postIdNum, fetchData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDeletePost = async () => {
     if (!confirm('이 게시글을 삭제하시겠습니까?')) return
-    const supabase = createClient()
     const { error } = await supabase.from('group_posts').delete().eq('id', postIdNum)
     if (error) { alert('삭제 실패: ' + error.message); return }
     router.push(`/groups/${groupId}`)
@@ -94,12 +93,11 @@ export default function PostDetailPage() {
     setCommentLoading(true)
 
     try {
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { alert('로그인이 필요합니다.'); return }
 
       const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
-      const authorName = (profile as any)?.name ?? '알 수 없음'
+      const authorName = (profile as { name?: string })?.name ?? '알 수 없음'
 
       const { error } = await supabase.from('group_post_comments').insert([{
         post_id: postIdNum,
@@ -113,7 +111,7 @@ export default function PostDetailPage() {
         alert('댓글 등록 실패: ' + error.message)
       } else {
         setCommentText('')
-        await fetchData(supabase)
+        await fetchData()
       }
     } catch (e: unknown) {
       alert('오류: ' + (e instanceof Error ? e.message : String(e)))
@@ -124,74 +122,84 @@ export default function PostDetailPage() {
 
   const handleDeleteComment = async (commentId: number) => {
     if (!confirm('댓글을 삭제하시겠습니까?')) return
-    const supabase = createClient()
     const { error } = await supabase.from('group_post_comments').delete().eq('id', commentId)
     if (error) { alert('삭제 실패: ' + error.message); return }
-    await fetchData(supabase)
+    await fetchData()
   }
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16 flex items-center justify-center">
-        <p className="text-gray-400">불러오는 중...</p>
-      </main>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#FAF8F5' }}>
+        <p style={{ color: '#A09890' }}>불러오는 중...</p>
+      </div>
     )
   }
 
   if (access === 'notLoggedIn') {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-gray-500 mb-4">로그인 후 이용할 수 있습니다.</p>
-          <Link href="/auth/login" className="inline-block px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+        <div className="max-w-[860px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+          <p className="mb-4" style={{ color: '#8B7355' }}>로그인 후 이용할 수 있습니다.</p>
+          <Link href="/auth/login" className="inline-block px-6 py-2.5 text-white text-sm font-semibold rounded-xl" style={{ background: '#B8860B' }}>
             로그인
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (access === 'denied') {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-gray-500 mb-2">이 소그룹에 소속되어 있지 않습니다.</p>
-          <Link href="/groups" className="inline-block mt-4 px-6 py-2.5 bg-gray-100 text-gray-700 text-sm rounded-lg">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+        <div className="max-w-[860px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+          <p className="mb-2" style={{ color: '#8B7355' }}>이 소그룹에 소속되어 있지 않습니다.</p>
+          <Link href={`/groups/${groupId}`} className="inline-block mt-4 px-6 py-2.5 text-sm rounded-xl border" style={{ background: '#FAF8F5', color: '#5C5650', borderColor: '#E8E4DE' }}>
             내 소그룹으로 돌아가기
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   if (access === 'error' || !post) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-20 pb-16">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+        <div className="max-w-[860px] mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <p className="text-red-500">게시글을 불러올 수 없습니다.</p>
-          <Link href={`/groups/${groupId}`} className="inline-block mt-4 px-6 py-2.5 bg-gray-100 text-gray-700 text-sm rounded-lg">
+          <Link href={`/groups/${groupId}`} className="inline-block mt-4 px-6 py-2.5 text-sm rounded-xl border" style={{ background: '#FAF8F5', color: '#5C5650', borderColor: '#E8E4DE' }}>
             게시판으로 돌아가기
           </Link>
         </div>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-20 pb-16">
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 뒤로 가기 */}
-        <div className="mb-5">
-          <Link href={`/groups/${groupId}`} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-            ← 게시판으로 돌아가기
-          </Link>
-        </div>
+    <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
+      {/* 모바일 뒤로가기 */}
+      <div className="sticky top-16 z-10 backdrop-blur-sm border-b px-4 py-3 md:hidden" style={{ background: 'rgba(250,248,245,0.9)', borderColor: '#E8E4DE' }}>
+        <Link href={`/groups/${groupId}`} className="inline-flex items-center gap-1.5 text-sm font-medium" style={{ color: '#5C5650' }}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          게시판
+        </Link>
+      </div>
+
+      <div className="max-w-[860px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {/* 데스크톱 뒤로가기 */}
+        <Link href={`/groups/${groupId}`} className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium mb-8 transition-colors" style={{ color: '#8B7355' }}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          게시판으로
+        </Link>
 
         {/* 게시글 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-5">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">{post.title}</h1>
-          <div className="flex items-center gap-3 text-base text-gray-400 pb-5 border-b border-gray-100">
-            <span>👤 {post.author_name}</span>
+        <div className="bg-white rounded-2xl shadow-sm border p-8 mb-5" style={{ borderColor: '#E8E4DE' }}>
+          <h1 className="text-2xl md:text-3xl font-extrabold leading-tight mb-3" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{post.title}</h1>
+          <div className="flex items-center gap-3 text-sm pb-5 border-b" style={{ color: '#A09890', borderColor: '#E8E4DE' }}>
+            <span style={{ color: '#8B7355' }}>{post.author_name}</span>
             <span>
               {new Date(post.created_at).toLocaleDateString('ko-KR', {
                 year: 'numeric', month: 'long', day: 'numeric',
@@ -202,7 +210,8 @@ export default function PostDetailPage() {
                 {post.author_id === currentUserId && (
                   <Link
                     href={`/groups/${groupId}/posts/${postIdNum}/edit`}
-                    className="text-xs text-indigo-400 hover:text-indigo-600 px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                    className="text-xs px-2 py-1 rounded transition-colors"
+                    style={{ color: '#B8860B' }}
                   >
                     수정
                   </Link>
@@ -222,37 +231,38 @@ export default function PostDetailPage() {
               <img
                 src={post.image_url}
                 alt="첨부 이미지"
-                className="max-w-full rounded-xl border border-gray-100"
+                className="max-w-full rounded-xl border"
+                style={{ borderColor: '#E8E4DE' }}
               />
             </div>
           )}
 
           <div
-            className="prose prose-lg max-w-none text-gray-700 mt-5"
+            className="prose prose-lg max-w-none mt-5"
+            style={{ color: '#5C5650' }}
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
         </div>
 
         {/* 댓글 섹션 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-5">
+        <div className="bg-white rounded-2xl shadow-sm border p-6" style={{ borderColor: '#E8E4DE' }}>
+          <h2 className="text-base font-bold mb-5" style={{ color: '#2D2A26' }}>
             댓글{comments.length > 0 ? ` (${comments.length})` : ''}
           </h2>
 
-          {/* 댓글 목록 */}
           {comments.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6 mb-2">아직 댓글이 없습니다.</p>
+            <p className="text-sm text-center py-6 mb-2" style={{ color: '#A09890' }}>아직 댓글이 없습니다.</p>
           ) : (
             <div className="space-y-5 mb-6">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm font-bold">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: '#B8860B1A', color: '#B8860B' }}>
                     {comment.author_name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-base font-semibold text-gray-800">{comment.author_name}</span>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm font-semibold" style={{ color: '#2D2A26' }}>{comment.author_name}</span>
+                      <span className="text-xs" style={{ color: '#A09890' }}>
                         {new Date(comment.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
                       </span>
                       {(comment.author_id === currentUserId || isAdmin) && (
@@ -264,7 +274,7 @@ export default function PostDetailPage() {
                         </button>
                       )}
                     </div>
-                    <p className="text-base text-gray-600 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: '#5C5650' }}>{comment.content}</p>
                   </div>
                 </div>
               ))}
@@ -272,24 +282,26 @@ export default function PostDetailPage() {
           )}
 
           {/* 댓글 작성 */}
-          <form onSubmit={handleAddComment} className="flex gap-3 pt-4 border-t border-gray-100">
+          <form onSubmit={handleAddComment} className="flex gap-3 pt-4 border-t" style={{ borderColor: '#E8E4DE' }}>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="댓글을 입력하세요..."
               rows={2}
-              className="flex-1 px-3 py-2 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="flex-1 px-3 py-2 text-sm border rounded-xl focus:ring-2 focus:ring-[#B8860B] focus:border-transparent resize-none outline-none"
+              style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
             />
             <button
               type="submit"
               disabled={commentLoading || !commentText.trim()}
-              className="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors self-end"
+              className="px-4 py-2 text-white text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors self-end"
+              style={{ background: '#B8860B' }}
             >
               {commentLoading ? '...' : '등록'}
             </button>
           </form>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

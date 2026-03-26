@@ -162,21 +162,21 @@ export default function RegisterPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-12">
+            <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#FAF8F5' }}>
                 <div className="w-full max-w-md text-center">
-                    <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-10">
+                    <div className="bg-white rounded-3xl shadow-xl border p-10" style={{ borderColor: '#E8E4DE' }}>
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-extrabold text-gray-900 mb-2">회원가입 완료!</h2>
-                        <p className="text-gray-500 mb-6 text-sm">
+                        <h2 className="text-2xl font-extrabold mb-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>회원가입 완료!</h2>
+                        <p className="mb-6 text-sm" style={{ color: '#8B7355' }}>
                             성공적으로 회원가입 되었습니다.<br />
                             아래 버튼을 눌러 로그인해 주세요.
                         </p>
                         <Link href="/auth/login"
-                            className="block w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
+                            className="block w-full py-3 text-white font-bold rounded-xl transition-colors" style={{ background: '#B8860B' }}>
                             로그인 화면으로 가기
                         </Link>
                     </div>
@@ -186,22 +186,22 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: '#FAF8F5' }}>
             <div className="w-full max-w-md">
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+                <div className="bg-white rounded-3xl shadow-xl border p-8" style={{ borderColor: '#E8E4DE' }}>
                     {/* Logo */}
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 rounded-md overflow-hidden mx-auto mb-4 shadow-lg">
                             <img src="/images/logo.svg" alt="순천순동교회 로고" className="w-full h-full object-cover" />
                         </div>
-                        <h1 className="text-2xl font-extrabold text-gray-900">교인 등록</h1>
-                        <p className="text-gray-500 text-sm mt-1">순천순동교회 교인으로 등록하세요</p>
+                        <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>교인 등록</h1>
+                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 교인으로 등록하세요</p>
                     </div>
 
                     <form onSubmit={handleRegister} className="space-y-4">
                         {/* Username */}
                         <div>
-                            <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="username" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 아이디 <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -211,14 +211,14 @@ export default function RegisterPage() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="영문, 숫자, 밑줄(_) 3~20자"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow" style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
-                            <p className="mt-1 text-xs text-gray-400">로그인에 사용할 고유 아이디입니다.</p>
+                            <p className="mt-1 text-xs" style={{ color: '#A09890' }}>로그인에 사용할 고유 아이디입니다.</p>
                         </div>
 
                         {/* Name */}
                         <div>
-                            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="name" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 이름 <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -228,14 +228,14 @@ export default function RegisterPage() {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="홍길동"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow" style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
                         {/* Email (optional) */}
                         <div>
-                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                이메일 <span className="text-gray-400 font-normal">(선택)</span>
+                            <label htmlFor="email" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
+                                이메일 <span className="font-normal" style={{ color: '#A09890' }}>(선택)</span>
                             </label>
                             <input
                                 id="email"
@@ -243,13 +243,13 @@ export default function RegisterPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow" style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="password" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 비밀번호 <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -259,13 +259,13 @@ export default function RegisterPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="6자 이상"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow" style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
                         {/* Confirm Password */}
                         <div>
-                            <label htmlFor="confirm" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="confirm" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 비밀번호 확인 <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -275,13 +275,13 @@ export default function RegisterPage() {
                                 value={confirm}
                                 onChange={(e) => setConfirm(e.target.value)}
                                 placeholder="비밀번호 재입력"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow"
+                                className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow" style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
 
                         {/* Phone Number */}
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label htmlFor="phone" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 휴대폰 번호 <span className="text-red-500">*</span>
                             </label>
                             <div className="flex gap-2">
@@ -296,17 +296,19 @@ export default function RegisterPage() {
                                     }}
                                     disabled={isPhoneVerified}
                                     placeholder="01012345678 (숫자만 입력)"
-                                    className={`flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-shadow ${isPhoneVerified ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                                    className={`flex-1 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow ${isPhoneVerified ? 'cursor-not-allowed opacity-60' : ''}`}
+                                    style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                                 />
                                 <button
                                     type="button"
                                     onClick={handleSendVerificationCode}
                                     disabled={isPhoneVerified || phone.length < 10 || loading}
-                                    className={`px-4 py-3 font-semibold rounded-xl whitespace-nowrap transition-colors ${
+                                    className={`px-4 py-3 font-semibold rounded-xl whitespace-nowrap transition-colors text-sm ${
                                         isPhoneVerified
                                             ? 'bg-green-100 text-green-700 border border-green-200 cursor-not-allowed'
-                                            : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
+                                            : 'border disabled:opacity-50 disabled:cursor-not-allowed'
                                     }`}
+                                    style={!isPhoneVerified ? { background: '#B8860B1A', color: '#B8860B', borderColor: '#B8860B33' } : undefined}
                                 >
                                     {isPhoneVerified ? '인증 완료' : loading ? '발송 중...' : '인증번호 받기'}
                                 </button>
@@ -315,12 +317,12 @@ export default function RegisterPage() {
 
                         {/* SMS Verification Input */}
                         {showSmsInput && !isPhoneVerified && (
-                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-2">
+                            <div className="p-4 rounded-xl border mt-2" style={{ background: '#B8860B08', borderColor: '#B8860B22' }}>
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <label htmlFor="smsCode" className="text-sm font-semibold text-blue-800">
+                                    <label htmlFor="smsCode" className="text-sm font-semibold" style={{ color: '#2D2A26' }}>
                                         인증번호 입력
                                     </label>
-                                    <span className={`text-sm font-mono font-semibold ${timeLeft <= 60 ? 'text-red-500' : 'text-blue-600'}`}>
+                                    <span className={`text-sm font-mono font-semibold ${timeLeft <= 60 ? 'text-red-500' : ''}`} style={timeLeft > 60 ? { color: '#B8860B' } : undefined}>
                                         {timeLeft > 0 ? formatTime(timeLeft) : '만료됨'}
                                     </span>
                                 </div>
@@ -332,13 +334,15 @@ export default function RegisterPage() {
                                         onChange={(e) => setSmsCode(e.target.value)}
                                         placeholder="인증번호 6자리"
                                         maxLength={6}
-                                        className="flex-1 px-4 py-2.5 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-blue-300"
+                                        className="flex-1 px-4 py-2.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent"
+                                        style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                                     />
                                     <button
                                         type="button"
                                         onClick={handleVerifyCode}
                                         disabled={timeLeft <= 0 || loading}
-                                        className="px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        className="px-4 py-2.5 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        style={{ background: '#B8860B' }}
                                     >
                                         확인
                                     </button>
@@ -347,7 +351,8 @@ export default function RegisterPage() {
                                     type="button"
                                     onClick={handleSendVerificationCode}
                                     disabled={loading}
-                                    className="mt-2 text-xs text-blue-500 hover:text-blue-700 hover:underline disabled:opacity-50 transition-colors"
+                                    className="mt-2 text-xs hover:underline disabled:opacity-50 transition-colors"
+                                    style={{ color: '#B8860B' }}
                                 >
                                     {loading ? '발송 중...' : '인증번호 재발송'}
                                 </button>
@@ -355,17 +360,17 @@ export default function RegisterPage() {
                         )}
 
                         {/* Terms and Privacy Checkboxes */}
-                        <div className="pt-2 border-t border-gray-100 mt-4 space-y-3">
+                        <div className="pt-2 border-t mt-4 space-y-3" style={{ borderColor: '#E8E4DE' }}>
                             <label className="flex items-start gap-3 cursor-pointer group">
                                 <div className="flex items-center h-5">
                                     <input
                                         type="checkbox"
                                         checked={agreedToTerms}
                                         onChange={(e) => setAgreedToTerms(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                        className="w-4 h-4 rounded focus:ring-[#B8860B] cursor-pointer accent-[#B8860B]"
                                     />
                                 </div>
-                                <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                                <span className="text-sm transition-colors" style={{ color: '#5C5650' }}>
                                     [필수] 순천순동교회 홈페이지 서비스 이용약관에 동의합니다.
                                 </span>
                             </label>
@@ -376,12 +381,12 @@ export default function RegisterPage() {
                                         type="checkbox"
                                         checked={agreedToPrivacy}
                                         onChange={(e) => setAgreedToPrivacy(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                        className="w-4 h-4 rounded focus:ring-[#B8860B] cursor-pointer accent-[#B8860B]"
                                     />
                                 </div>
-                                <div className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                                <div className="text-sm transition-colors" style={{ color: '#5C5650' }}>
                                     <span className="block">[필수] 개인정보 수집 및 이용에 동의합니다.</span>
-                                    <span className="block text-xs text-gray-500 mt-0.5">※ 수집항목: 이름, 휴대폰 번호 (교인 관리 및 교회 안내 문자 발송 목적)</span>
+                                    <span className="block text-xs mt-0.5" style={{ color: '#A09890' }}>※ 수집항목: 이름, 휴대폰 번호 (교인 관리 및 교회 안내 문자 발송 목적)</span>
                                 </div>
                             </label>
                         </div>
@@ -400,7 +405,7 @@ export default function RegisterPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg mt-2"
+                            className="w-full py-3.5 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg mt-2" style={{ background: '#B8860B' }}
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -414,9 +419,9 @@ export default function RegisterPage() {
                         </button>
                     </form>
 
-                    <p className="text-center text-sm text-gray-500 mt-6">
+                    <p className="text-center text-sm mt-6" style={{ color: '#8B7355' }}>
                         이미 계정이 있으신가요?{' '}
-                        <Link href="/auth/login" className="text-blue-600 font-semibold hover:underline">
+                        <Link href="/auth/login" className="font-semibold hover:underline" style={{ color: '#B8860B' }}>
                             로그인
                         </Link>
                     </p>

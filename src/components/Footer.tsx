@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export default function Footer() {
     return (
-        <footer className="bg-gray-900 text-gray-400">
+        <footer className="bg-[#2D2A26] text-[#A09890]">
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Church Info */}
@@ -12,7 +12,7 @@ export default function Footer() {
                             <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0">
                                 <Image src="/images/logo.svg" alt="순천순동교회 로고" width={36} height={36} className="w-full h-full object-cover" />
                             </div>
-                            <span className="font-bold text-white text-lg">순천순동교회</span>
+                            <span className="font-bold text-[#FAF8F5] text-lg" style={{ fontFamily: 'var(--font-serif)' }}>순천순동교회</span>
                         </div>
                         <p className="text-sm leading-relaxed">
                             하나님의 은혜 안에서 함께 성장하고<br />
@@ -22,18 +22,18 @@ export default function Footer() {
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">빠른 링크</h3>
+                        <h3 className="text-[#FAF8F5] font-semibold mb-4">빠른 링크</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/" className="hover:text-white transition-colors">홈</Link></li>
-                            <li><Link href="/events" className="hover:text-white transition-colors">예배/행사 일정</Link></li>
-                            <li><Link href="/notices" className="hover:text-white transition-colors">공지사항</Link></li>
-                            <li><Link href="/auth/register" className="hover:text-white transition-colors">회원가입</Link></li>
+                            <li><Link href="/" className="hover:text-[#FAF8F5] transition-colors">홈</Link></li>
+                            <li><Link href="/events" className="hover:text-[#FAF8F5] transition-colors">예배/행사 일정</Link></li>
+                            <li><Link href="/notices" className="hover:text-[#FAF8F5] transition-colors">공지사항</Link></li>
+                            <li><Link href="/auth/register" className="hover:text-[#FAF8F5] transition-colors">회원가입</Link></li>
                         </ul>
                     </div>
 
                     {/* Contact */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4">연락처</h3>
+                        <h3 className="text-[#FAF8F5] font-semibold mb-4">연락처</h3>
                         <ul className="space-y-2 text-sm">
                             <li className="flex items-start gap-2">
                                 <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,7 +66,7 @@ export default function Footer() {
                         <div className="mt-8 flex items-center gap-4">
                             <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
                                 target="_blank" rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                                className="w-10 h-10 rounded-full bg-[#3D3835] flex items-center justify-center text-[#A09890] hover:bg-red-600 hover:text-white transition-all shadow-sm"
                                 aria-label="순천순동교회 유튜브 채널">
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
@@ -76,7 +76,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-10 pt-6 border-t border-gray-800 text-center text-xs text-gray-600">
+                <div className="mt-10 pt-6 border-t border-[#4A4540] text-center text-xs text-[#6B6560]">
                     © {new Date().getFullYear()} 순천순동교회. All rights reserved.
                 </div>
             </div>
