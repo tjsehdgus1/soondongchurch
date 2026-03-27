@@ -8,14 +8,14 @@ export default async function GroupsLayout({
 }) {
   const supabase = await createClient()
 
-  // middleware가 미인증 redirect 처리 → getSession()으로 사용자 ID만 읽기
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) redirect('/auth/login')
+  // middleware가 미인증 redirect 처리 → getUser()로 보안 검증
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('is_blocked')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single()
 
   if (profile?.is_blocked) {

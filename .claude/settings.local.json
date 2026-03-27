@@ -36,7 +36,28 @@
       "Bash(node test_yt.mjs)",
       "Bash(node test_yt.cjs)",
       "Bash(for file:*)",
-      "Bash(do echo:*)"
+      "Bash(do echo:*)",
+      "Bash(python3 -c \"import json,sys; policies=json.load\\(sys.stdin\\); [print\\(json.dumps\\(p, indent=2\\)\\) for p in policies if p.get\\(''''table''''\\)==''''group_members'''']\")",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(json.dumps\\(data, indent=2\\)\\)\")",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(claude mcp:*)",
+      "Bash(command -v claude)",
+      "Bash(echo:*)",
+      "Bash(powershell.exe -Command \"echo \\\\$PROFILE\")",
+      "Bash(powershell.exe -Command \"Test-Path \\\\$PROFILE\")",
+      "Skill(update-config)",
+      "mcp__claude_ai_Figma__use_figma",
+      "Bash(bun --version)",
+      "Bash(npx --version)",
+      "Bash(npx -y cursor-talk-to-figma-mcp@latest --version)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(find /d/church/src -name *.css)",
+      "Bash(grep -n \"bg-gray-50\\\\|text-gray-900\\\\|blue-600\\\\|indigo-600\\\\|border-gray-100\\\\|border-gray-200\" D:/church/src/app/events/page.tsx D:/church/src/app/notices/page.tsx D:/church/src/app/notices/[id]/page.tsx D:/church/src/app/bulletins/[id]/page.tsx D:/church/src/app/auth/login/page.tsx)",
+      "Bash(grep -n \"헤더\\\\|py-10\\\\|py-12\\\\|py-8\\\\|bg-white border\\\\|max-w-\\\\[1300px\\\\]\" D:/church/src/app/events/page.tsx D:/church/src/app/notices/page.tsx D:/church/src/app/notices/[id]/page.tsx D:/church/src/app/bulletins/page.tsx D:/church/src/app/sermons/page.tsx D:/church/src/app/directions/page.tsx)",
+      "Bash(tail:*)",
+      "Bash(grep:*)"
     ]
   }
 }
