@@ -54,6 +54,22 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
             {sermon.title}
           </h1>
           <p className="text-sm mt-2" style={{ color: '#8B7355' }}>김광선 목사 · 순천순동교회</p>
+
+          {/* 태그 */}
+          {sermon.tags && sermon.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {sermon.tags.map((tag: string) => (
+                <Link
+                  key={tag}
+                  href={`/sermons?tag=${encodeURIComponent(tag)}`}
+                  className="px-3 py-1 rounded-full text-xs font-semibold border transition-colors hover:bg-amber-100 hover:text-amber-700"
+                  style={{ color: '#B8860B', borderColor: '#B8860B33', background: '#B8860B08' }}
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 유튜브 영상 임베드 */}

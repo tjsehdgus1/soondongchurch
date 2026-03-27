@@ -10,6 +10,7 @@ type Sermon = {
     summary: string | null
     thumbnail_url: string | null
     status: 'draft' | 'published'
+    tags: string[]
 }
 
 export default function AdminSermonPage() {
@@ -24,6 +25,8 @@ export default function AdminSermonPage() {
     const [modalTitle, setModalTitle] = useState('')
     const [modalDate, setModalDate] = useState('')
     const [modalSummary, setModalSummary] = useState('')
+    const [modalTags, setModalTags] = useState<string[]>([])
+    const [tagInput, setTagInput] = useState('')
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
@@ -97,6 +100,8 @@ export default function AdminSermonPage() {
         setModalTitle(s.title)
         setModalDate(s.sermon_date)
         setModalSummary(s.summary ?? '')
+        setModalTags(s.tags ?? [])
+        setTagInput('')
     }
 
     const closeModal = () => {
@@ -116,6 +121,7 @@ export default function AdminSermonPage() {
                     title: modalTitle.trim(),
                     sermon_date: modalDate,
                     summary: modalSummary,
+                    tags: modalTags,
                 }),
             })
             const result = await res.json()
@@ -237,6 +243,15 @@ export default function AdminSermonPage() {
                                             {s.summary}
                                         </p>
                                     )}
+                                    {s.tags && s.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {s.tags.map((tag) => (
+                                                <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                     <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                                         {s.status === 'published' ? '공개중' : '검토 대기중'}
                                     </span>
@@ -335,6 +350,48 @@ export default function AdminSermonPage() {
                                     onChange={(e) => setModalDate(e.target.value)}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 />
+                            </div>
+
+                            {/* 태그 */}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">태그</label>
+                                <div className="space-y-2">
+                                    {modalTags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {modalTags.map((tag) => (
+                                                <div key={tag} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
+                                                    {tag}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setModalTags(modalTags.filter((t) => t !== tag))}
+                                                        className="hover:text-amber-900 font-bold"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="태그 입력 후 Enter 또는 쉼표(,) 입력"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                                                    e.preventDefault()
+                                                    const newTag = tagInput.trim().replace(/,/g, '')
+                                                    if (newTag && !modalTags.includes(newTag)) {
+                                                        setModalTags([...modalTags, newTag])
+                                                        setTagInput('')
+                                                    }
+                                                }
+                                            }}
+                                            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             {/* AI 요약 내용 */}

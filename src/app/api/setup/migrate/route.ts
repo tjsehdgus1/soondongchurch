@@ -236,7 +236,20 @@ export async function POST(req: NextRequest) {
     `)
     results.push('group_posts 테이블 완료')
 
-    // 8. Storage 버킷 생성
+    // 8. sermons 테이블에 tags 컬럼 추가
+    await runSQL(`
+        ALTER TABLE public.sermons
+          ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}';
+    `)
+    results.push('sermons tags 컬럼 추가 완료')
+
+    // 9. tags 필터링용 GIN 인덱스 생성
+    await runSQL(`
+        CREATE INDEX IF NOT EXISTS idx_sermons_tags ON public.sermons USING GIN (tags);
+    `)
+    results.push('sermons tags GIN 인덱스 생성 완료')
+
+    // 10. Storage 버킷 생성
     const supabase = getServiceClient()
 
     const { error: bulletinBucketErr } = await supabase.storage.createBucket('bulletins', {

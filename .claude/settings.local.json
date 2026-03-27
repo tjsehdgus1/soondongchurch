@@ -57,7 +57,9 @@
       "Bash(grep -n \"bg-gray-50\\\\|text-gray-900\\\\|blue-600\\\\|indigo-600\\\\|border-gray-100\\\\|border-gray-200\" D:/church/src/app/events/page.tsx D:/church/src/app/notices/page.tsx D:/church/src/app/notices/[id]/page.tsx D:/church/src/app/bulletins/[id]/page.tsx D:/church/src/app/auth/login/page.tsx)",
       "Bash(grep -n \"헤더\\\\|py-10\\\\|py-12\\\\|py-8\\\\|bg-white border\\\\|max-w-\\\\[1300px\\\\]\" D:/church/src/app/events/page.tsx D:/church/src/app/notices/page.tsx D:/church/src/app/notices/[id]/page.tsx D:/church/src/app/bulletins/page.tsx D:/church/src/app/sermons/page.tsx D:/church/src/app/directions/page.tsx)",
       "Bash(tail:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find /d/church -name *schema* -o -name *migration* -o -name *sql*)",
+      "Bash(xargs ls:*)"
     ]
   }
 }

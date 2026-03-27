@@ -10,7 +10,7 @@ export async function GET() {
     const supabase = await createClient()
     const { data, error: dbError } = await supabase
         .from('sermons')
-        .select('id, youtube_id, title, sermon_date, summary, thumbnail_url, status, created_at')
+        .select('id, youtube_id, title, sermon_date, summary, thumbnail_url, status, created_at, tags')
         .order('sermon_date', { ascending: false })
 
     if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
@@ -23,10 +23,10 @@ export async function PUT(req: Request) {
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
     const supabase = await createClient()
-    const { id, title, sermon_date, summary } = await req.json()
+    const { id, title, sermon_date, summary, tags } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
-        .update({ title, sermon_date, summary })
+        .update({ title, sermon_date, summary, tags: tags ?? [] })
         .eq('id', id)
 
     if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
