@@ -14,12 +14,13 @@ const PAGE_SIZE = 12
 export default async function SermonsPage({
   searchParams,
 }: {
-  searchParams: { q?: string; tag?: string; page?: string }
+  searchParams: Promise<{ q?: string; tag?: string; page?: string }>
 }) {
   const supabase = createPublicClient()
-  const q = searchParams.q ?? ''
-  const tag = searchParams.tag ?? ''
-  const page = parseInt(searchParams.page ?? '1', 10)
+  const { q: rawQ = '', tag: rawTag = '', page: rawPage = '1' } = await searchParams
+  const q = rawQ
+  const tag = rawTag
+  const page = parseInt(rawPage, 10)
 
   // 전체 태그 목록 조회
   const { data: tagRows } = await supabase

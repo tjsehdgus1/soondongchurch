@@ -27,6 +27,7 @@ export default function AdminSermonPage() {
     const [modalSummary, setModalSummary] = useState('')
     const [modalTags, setModalTags] = useState<string[]>([])
     const [tagInput, setTagInput] = useState('')
+    const [isComposing, setIsComposing] = useState(false)
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
@@ -113,25 +114,39 @@ export default function AdminSermonPage() {
         if (!modalTitle.trim()) return alert('제목을 입력해주세요.')
         setSaving(true)
         try {
+            const payload = {
+                id: modalSermon.id,
+                title: modalTitle.trim(),
+                sermon_date: modalDate,
+                summary: modalSummary,
+                tags: modalTags,
+            }
+            console.log('📝 저장 요청:', {
+                id: payload.id,
+                title: payload.title,
+                tagsCount: payload.tags.length,
+                tags: payload.tags
+            })
+
             const res = await fetch('/api/sermons/manage', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: modalSermon.id,
-                    title: modalTitle.trim(),
-                    sermon_date: modalDate,
-                    summary: modalSummary,
-                    tags: modalTags,
-                }),
+                body: JSON.stringify(payload),
             })
+
             const result = await res.json()
+            console.log('📥 API 응답:', result)
+
             if (result.success) {
+                console.log('✅ 저장 성공')
                 await fetchSermons()
                 closeModal()
             } else {
+                console.error('❌ 저장 실패:', result.error)
                 alert(`저장에 실패했습니다: ${result.error}`)
             }
         } catch (e) {
+            console.error('💥 저장 중 에러:', e)
             alert('저장 중 오류가 발생했습니다.')
         } finally {
             setSaving(false)
@@ -354,44 +369,55 @@ export default function AdminSermonPage() {
 
                             {/* 태그 */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">태그</label>
-                                <div className="space-y-2">
-                                    {modalTags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {modalTags.map((tag) => (
-                                                <div key={tag} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium border border-amber-200">
-                                                    {tag}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setModalTags(modalTags.filter((t) => t !== tag))}
-                                                        className="hover:text-amber-900 font-bold"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="태그 입력 후 Enter 또는 쉼표(,) 입력"
-                                            value={tagInput}
-                                            onChange={(e) => setTagInput(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-                                                    e.preventDefault()
-                                                    const newTag = tagInput.trim().replace(/,/g, '')
-                                                    if (newTag && !modalTags.includes(newTag)) {
-                                                        setModalTags([...modalTags, newTag])
-                                                        setTagInput('')
-                                                    }
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">태그</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder='태그입력 후 Enter'
+                                        value={tagInput}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault()
+                                                const tag = tagInput.trim()
+                                                if (tag && !modalTags.includes(tag)) {
+                                                    setModalTags([...modalTags, tag])
+                                                    setTagInput('')
                                                 }
-                                            }}
-                                            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                        />
-                                    </div>
+                                            }
+                                        }}
+                                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const tag = tagInput.trim()
+                                            if (tag && !modalTags.includes(tag)) {
+                                                setModalTags([...modalTags, tag])
+                                                setTagInput('')
+                                            }
+                                        }}
+                                        className="px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                                    >
+                                        추가
+                                    </button>
                                 </div>
+                                {modalTags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {modalTags.map((tag, idx) => (
+                                            <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-300">
+                                                {tag}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setModalTags(modalTags.filter((_, i) => i !== idx))}
+                                                    className="font-bold hover:text-blue-900"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* AI 요약 내용 */}

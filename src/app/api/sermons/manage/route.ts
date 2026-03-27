@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { verifyAdmin } from '@/lib/admin'
+import { getServiceClient, verifyAdmin } from '@/lib/admin'
 
 // GET: 관리자용 전체 설교 목록 (draft 포함) — raw_transcript 제외 (대용량 필드)
 export async function GET() {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
-    const supabase = await createClient()
+    const supabase = getServiceClient()
     const { data, error: dbError } = await supabase
         .from('sermons')
         .select('id, youtube_id, title, sermon_date, summary, thumbnail_url, status, created_at, tags')
@@ -22,15 +21,29 @@ export async function PUT(req: Request) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
-    const supabase = await createClient()
+    const supabase = getServiceClient()
     const { id, title, sermon_date, summary, tags } = await req.json()
-    const { error: dbError } = await supabase
-        .from('sermons')
-        .update({ title, sermon_date, summary, tags: tags ?? [] })
-        .eq('id', id)
 
-    if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 })
-    return NextResponse.json({ success: true })
+    console.log('📝 PUT 요청 받음:', { id, title, tagsLength: tags?.length, tags })
+
+    const updateData = { title, sermon_date, summary, tags: tags ?? [] }
+    console.log('🔄 업데이트 데이터:', updateData)
+
+    const { data, error: dbError } = await supabase
+        .from('sermons')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+
+    console.log('📊 DB 응답:', { data, error: dbError })
+
+    if (dbError) {
+        console.error('❌ DB 에러:', dbError)
+        return NextResponse.json({ error: dbError.message }, { status: 500 })
+    }
+
+    console.log('✅ 업데이트 성공:', data)
+    return NextResponse.json({ success: true, data })
 }
 
 // PATCH: 발행 상태 토글
@@ -38,7 +51,7 @@ export async function PATCH(req: Request) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
-    const supabase = await createClient()
+    const supabase = getServiceClient()
     const { id, status } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
@@ -54,7 +67,7 @@ export async function DELETE(req: Request) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
 
-    const supabase = await createClient()
+    const supabase = getServiceClient()
     const { id } = await req.json()
     const { error: dbError } = await supabase
         .from('sermons')
