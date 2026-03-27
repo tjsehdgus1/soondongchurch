@@ -140,20 +140,31 @@ export async function POST(req: Request) {
             // 제목 가져오기 실패 시 기본값 유지
         }
 
-        // 4. Gemini API 연동 (요약 생성)
+        // 4. Gemini API 연동 (요약 + 태그 생성)
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
         const prompt = `다음은 교회 설교 영상의 전체 자막입니다.
-이 설교의 핵심 메시지를 100자 이내로 간결하게 한 문장으로 요약해 주세요.
-정중한 격식체(~입니다)를 사용하고, 성경적 핵심 내용을 담아 주세요.
-불필요한 설명 없이 핵심만 담은 한 문장으로만 답해 주세요.
+설교를 분석하여 아래 JSON 형식으로만 응답해주세요. 다른 텍스트는 포함하지 마세요.
+
+{
+  "summary": "설교 핵심 메시지를 100자 이내 한 문장으로 (정중한 격식체, ~입니다)",
+  "tags": ["성경 본문", "주제", "키워드", ...] // 3~7개, 한국어
+}
+
+태그 예시: ["로마서 8장", "성령", "구원", "감사", "부활절"]
 
 설교 자막:
 ${transcriptText}`
 
         const result = await model.generateContent(prompt)
-        const summary = result.response.text()
+        const rawText = result.response.text().trim()
+
+        // JSON 파싱 (마크다운 코드 블록 제거)
+        const jsonText = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+        const parsed = JSON.parse(jsonText)
+        const summary: string = parsed.summary || ''
+        const tags: string[] = Array.isArray(parsed.tags) ? parsed.tags : []
 
         // 5. Supabase DB에 임시 저장 (Draft 상태)
         const supabase = supabaseAuth
@@ -169,7 +180,8 @@ ${transcriptText}`
                 summary: summary,
                 raw_transcript: transcriptText,
                 thumbnail_url: thumbnail_url,
-                status: 'draft'
+                status: 'draft',
+                tags: tags
             }, { onConflict: 'youtube_id' })
             .select()
 
