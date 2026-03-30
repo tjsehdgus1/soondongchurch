@@ -4,8 +4,56 @@ import { createServerClient } from '@supabase/ssr'
 
 export const runtime = 'edge'
 
-const ANDROID_UA = 'com.google.android.youtube/20.10.38 (Linux; U; Android 14)'
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36,gzip(gfe)'
+
+type CaptionTrack = { languageCode: string; baseUrl: string }
+type PlayerData = {
+    captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: CaptionTrack[] } }
+    playabilityStatus?: { status?: string; reason?: string }
+}
+
+const CLIENTS = [
+    {
+        name: 'IOS',
+        version: '19.29.1',
+        ua: 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)',
+    },
+    {
+        name: 'ANDROID_CREATOR',
+        version: '24.45.100',
+        ua: 'com.google.android.apps.youtube.creator/24.45.100 (Linux; U; Android 14)',
+    },
+    {
+        name: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+        version: '2.0',
+        ua: BROWSER_UA,
+    },
+]
+
+async function fetchTracks(videoId: string): Promise<CaptionTrack[]> {
+    for (const client of CLIENTS) {
+        try {
+            const res = await fetch(
+                'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'User-Agent': client.ua },
+                    body: JSON.stringify({
+                        context: { client: { clientName: client.name, clientVersion: client.version } },
+                        videoId,
+                    }),
+                }
+            )
+            if (!res.ok) continue
+            const data = await res.json() as PlayerData
+            const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+            if (tracks.length) return tracks
+        } catch {
+            continue
+        }
+    }
+    return []
+}
 
 export async function POST(req: Request) {
     try {
@@ -28,36 +76,11 @@ export async function POST(req: Request) {
         const { videoId, lang = 'ko' } = await req.json()
         if (!videoId) return Response.json({ error: 'videoId 필요' }, { status: 400 })
 
-        // 1. InnerTube ANDROID 클라이언트로 captionTracks 취득
-        const playerRes = await fetch(
-            'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'User-Agent': ANDROID_UA },
-                body: JSON.stringify({
-                    context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38' } },
-                    videoId,
-                }),
-            }
-        )
-
-        if (!playerRes.ok) {
-            const body = await playerRes.text().catch(() => '')
-            return Response.json({ error: `InnerTube 요청 실패 (${playerRes.status})`, detail: body.slice(0, 300) }, { status: 502 })
-        }
-
-        const playerData = await playerRes.json() as {
-            captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ languageCode: string; baseUrl: string }> } }
-            playabilityStatus?: { status?: string; reason?: string }
-        }
-        const tracks = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+        // 3개 클라이언트 순차 시도 (IOS → ANDROID_CREATOR → TVHTML5)
+        const tracks = await fetchTracks(videoId)
 
         if (!tracks.length) {
-            return Response.json({
-                error: '이 영상에는 자막 트랙이 없습니다',
-                playability: playerData?.playabilityStatus,
-                hasCaptions: !!playerData?.captions,
-            }, { status: 404 })
+            return Response.json({ error: '이 영상에는 자막 트랙이 없습니다' }, { status: 404 })
         }
 
         // 2. 선호 언어 → 첫 번째 트랙 선택
