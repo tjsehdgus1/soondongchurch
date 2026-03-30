@@ -1,59 +1,6 @@
-// Edge 런타임: AWS Lambda와 다른 IP 대역 사용
-// Vercel Edge는 YouTube의 서버리스(AWS) IP 차단과 별개로 동작할 가능성이 높음
 import { createServerClient } from '@supabase/ssr'
 
 export const runtime = 'edge'
-
-const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36,gzip(gfe)'
-
-type CaptionTrack = { languageCode: string; baseUrl: string }
-type PlayerData = {
-    captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: CaptionTrack[] } }
-    playabilityStatus?: { status?: string; reason?: string }
-}
-
-const CLIENTS = [
-    {
-        name: 'IOS',
-        version: '19.29.1',
-        ua: 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)',
-    },
-    {
-        name: 'ANDROID_CREATOR',
-        version: '24.45.100',
-        ua: 'com.google.android.apps.youtube.creator/24.45.100 (Linux; U; Android 14)',
-    },
-    {
-        name: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
-        version: '2.0',
-        ua: BROWSER_UA,
-    },
-]
-
-async function fetchTracks(videoId: string): Promise<CaptionTrack[]> {
-    for (const client of CLIENTS) {
-        try {
-            const res = await fetch(
-                'https://www.youtube.com/youtubei/v1/player?prettyPrint=false',
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'User-Agent': client.ua },
-                    body: JSON.stringify({
-                        context: { client: { clientName: client.name, clientVersion: client.version } },
-                        videoId,
-                    }),
-                }
-            )
-            if (!res.ok) continue
-            const data = await res.json() as PlayerData
-            const tracks = data?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
-            if (tracks.length) return tracks
-        } catch {
-            continue
-        }
-    }
-    return []
-}
 
 export async function POST(req: Request) {
     try {
@@ -76,59 +23,31 @@ export async function POST(req: Request) {
         const { videoId, lang = 'ko' } = await req.json()
         if (!videoId) return Response.json({ error: 'videoId 필요' }, { status: 400 })
 
-        // 3개 클라이언트 순차 시도 (IOS → ANDROID_CREATOR → TVHTML5)
-        const tracks = await fetchTracks(videoId)
+        const apiKey = process.env.SUPADATA_API_KEY
+        if (!apiKey) return Response.json({ error: 'SUPADATA_API_KEY 환경변수가 설정되지 않았습니다.' }, { status: 500 })
 
-        if (!tracks.length) {
-            return Response.json({ error: '이 영상에는 자막 트랙이 없습니다' }, { status: 404 })
-        }
-
-        // 2. 선호 언어 → 첫 번째 트랙 선택
-        const track = (lang ? tracks.find(t => t.languageCode === lang) : null) ?? tracks[0]
-
-        // 3. 자막 XML 요청 (User-Agent 필수 — 없으면 0 bytes)
-        const captionRes = await fetch(track.baseUrl, {
-            headers: { 'User-Agent': BROWSER_UA, 'Accept-Language': lang || 'ko' },
+        // Supadata YouTube Transcript API
+        const url = `https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}&lang=${lang}&text=true`
+        const res = await fetch(url, {
+            headers: { 'x-api-key': apiKey },
         })
 
-        if (!captionRes.ok) {
-            return Response.json({ error: `자막 데이터 요청 실패 (${captionRes.status})` }, { status: 502 })
-        }
-
-        const xml = await captionRes.text()
-
-        // 4. XML 파싱 (<text> 또는 <p><s> 두 가지 포맷 처리)
-        const texts: string[] = []
-        const tagRegex = /<text[^>]*>([^<]*)<\/text>|<p[^>]*>([\s\S]*?)<\/p>/g
-        const segRegex = /<s[^>]*>([^<]*)<\/s>/g
-        let m: RegExpExecArray | null
-
-        while ((m = tagRegex.exec(xml)) !== null) {
-            if (m[1] !== undefined) {
-                texts.push(m[1])
-            } else if (m[2] !== undefined) {
-                let seg: RegExpExecArray | null
-                const inner = m[2]
-                segRegex.lastIndex = 0
-                while ((seg = segRegex.exec(inner)) !== null) texts.push(seg[1])
+        if (!res.ok) {
+            const body = await res.text().catch(() => '')
+            if (res.status === 404) {
+                return Response.json({ error: '이 영상에는 자막 트랙이 없습니다' }, { status: 404 })
             }
+            return Response.json({ error: `자막 API 오류 (${res.status}): ${body.slice(0, 200)}` }, { status: 502 })
         }
 
-        const transcript = texts
-            .map(t => t
-                .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-                .replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim()
-            )
-            .filter(t => t)
-            .join(' ')
-            .replace(/\s+/g, ' ')
-            .trim()
+        const data = await res.json() as { content?: string; lang?: string }
 
+        const transcript = (data.content ?? '').trim()
         if (!transcript) {
             return Response.json({ error: '자막 내용이 비어 있습니다' }, { status: 404 })
         }
 
-        return Response.json({ transcript, lang: track.languageCode })
+        return Response.json({ transcript, lang: data.lang ?? lang })
 
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
