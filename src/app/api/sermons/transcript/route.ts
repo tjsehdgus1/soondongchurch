@@ -42,16 +42,22 @@ export async function POST(req: Request) {
         )
 
         if (!playerRes.ok) {
-            return Response.json({ error: `InnerTube 요청 실패 (${playerRes.status})` }, { status: 502 })
+            const body = await playerRes.text().catch(() => '')
+            return Response.json({ error: `InnerTube 요청 실패 (${playerRes.status})`, detail: body.slice(0, 300) }, { status: 502 })
         }
 
         const playerData = await playerRes.json() as {
             captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ languageCode: string; baseUrl: string }> } }
+            playabilityStatus?: { status?: string; reason?: string }
         }
         const tracks = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
 
         if (!tracks.length) {
-            return Response.json({ error: '이 영상에는 자막 트랙이 없습니다' }, { status: 404 })
+            return Response.json({
+                error: '이 영상에는 자막 트랙이 없습니다',
+                playability: playerData?.playabilityStatus,
+                hasCaptions: !!playerData?.captions,
+            }, { status: 404 })
         }
 
         // 2. 선호 언어 → 첫 번째 트랙 선택
