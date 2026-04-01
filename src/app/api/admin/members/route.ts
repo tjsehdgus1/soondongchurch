@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { checkCsrf } from '@/lib/csrf'
 
 // GET: 전체 교인 목록 + 소속 그룹 + 차단 여부
 export async function GET() {
@@ -24,6 +25,8 @@ export async function GET() {
 
 // PATCH: 교인 정보 수정 (username, name, email, phone_number, role, is_blocked)
 export async function PATCH(req: Request) {
+  if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
+
   const admin = await verifyAdmin()
   if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
 

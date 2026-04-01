@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { checkCsrf } from '@/lib/csrf'
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
+
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
 

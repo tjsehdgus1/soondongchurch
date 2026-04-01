@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
+import { verifyAdmin } from '@/lib/admin'
+import { checkCsrf } from '@/lib/csrf'
 
 // Vercel 서버리스 타임아웃 연장 (AI 요약까지 처리 시간 확보)
 export const maxDuration = 60
@@ -85,16 +87,17 @@ async function fetchYouTubeTranscript(videoId: string, preferLang = 'ko'): Promi
 
 export async function POST(req: Request) {
     try {
-        // 0. 관리자 인증 체크
-        const supabaseAuth = await createClient()
-        const { data: { user } } = await supabaseAuth.auth.getUser()
-        if (!user) {
-            return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
+        // CSRF 검증
+        if (!checkCsrf(req)) {
+            return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
         }
-        const { data: profile } = await supabaseAuth.from('profiles').select('role').eq('id', user.id).single()
-        if (profile?.role !== 'admin') {
+
+        // 관리자 인증 체크
+        const admin = await verifyAdmin()
+        if (!admin) {
             return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 })
         }
+        const supabaseAuth = await createClient()
 
         const { youtubeUrl, sermonDate, transcript: clientTranscript } = await req.json()
 
@@ -207,7 +210,7 @@ ${transcriptText}`
         return NextResponse.json({ success: true, data: data[0] })
 
     } catch (error: unknown) {
-        console.error("서버 내부 오류:", error)
-        return NextResponse.json({ error: error instanceof Error ? error.message : '서버 오류가 발생했습니다.' }, { status: 500 })
+        console.error('sermon parse 오류:', error instanceof Error ? error.message : String(error))
+        return NextResponse.json({ error: '설교 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 })
     }
 }

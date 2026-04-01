@@ -27,10 +27,15 @@ export default function AdminBulletinsPage() {
     const fileRef = useRef<HTMLInputElement>(null)
 
     const fetchBulletins = async () => {
-        const res = await fetch('/api/admin/bulletins')
-        const data = await res.json()
-        setBulletins(data.bulletins ?? [])
-        setLoading(false)
+        try {
+            const res = await fetch('/api/admin/bulletins')
+            const data = await res.json()
+            setBulletins(data.bulletins ?? [])
+        } catch (e) {
+            console.error('주보 목록 조회 오류:', e)
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => { fetchBulletins() }, [])

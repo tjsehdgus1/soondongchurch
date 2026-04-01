@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { checkCsrf } from '@/lib/csrf'
 
 // 주보 목록
 export async function GET() {
@@ -19,6 +20,8 @@ export async function GET() {
 // 주보 메타데이터 저장 (파일은 클라이언트에서 직접 업로드)
 export async function POST(req: NextRequest) {
     try {
+        if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
+
         const admin = await verifyAdmin()
         if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
 

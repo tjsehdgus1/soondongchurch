@@ -18,9 +18,14 @@ async function runSQL(query: string) {
 }
 
 export async function POST(req: NextRequest) {
+    // 프로덕션 환경에서는 완전 비활성화
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: '이 API는 프로덕션에서 비활성화되어 있습니다.' }, { status: 403 })
+    }
+
     const { secret } = await req.json()
 
-    if (secret !== process.env.MIGRATE_SECRET) {
+    if (!process.env.MIGRATE_SECRET || secret !== process.env.MIGRATE_SECRET) {
         return NextResponse.json({ error: '인증 실패' }, { status: 401 })
     }
 
@@ -71,8 +76,14 @@ export async function POST(req: NextRequest) {
             code VARCHAR(6) NOT NULL,
             created_at TIMESTAMPTZ DEFAULT NOW(),
             expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '5 minutes'),
-            verified BOOLEAN DEFAULT FALSE
+            verified BOOLEAN DEFAULT FALSE,
+            failed_attempts INT NOT NULL DEFAULT 0
         );
+    `)
+    // failed_attempts 컬럼 기존 테이블에 추가 (이미 있으면 무시)
+    await runSQL(`
+        ALTER TABLE public.sms_verifications
+          ADD COLUMN IF NOT EXISTS failed_attempts INT NOT NULL DEFAULT 0;
     `)
     results.push('sms_verifications 테이블 완료')
 
@@ -261,6 +272,7 @@ export async function POST(req: NextRequest) {
     const { error: groupImageBucketErr } = await supabase.storage.createBucket('group-images', {
         public: true,
         fileSizeLimit: 10485760, // 10MB
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     })
     if (groupImageBucketErr && !groupImageBucketErr.message.includes('already exists')) {
         return NextResponse.json({ error: groupImageBucketErr.message, results }, { status: 500 })

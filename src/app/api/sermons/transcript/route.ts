@@ -33,11 +33,13 @@ export async function POST(req: Request) {
         })
 
         if (!res.ok) {
-            const body = await res.text().catch(() => '')
             if (res.status === 404) {
                 return Response.json({ error: '이 영상에는 자막 트랙이 없습니다' }, { status: 404 })
             }
-            return Response.json({ error: `자막 API 오류 (${res.status}): ${body.slice(0, 200)}` }, { status: 502 })
+            // 외부 API 오류 내용은 서버 로그에만 기록 (클라이언트에 노출 금지)
+            const body = await res.text().catch(() => '')
+            console.error(`자막 API 오류 (${res.status}):`, body.slice(0, 500))
+            return Response.json({ error: '자막을 가져오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' }, { status: 502 })
         }
 
         const data = await res.json() as { content?: string; lang?: string }
@@ -50,7 +52,7 @@ export async function POST(req: Request) {
         return Response.json({ transcript, lang: data.lang ?? lang })
 
     } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        return Response.json({ error: msg }, { status: 500 })
+        console.error('transcript 서버 오류:', err instanceof Error ? err.message : String(err))
+        return Response.json({ error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 })
     }
 }
