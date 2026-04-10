@@ -100,12 +100,12 @@ export default function AdminMembersPage() {
   )
 
   return (
-    <div className="max-w-[1300px] mx-auto">
+    <div className="max-w-[1300px] mx-auto px-4 py-6 md:px-0 md:py-0">
       {/* 헤더 */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between md:mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">교인 관리</h1>
-          <p className="mt-1 text-gray-500">교인 정보 수정, 소그룹 확인, 차단 관리를 할 수 있습니다.</p>
+          <p className="mt-1 text-sm text-gray-500">교인 정보 수정, 소그룹 확인, 차단 관리를 할 수 있습니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <input
@@ -113,9 +113,9 @@ export default function AdminMembersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="이름·아이디·전화번호 검색"
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 w-56"
+            className="flex-1 min-w-0 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 md:w-56 md:flex-none"
           />
-          <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold border border-blue-100 text-sm whitespace-nowrap">
+          <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold border border-blue-100 text-sm whitespace-nowrap flex-shrink-0">
             총 {members.length}명
           </div>
         </div>
@@ -133,39 +133,118 @@ export default function AdminMembersPage() {
             다시 시도
           </button>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
+          {search ? '검색 결과가 없습니다.' : '등록된 교인이 없습니다.'}
+        </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
-                <tr>
-                  <th className="px-5 py-4 font-semibold">이름</th>
-                  <th className="px-5 py-4 font-semibold">아이디</th>
-                  <th className="px-5 py-4 font-semibold">이메일</th>
-                  <th className="px-5 py-4 font-semibold">휴대폰</th>
-                  <th className="px-5 py-4 font-semibold">권한</th>
-                  <th className="px-5 py-4 font-semibold">소속 소그룹</th>
-                  <th className="px-5 py-4 font-semibold">상태</th>
-                  <th className="px-5 py-4 font-semibold">가입일</th>
-                  <th className="px-5 py-4 font-semibold">관리</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtered.length === 0 ? (
+        <>
+          {/* 모바일: 카드 레이아웃 */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {filtered.map((member) => {
+              const groups = member.group_members?.map((gm) => gm.groups) ?? []
+              return (
+                <div
+                  key={member.id}
+                  className={`bg-white rounded-xl border border-gray-100 shadow-sm p-4 ${member.is_blocked ? 'opacity-60' : ''}`}
+                >
+                  {/* 상단: 아바타 + 이름 + 배지 */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${member.is_blocked ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-600'}`}>
+                      {member.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-gray-900">{member.name}</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          member.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {member.role === 'admin' ? '관리자' : '일반 교인'}
+                        </span>
+                        {member.is_blocked && (
+                          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
+                            🚫 차단됨
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 font-mono mt-0.5">{member.username}</p>
+                    </div>
+                  </div>
+
+                  {/* 연락처 */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-3">
+                    <div>
+                      <span className="text-xs text-gray-400">휴대폰</span>
+                      <p className="text-gray-700">{member.phone_number || '-'}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">가입일</span>
+                      <p className="text-gray-700 text-xs">
+                        {new Date(member.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 소그룹 */}
+                  {groups.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {groups.map((g) => (
+                        <span key={g.id} className="inline-block bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-md font-medium">
+                          {g.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 버튼 */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEdit(member)}
+                      className="flex-1 py-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => handleToggleBlock(member)}
+                      className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-colors ${
+                        member.is_blocked
+                          ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                          : 'text-red-500 bg-red-50 hover:bg-red-100'
+                      }`}
+                    >
+                      {member.is_blocked ? '차단 해제' : '차단'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* 데스크탑: 테이블 레이아웃 */}
+          <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
                   <tr>
-                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
-                      {search ? '검색 결과가 없습니다.' : '등록된 교인이 없습니다.'}
-                    </td>
+                    <th className="px-5 py-4 font-semibold">이름</th>
+                    <th className="px-5 py-4 font-semibold">아이디</th>
+                    <th className="px-5 py-4 font-semibold">이메일</th>
+                    <th className="px-5 py-4 font-semibold">휴대폰</th>
+                    <th className="px-5 py-4 font-semibold">권한</th>
+                    <th className="px-5 py-4 font-semibold">소속 소그룹</th>
+                    <th className="px-5 py-4 font-semibold">상태</th>
+                    <th className="px-5 py-4 font-semibold">가입일</th>
+                    <th className="px-5 py-4 font-semibold">관리</th>
                   </tr>
-                ) : (
-                  filtered.map((member) => {
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filtered.map((member) => {
                     const groups = member.group_members?.map((gm) => gm.groups) ?? []
                     return (
                       <tr
                         key={member.id}
                         className={`hover:bg-gray-50 transition-colors ${member.is_blocked ? 'opacity-50' : ''}`}
                       >
-                        {/* 이름 */}
                         <td className="px-5 py-4 font-medium text-gray-900 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${member.is_blocked ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-600'}`}>
@@ -174,23 +253,15 @@ export default function AdminMembersPage() {
                             {member.name}
                           </div>
                         </td>
-
-                        {/* 아이디 */}
                         <td className="px-5 py-4 text-gray-600 whitespace-nowrap font-mono text-xs">
                           {member.username || <span className="text-gray-400">-</span>}
                         </td>
-
-                        {/* 이메일 */}
                         <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
                           {member.email || <span className="text-gray-400">미등록</span>}
                         </td>
-
-                        {/* 휴대폰 */}
                         <td className="px-5 py-4 text-gray-600 whitespace-nowrap">
                           {member.phone_number || <span className="text-gray-400">미등록</span>}
                         </td>
-
-                        {/* 권한 */}
                         <td className="px-5 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                             member.role === 'admin'
@@ -200,8 +271,6 @@ export default function AdminMembersPage() {
                             {member.role === 'admin' ? '관리자' : '일반 교인'}
                           </span>
                         </td>
-
-                        {/* 소속 그룹 */}
                         <td className="px-5 py-4">
                           {groups.length === 0 ? (
                             <span className="text-gray-400 text-xs">없음</span>
@@ -215,8 +284,6 @@ export default function AdminMembersPage() {
                             </div>
                           )}
                         </td>
-
-                        {/* 상태 */}
                         <td className="px-5 py-4 whitespace-nowrap">
                           {member.is_blocked ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
@@ -228,15 +295,11 @@ export default function AdminMembersPage() {
                             </span>
                           )}
                         </td>
-
-                        {/* 가입일 */}
                         <td className="px-5 py-4 text-gray-500 whitespace-nowrap text-xs">
                           {new Date(member.created_at).toLocaleDateString('ko-KR', {
                             year: 'numeric', month: 'short', day: 'numeric',
                           })}
                         </td>
-
-                        {/* 관리 버튼 */}
                         <td className="px-5 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <button
@@ -259,21 +322,21 @@ export default function AdminMembersPage() {
                         </td>
                       </tr>
                     )
-                  })
-                )}
-              </tbody>
-            </table>
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* 수정 모달 */}
       {editTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/40 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setEditTarget(null) }}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 space-y-5">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">교인 정보 수정</h2>
               <button onClick={() => setEditTarget(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100">✕</button>
