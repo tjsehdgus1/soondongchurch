@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
+import { isHubKey } from '@/lib/hubs'
 
 const KINDS = ['list', 'card']
 const WRITE_LEVELS = ['admin', 'group', 'member']
@@ -12,9 +13,15 @@ function pickBoardFields(body: Record<string, unknown>): { updates: Record<strin
         if (typeof body.name !== 'string' || !body.name.trim()) return { error: '게시판 이름을 입력해 주세요.' }
         updates.name = body.name.trim()
     }
-    if ('section' in body) {
-        if (typeof body.section !== 'string' || !body.section.trim()) return { error: '메뉴 그룹을 선택해 주세요.' }
-        updates.section = body.section.trim()
+    if ('hub' in body) {
+        if (body.hub !== null && !isHubKey(body.hub as string)) return { error: '잘못된 메뉴 위치입니다.' }
+        updates.hub = body.hub
+        // section은 이전 메뉴용 필수 컬럼 — hub 값으로 채움
+        updates.section = body.hub ?? '숨김'
+    }
+    if ('tab_order' in body) {
+        if (!Number.isInteger(body.tab_order)) return { error: '탭 순서는 숫자여야 합니다.' }
+        updates.tab_order = body.tab_order
     }
     if ('kind' in body) {
         if (!KINDS.includes(body.kind as string)) return { error: '잘못된 목록 형태입니다.' }
@@ -46,7 +53,7 @@ export async function GET() {
 
     const service = getServiceClient()
     const [{ data: boards, error }, { data: groups }, { data: posts }] = await Promise.all([
-        service.from('boards').select('*').order('sort_order'),
+        service.from('boards').select('*').order('hub').order('tab_order'),
         service.from('groups').select('id, name').order('name'),
         service.from('board_posts').select('board_id'),
     ])
@@ -68,12 +75,12 @@ export async function POST(req: Request) {
     if (typeof body.slug !== 'string' || !/^[a-z0-9-]{2,40}$/.test(body.slug)) {
         return NextResponse.json({ error: '주소는 영문 소문자, 숫자, 하이픈(-) 2~40자로 입력해 주세요.' }, { status: 400 })
     }
-    if (!body.name || !body.section) return NextResponse.json({ error: '이름과 메뉴 그룹이 필요합니다.' }, { status: 400 })
+    if (!body.name) return NextResponse.json({ error: '게시판 이름이 필요합니다.' }, { status: 400 })
 
     const picked = pickBoardFields(body)
     if ('error' in picked) return NextResponse.json({ error: picked.error }, { status: 400 })
 
-    const { error } = await getServiceClient().from('boards').insert({ ...picked.updates, slug: body.slug })
+    const { error } = await getServiceClient().from('boards').insert({ section: '숨김', ...picked.updates, slug: body.slug })
     if (error) {
         const message = error.code === '23505' ? '이미 사용 중인 주소입니다.' : error.message
         return NextResponse.json({ error: message }, { status: 400 })
