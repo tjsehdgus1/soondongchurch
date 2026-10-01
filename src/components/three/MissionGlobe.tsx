@@ -7,7 +7,8 @@ import type { MissionField } from '@/lib/content'
 
 export const SUNCHEON = { lat: 34.95, lng: 127.49 }
 
-type Pin = { id: number | 'home', lat: number, lng: number, label: string }
+// left: 이름을 점 왼쪽에 둘지 (바로 동쪽에 다른 선교지가 있을 때)
+type Pin = { id: number | 'home', lat: number, lng: number, label: string, left: boolean }
 
 interface MissionGlobeProps {
     fields: MissionField[]
@@ -49,9 +50,16 @@ export default function MissionGlobe({ fields, selectedId, onSelect, reducedMoti
         startLat: SUNCHEON.lat, startLng: SUNCHEON.lng, endLat: f.lat, endLng: f.lng, id: f.id,
     })), [fields])
 
+    // 가까운 선교지(태국·캄보디아) 이름이 겹치지 않게 서쪽 것은 왼쪽에 표시
     const pins: Pin[] = useMemo(() => [
-        { id: 'home', ...SUNCHEON, label: '순천순동교회' },
-        ...fields.map((f) => ({ id: f.id, lat: f.lat, lng: f.lng, label: `${f.country}${f.region ? ` · ${f.region}` : ''}` })),
+        { id: 'home', ...SUNCHEON, label: '순천순동교회', left: false },
+        ...fields.map((f) => ({
+            id: f.id,
+            lat: f.lat,
+            lng: f.lng,
+            label: `${f.country}${f.region ? ` · ${f.region}` : ''}`,
+            left: fields.some((o) => o.id !== f.id && o.lng > f.lng && o.lng - f.lng < 12 && Math.abs(o.lat - f.lat) < 6),
+        })),
     ], [fields])
 
     // 초기 시점과 자동 회전 (휠 확대는 페이지 스크롤과 충돌하므로 끔)
@@ -87,8 +95,7 @@ export default function MissionGlobe({ fields, selectedId, onSelect, reducedMoti
             ? '<span class="block w-3 h-3 rounded-full bg-white ring-4 ring-white/30"></span>'
             : '<span class="block w-3.5 h-3.5 rounded-full bg-white ring-4 ring-white/30 transition-transform group-hover:scale-150"></span>'
         const label = document.createElement('span')
-        // 가까운 선교지(태국·캄보디아) 이름이 겹치지 않게 마우스를 올렸을 때만 표시
-        label.className = `absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-black/60 px-3 py-1 text-xs text-white backdrop-blur transition-opacity ${home ? '' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'}`
+        label.className = `absolute ${pin.left ? 'right-5' : 'left-5'} top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-black/60 px-3 py-1 text-xs text-white backdrop-blur transition-colors group-hover:bg-black/80`
         label.textContent = pin.label
         el.appendChild(label)
         if (!home) el.addEventListener('click', () => onSelect(pin.id as number))

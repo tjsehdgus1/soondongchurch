@@ -1,4 +1,4 @@
-// 상단·푸터 메뉴 (5개 고정 — doc/specs/2026-10-01-site-redesign-design.md 1절)
+// 상단 메뉴 (5개 고정 — doc/specs/2026-10-01-site-redesign-design.md 1절)
 
 export type MenuItem = { href: string, label: string }
 export type MenuSection = { label: string, href: string, items: MenuItem[] }
@@ -55,4 +55,23 @@ export function buildSiteMenu({ loggedIn, isAdmin }: { loggedIn: boolean, isAdmi
 export function isMenuActive(pathname: string, href: string): boolean {
     const path = href.split('?')[0]
     return pathname === path || pathname.startsWith(`${path}/`)
+}
+
+// 한 메뉴 묶음에서 현재 화면에 해당하는 항목 하나 — 가장 구체적인 경로, 탭(쿼리)까지 맞는 항목 우선
+// (/about/history에서 '환영합니다'(/about)까지 켜지거나, 다음세대 탭 항목이 모두 켜지는 것 방지)
+export function activeItemHref(items: MenuItem[], pathname: string, search: string): string | null {
+    const params = new URLSearchParams(search)
+    let best: string | null = null
+    let bestScore = -1
+    for (const { href } of items) {
+        const [path, query] = href.split('?')
+        if (!isMenuActive(pathname, path)) continue
+        if (query && ![...new URLSearchParams(query)].every(([key, value]) => params.get(key) === value)) continue
+        const score = path.length + (query ? 0.5 : 0)
+        if (score > bestScore) {
+            best = href
+            bestScore = score
+        }
+    }
+    return best
 }
