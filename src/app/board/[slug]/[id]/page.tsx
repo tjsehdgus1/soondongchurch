@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DeleteBoardPostButton from '@/components/DeleteBoardPostButton'
 import { type Board, formatDate, sanitizePostHtml } from '@/lib/boards'
+import { hubPathForBoard } from '@/lib/hubs'
 
 type Params = { params: Promise<{ slug: string, id: string }> }
 
@@ -39,6 +40,7 @@ export default async function BoardPostPage({ params }: Params) {
         )
     }
 
+    const listHref = hubPathForBoard(board)
     let canManage = !!user && post.author_id === user.id
     if (user && !canManage) {
         const { data: isAdmin } = await supabase.rpc('is_admin')
@@ -48,7 +50,7 @@ export default async function BoardPostPage({ params }: Params) {
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
             <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <Link href={`/board/${slug}`} className="inline-flex items-center gap-1.5 text-sm mb-8 group" style={{ color: '#8B7355' }}>
+                <Link href={listHref} className="inline-flex items-center gap-1.5 text-sm mb-8 group" style={{ color: '#8B7355' }}>
                     <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
@@ -89,7 +91,7 @@ export default async function BoardPostPage({ params }: Params) {
                 </article>
 
                 <div className="mt-8 flex justify-between gap-3">
-                    <Link href={`/board/${slug}`}
+                    <Link href={listHref}
                         className="px-5 py-2.5 text-sm font-medium bg-white border rounded-xl"
                         style={{ color: '#5C5650', borderColor: '#E8E4DE' }}
                     >
@@ -103,7 +105,7 @@ export default async function BoardPostPage({ params }: Params) {
                             >
                                 수정
                             </Link>
-                            <DeleteBoardPostButton postId={post.id} redirectTo={`/board/${slug}`} />
+                            <DeleteBoardPostButton postId={post.id} redirectTo={listHref} />
                         </div>
                     )}
                 </div>

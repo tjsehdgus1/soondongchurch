@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BoardPostList from '@/components/BoardPostList'
 import Pagination from '@/components/Pagination'
 import { type Board, type BoardPostSummary, PAGE_SIZE, POST_SUMMARY_COLUMNS } from '@/lib/boards'
+import { hubPathForBoard } from '@/lib/hubs'
 
 type Params = { params: Promise<{ slug: string }>, searchParams: Promise<{ page?: string, category?: string }> }
 
@@ -22,6 +23,9 @@ export default async function BoardPage({ params, searchParams }: Params) {
 
     const { data: board } = await supabase.from('boards').select('*').eq('slug', slug).maybeSingle<Board>()
     if (!board) notFound()
+    // 허브 소속 게시판은 허브 탭에서 보여줌
+    const hubPath = hubPathForBoard(board)
+    if (hubPath !== `/board/${slug}`) redirect(hubPath)
 
     let query = supabase
         .from('board_posts')
@@ -52,7 +56,7 @@ export default async function BoardPage({ params, searchParams }: Params) {
             <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
                 <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-wrap items-end justify-between gap-4">
                     <div>
-                        <span className="font-semibold text-sm tracking-wider" style={{ color: '#B8860B' }}>{board.section}</span>
+                        <span className="font-semibold text-sm tracking-wider" style={{ color: '#B8860B' }}>소식·나눔</span>
                         <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{board.name}</h1>
                     </div>
                     {canWrite && (

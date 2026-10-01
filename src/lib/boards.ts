@@ -10,6 +10,9 @@ export type Board = {
     group_id: number | null
     categories: string[]
     sort_order: number
+    // 소속 허브(탭 화면), null이면 메뉴에서 숨김
+    hub: string | null
+    tab_order: number
 }
 
 export type BoardPostSummary = {

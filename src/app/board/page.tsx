@@ -15,9 +15,11 @@ export default async function AllPostsPage({ searchParams }: { searchParams: Pro
 
     const from = (page - 1) * PAGE_SIZE
     const [{ data: posts, count }, { data: boards }] = await Promise.all([
+        // 교회 소개(콘텐츠로 이전, hub 없음) 글 제외
         supabase
             .from('board_posts')
-            .select(POST_SUMMARY_COLUMNS, { count: 'exact' })
+            .select(`${POST_SUMMARY_COLUMNS}, boards!inner(hub)`, { count: 'exact' })
+            .not('boards.hub', 'is', null)
             .order('created_at', { ascending: false })
             .range(from, from + PAGE_SIZE - 1),
         supabase.from('boards').select('id, slug, name'),
