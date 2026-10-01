@@ -1,5 +1,3 @@
-import DOMPurify from 'isomorphic-dompurify'
-
 export type Board = {
     id: number
     slug: string
@@ -51,10 +49,6 @@ export function postThumbnail(post: Pick<BoardPostSummary, 'thumbnail_url' | 'yo
 export function firstImageSrc(html: string): string | null {
     const match = html.match(/<img[^>]+src="([^"]+)"/)
     return match ? match[1] : null
-}
-
-export function sanitizePostHtml(html: string): string {
-    return DOMPurify.sanitize(html)
 }
 
 // 서버(UTC)에서 렌더해도 한국 날짜로 표시

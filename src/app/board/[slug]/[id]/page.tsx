@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DeleteBoardPostButton from '@/components/DeleteBoardPostButton'
-import { type Board, formatDate, sanitizePostHtml } from '@/lib/boards'
+import { type Board, formatDate } from '@/lib/boards'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { hubPathForBoard } from '@/lib/hubs'
 
 type Params = { params: Promise<{ slug: string, id: string }> }
@@ -85,7 +86,7 @@ export default async function BoardPostPage({ params }: Params) {
                         <div
                             className="prose prose-lg max-w-none overflow-x-auto"
                             style={{ color: '#5C5650' }}
-                            dangerouslySetInnerHTML={{ __html: sanitizePostHtml(post.content) }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
                         />
                     </div>
                 </article>
