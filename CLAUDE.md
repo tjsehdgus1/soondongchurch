@@ -241,9 +241,10 @@ new Date('2024-03-24' + 'T00:00:00')
 
 ### XSS 방지 (dangerouslySetInnerHTML)
 ```typescript
-import DOMPurify from 'isomorphic-dompurify'
-dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+import { sanitizeHtml } from '@/lib/sanitize'
+dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
 ```
+- `isomorphic-dompurify`(jsdom) 사용 금지 — Vercel 서버 런타임에서 jsdom을 불러오지 못해 해당 페이지가 전부 500 (2026-10-01 장애). `sanitizeHtml`은 DOM 없이 동작하는 `xss` 기반
 
 ### window 접근 (SSR 하이드레이션 방지)
 ```typescript
