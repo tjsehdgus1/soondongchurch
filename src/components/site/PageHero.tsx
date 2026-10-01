@@ -1,5 +1,4 @@
 import SplitHeading from '@/components/motion/SplitHeading'
-import Reveal from '@/components/motion/Reveal'
 
 interface PageHeroProps {
     eyebrow: string
@@ -25,9 +24,7 @@ export default function PageHero({ eyebrow, title, description, image, children 
                         {title}
                     </SplitHeading>
                     {description && (
-                        <Reveal delay={0.4} className="mt-6 max-w-2xl text-base sm:text-lg text-white/80 leading-relaxed">
-                            <p>{description}</p>
-                        </Reveal>
+                        <p className="hero-rise mt-6 max-w-2xl text-base sm:text-lg text-white/80 leading-relaxed" style={{ animationDelay: '0.45s' }}>{description}</p>
                     )}
                     {children}
                 </div>
@@ -43,9 +40,7 @@ export default function PageHero({ eyebrow, title, description, image, children 
                     {title}
                 </SplitHeading>
                 {description && (
-                    <Reveal delay={0.3} className="mt-6 max-w-2xl text-base sm:text-lg text-[#5C5650] leading-relaxed">
-                        <p>{description}</p>
-                    </Reveal>
+                    <p className="hero-rise mt-6 max-w-2xl text-base sm:text-lg text-[#5C5650] leading-relaxed" style={{ animationDelay: '0.35s' }}>{description}</p>
                 )}
                 {children}
             </div>

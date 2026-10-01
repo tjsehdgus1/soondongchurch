@@ -27,7 +27,7 @@ export default async function AboutPage() {
                 eyebrow="About"
                 title={greeting?.title ?? '순천순동교회에 오신 것을 환영합니다'}
                 description={greeting?.subtitle ?? '1946년부터 순천과 함께한 교회'}
-                image="/images/hero-bg-2.jpg"
+                image="/images/hero-bg-2.webp"
             />
 
             {/* 인사말 */}

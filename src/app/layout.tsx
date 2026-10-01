@@ -8,10 +8,14 @@ import VideoModalProvider from '@/components/video/VideoModal'
 import Footer from '@/components/Footer'
 import { createClient } from '@/lib/supabase/server'
 
+// 제목용 세리프: 한글 글꼴은 조각 파일이 많아 미리 받지 않음(preload: false) — 본문 표시를 막지 않도록
+// 600은 700으로 대체되므로 400·700만 사용
 const notoSerifKR = Noto_Serif_KR({
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
+  weight: ['400', '700'],
   variable: '--font-serif',
+  display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {
@@ -48,7 +52,7 @@ export default async function RootLayout({
         {/* 첫 페인트 전에 JS 사용 표시 → 등장 애니메이션 대상만 초기 숨김 (globals.css) */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <link rel="stylesheet" as="style" crossOrigin="anonymous"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       </head>
       <body className={`${notoSerifKR.variable} antialiased`}>
         <SmoothScroll />

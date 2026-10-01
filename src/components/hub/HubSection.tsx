@@ -70,8 +70,8 @@ export default async function HubSection({ hub, tab, page: pageParam }: HubSecti
                     ) : kind === 'video' ? (
                         // key로 탭이 바뀔 때마다 등장 애니메이션 재생
                         <Reveal key={`${board.slug}-${page}`} stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
-                            {list.map((post) => post.youtube_id ? (
-                                <VideoCard key={post.id} youtubeId={post.youtube_id} title={post.title}
+                            {list.map((post, i) => post.youtube_id ? (
+                                <VideoCard key={post.id} priority={i < 3} youtubeId={post.youtube_id} title={post.title}
                                     href={`/board/${board.slug}/${post.id}`} meta={formatDate(post.created_at)} />
                             ) : (
                                 <Link key={post.id} href={`/board/${board.slug}/${post.id}`} className="block rounded-2xl bg-white border border-[#E8E4DE] p-6 hover:border-[#B8860B]">

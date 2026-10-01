@@ -9,7 +9,11 @@ import NewsSection from '@/components/home/NewsSection'
 import VisitBand from '@/components/home/VisitBand'
 
 const FOUNDED_YEAR = 1946
-const HERO_IMAGES = ['/images/hero-bg-1.jpg', '/images/hero-bg-2.jpg']
+// 원본 6000px → 2400/1200px webp (모바일은 작은 파일)
+const HERO_IMAGES = [
+  { src: '/images/hero-bg-1.webp', srcSet: '/images/hero-bg-1-sm.webp 1200w, /images/hero-bg-1.webp 2400w' },
+  { src: '/images/hero-bg-2.webp', srcSet: '/images/hero-bg-2-sm.webp 1200w, /images/hero-bg-2.webp 2400w' },
+]
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -48,7 +52,7 @@ export default async function HomePage() {
       <HomeHero
         title={hero?.title ?? '하나님이 기뻐하시는\n행복한 교회'}
         subtitle={hero?.subtitle ?? '하나님의 은혜 안에서 함께 성장하는 교회'}
-        images={hero?.image_url ? [hero.image_url, ...HERO_IMAGES] : HERO_IMAGES}
+        images={hero?.image_url ? [{ src: hero.image_url }, ...HERO_IMAGES] : HERO_IMAGES}
       />
       <WorshipStrip />
       <NumbersBand years={thisYear - FOUNDED_YEAR} missionCount={missionFields.length} nextGenCount={nextGenCount ?? 0} />

@@ -10,7 +10,7 @@ interface SplitHeadingProps {
     as?: 'h1' | 'h2' | 'h3' | 'p'
     className?: string
     style?: React.CSSProperties
-    // true면 스크롤과 관계없이 바로 재생 (첫 화면 제목)
+    // true면 첫 화면 제목 — CSS로 바로 등장 (줄 나눔 효과 없음)
     immediate?: boolean
     delay?: number
 }
@@ -21,7 +21,7 @@ export default function SplitHeading({ children, as: Tag = 'h2', className, styl
 
     useGSAP(() => {
         const el = ref.current
-        if (!el) return
+        if (!el || immediate) return
         const gsap = registerGsap()
         gsap.set(el, { autoAlpha: 1 })
         if (prefersReducedMotion()) return
@@ -36,12 +36,16 @@ export default function SplitHeading({ children, as: Tag = 'h2', className, styl
                     ease: EASE_OUT,
                     stagger: 0.12,
                     delay,
-                    scrollTrigger: immediate ? undefined : { trigger: el, start: REVEAL_START, once: true },
+                    scrollTrigger: { trigger: el, start: REVEAL_START, once: true },
                 })
             },
         })
         return () => split.revert()
     }, { scope: ref })
 
+    // 첫 화면 제목: 숨김 없이 CSS 애니메이션으로 등장 (LCP 지연 방지)
+    if (immediate) {
+        return <Tag className={`hero-rise ${className ?? ''}`} style={{ ...style, animationDelay: `${0.15 + delay}s` }}>{children}</Tag>
+    }
     return <Tag ref={ref} data-reveal="" className={className} style={style}>{children}</Tag>
 }

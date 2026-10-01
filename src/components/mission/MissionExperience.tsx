@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useGSAP } from '@gsap/react'
@@ -41,6 +41,19 @@ interface MissionExperienceProps {
 
 export default function MissionExperience({ fields, title, subtitle }: MissionExperienceProps) {
     const mode = useSyncExternalStore(subscribe, getMode, getServerMode)
+    // 3D는 첫 화면이 그려지고 브라우저가 한가할 때 시작 (초기 로딩 중 메인 스레드 점유 방지)
+    const [idle, setIdle] = useState(false)
+    useEffect(() => {
+        if (mode !== 'globe') return
+        const start = () => setIdle(true)
+        // Safari는 requestIdleCallback 미지원 → 타이머로 대체
+        if (typeof window.requestIdleCallback === 'function') {
+            const id = window.requestIdleCallback(start, { timeout: 2500 })
+            return () => window.cancelIdleCallback(id)
+        }
+        const id = setTimeout(start, 1200)
+        return () => clearTimeout(id)
+    }, [mode])
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const sectionRef = useRef<HTMLElement>(null)
     const stageRef = useRef<HTMLDivElement>(null)
@@ -65,7 +78,7 @@ export default function MissionExperience({ fields, title, subtitle }: MissionEx
     return (
         <section ref={sectionRef} data-hero className="relative -mt-16 lg:-mt-20 h-[100svh] min-h-[680px] overflow-hidden bg-[radial-gradient(ellipse_at_60%_45%,#2d2924,#14120f_70%)] text-white">
             <div ref={stageRef} className="absolute inset-0 lg:left-[22%]">
-                {mode === 'globe' && (
+                {mode === 'globe' && idle && (
                     <MissionGlobe fields={fields} selectedId={selectedId} onSelect={setSelectedId} reducedMotion={false} />
                 )}
                 {mode === 'fallback' && (
