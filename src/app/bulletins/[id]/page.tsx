@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import AdminActions from '@/components/admin/AdminActions'
 import PdfViewerClient from './PdfViewerClient'
 
 async function getBulletin(id: string) {
@@ -30,7 +31,14 @@ export default async function BulletinViewerPage({ params }: { params: Promise<{
                         </svg>
                         주보 목록
                     </Link>
-                    <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{bulletin.title}</h1>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{bulletin.title}</h1>
+                        <AdminActions
+                            deleteUrl={`/api/admin/bulletins/${bulletin.id}`}
+                            deleteConfirm={`"${bulletin.title}" 주보를 삭제하시겠습니까?\n되돌릴 수 없습니다.`}
+                            afterDelete="/bulletins"
+                        />
+                    </div>
                     <p className="text-sm mt-1" style={{ color: '#8B7355' }}>{formatDate(bulletin.bulletin_date)}</p>
                 </div>
             </div>

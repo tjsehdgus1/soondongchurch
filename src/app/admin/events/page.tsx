@@ -23,6 +23,29 @@ export default function AdminEventsPage() {
   const [eventTime, setEventTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  // 수정 중인 일정 (null이면 새 일정 등록)
+  const [editingId, setEditingId] = useState<number | null>(null)
+
+  const startEdit = (ev: Event) => {
+    setEditingId(ev.id)
+    setTitle(ev.title)
+    setEventType(ev.event_type)
+    setEventDate(ev.event_date)
+    setEventTime(ev.event_time ? ev.event_time.slice(0, 5) : '')
+    setLocation(ev.location ?? '')
+    setDescription(ev.description ?? '')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const resetForm = () => {
+    setEditingId(null)
+    setTitle('')
+    setEventType('event')
+    setEventDate('')
+    setEventTime('')
+    setLocation('')
+    setDescription('')
+  }
 
   const fetchEvents = async () => {
     setLoading(true)
@@ -42,25 +65,29 @@ export default function AdminEventsPage() {
     fetchEvents()
   }, [])
 
+  // 사용자 화면의 '수정' 버튼으로 들어온 경우 (?edit=일정번호) 해당 일정을 바로 수정 상태로
+  const [editParamHandled, setEditParamHandled] = useState(false)
+  useEffect(() => {
+    if (editParamHandled || loading) return
+    setEditParamHandled(true)
+    const id = Number(new URLSearchParams(window.location.search).get('edit'))
+    const target = events.find((ev) => ev.id === id)
+    if (target) startEdit(target)
+  }, [loading, events, editParamHandled])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title || !eventDate) return
     setFormLoading(true)
     try {
-      const res = await fetch('/api/admin/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, event_type: eventType, event_date: eventDate, event_time: eventTime || null, location, description }),
-      })
+      const body = JSON.stringify({ title, event_type: eventType, event_date: eventDate, event_time: eventTime || null, location, description })
+      const res = editingId
+        ? await fetch(`/api/admin/events?id=${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body })
+        : await fetch('/api/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? '등록 실패')
-      alert('일정이 등록되었습니다.')
-      setTitle('')
-      setEventType('event')
-      setEventDate('')
-      setEventTime('')
-      setLocation('')
-      setDescription('')
+      if (!res.ok) throw new Error(data.error ?? '저장 실패')
+      alert(editingId ? '일정이 수정되었습니다.' : '일정이 등록되었습니다.')
+      resetForm()
       fetchEvents()
     } catch (e) {
       alert('등록 중 오류가 발생했습니다: ' + (e instanceof Error ? e.message : '알 수 없는 오류'))
@@ -93,7 +120,7 @@ export default function AdminEventsPage() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="text-blue-500">➕</span> 새 일정 등록
+              <span className="text-blue-500">➕</span> {editingId ? '일정 수정' : '새 일정 등록'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -127,8 +154,13 @@ export default function AdminEventsPage() {
                 <textarea rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="일정에 대한 간단한 안내" className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none" />
               </div>
               <button disabled={formLoading} type="submit" className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2">
-                {formLoading ? '등록 중...' : '등록하기'}
+                {formLoading ? '저장 중...' : editingId ? '수정 내용 저장' : '등록하기'}
               </button>
+              {editingId && (
+                <button type="button" onClick={resetForm} className="w-full py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  수정 취소
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -149,10 +181,10 @@ export default function AdminEventsPage() {
                     <div key={ev.id} className="p-5 flex items-start gap-4 hover:bg-gray-50 transition-colors">
                       <div className="text-center bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 min-w-[64px]">
                         <p className="text-xs text-gray-500 font-medium">
-                          {new Date(ev.event_date).toLocaleDateString('ko-KR', { month: 'short' })}
+                          {new Date(ev.event_date + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'short' })}
                         </p>
                         <p className="text-xl font-extrabold text-gray-900">
-                          {new Date(ev.event_date).getDate()}
+                          {new Date(ev.event_date + 'T00:00:00').getDate()}
                         </p>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -170,7 +202,10 @@ export default function AdminEventsPage() {
                           </p>
                         )}
                       </div>
-                      <div>
+                      <div className="flex gap-1">
+                        <button onClick={() => startEdit(ev)} className="text-xs font-medium text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors">
+                          수정
+                        </button>
                         <button onClick={() => handleDelete(ev.id)} className="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors">
                           삭제
                         </button>

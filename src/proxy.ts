@@ -29,11 +29,11 @@ export async function proxy(request: NextRequest) {
 
     // IMPORTANT: getUser()는 반드시 호출 — 세션 토큰 갱신 담당
     // profiles 쿼리는 middleware에서 제거 (모든 요청마다 DB 왕복 방지)
-    // is_blocked 체크는 admin/layout.tsx, groups/layout.tsx에서 처리
+    // is_blocked 체크는 admin/layout.tsx에서 처리
     const { data: { user } } = await supabase.auth.getUser()
 
     const pathname = request.nextUrl.pathname
-    const isProtected = pathname.startsWith('/admin') || pathname.startsWith('/groups')
+    const isProtected = pathname.startsWith('/admin')
 
     if (isProtected && !user) {
         const loginUrl = request.nextUrl.clone()

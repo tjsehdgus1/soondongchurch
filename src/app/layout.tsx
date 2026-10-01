@@ -6,6 +6,8 @@ import SiteHeader from '@/components/site/SiteHeader'
 import SmoothScroll from '@/components/motion/SmoothScroll'
 import VideoModalProvider from '@/components/video/VideoModal'
 import Footer from '@/components/Footer'
+import { AdminProvider } from '@/components/admin/AdminContext'
+import AdminPageBar from '@/components/admin/AdminPageBar'
 import { createClient } from '@/lib/supabase/server'
 
 // 제목용 세리프: 한글 글꼴은 조각 파일이 많아 미리 받지 않음(preload: false) — 본문 표시를 막지 않도록
@@ -34,15 +36,18 @@ export default async function RootLayout({
 
   let initialRole = 'member'
   let initialUserName = ''
+  // 관리자 버튼 표시용 (실제 권한은 관리자 API·RLS가 검사)
+  let isAdmin = false
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, name')
+      .select('role, name, is_blocked')
       .eq('id', user.id)
       .single()
     if (profile) {
       initialRole = profile.role ?? 'member'
       initialUserName = profile.name ?? ''
+      isAdmin = profile.role === 'admin' && !profile.is_blocked
     }
   }
 
@@ -61,13 +66,16 @@ export default async function RootLayout({
           initialRole={initialRole}
           initialUserName={initialUserName}
         />
-        <VideoModalProvider>
-          <ViewTransition>
-            <main className="min-h-screen pt-16 lg:pt-20">
-              {children}
-            </main>
-          </ViewTransition>
-        </VideoModalProvider>
+        <AdminProvider isAdmin={isAdmin}>
+          <VideoModalProvider>
+            <ViewTransition>
+              <main className="min-h-screen pt-16 lg:pt-20">
+                {children}
+              </main>
+            </ViewTransition>
+          </VideoModalProvider>
+          <AdminPageBar />
+        </AdminProvider>
         <Footer />
       </body>
     </html>

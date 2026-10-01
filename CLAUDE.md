@@ -3,7 +3,9 @@
 ## 프로젝트 개요
 
 순천순동교회 공식 홈페이지. Next.js 16 App Router + Supabase 기반.
-소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
+회원 관리(가입 승인제), 부서 게시판, 주보 PDF 뷰어 포함.
+홈페이지 계정은 **'회원'** 으로 부른다 (교회 '교인'과 구분 — 가입했다고 교인이 되는 것은 아님).
+소그룹 게시판(/groups) 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것. `groups`·`group_members` 테이블은 '부서'(부서 게시판 글쓰기 권한)로만 사용.
 설교 AI 자동요약·설교 관리 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
 설교 영상은 네이버 카페 이관으로 만든 **일반 게시판(유튜브 영상 첨부, AI 없음)**으로 운영한다 (`doc/cafe_migration_design.md`).
 2026-10 리디자인: 메뉴 5개(교회소개/예배·말씀/다음세대/선교·사역/소식·나눔), 관리자 수정 콘텐츠 페이지, 시네마틱 모션, 3D 지구본(선교). 히어로 빛 셰이더와 밝은 금색 강조는 사용자 요청으로 제거됨 — 되살리지 말 것 — 설계 `doc/specs/2026-10-01-site-redesign-design.md`, 계획 `doc/plans/2026-10-01-site-redesign.md`.
@@ -17,7 +19,7 @@
 | TypeScript | 5.x (strict) |
 | Tailwind CSS | 4.x (`@tailwindcss/postcss`, 설정 파일 없음) |
 | Supabase | `@supabase/ssr` 0.9.x (SSR 쿠키 기반) |
-| Tiptap | 3.x (소그룹 게시글 에디터) |
+| Tiptap | 3.x (게시글 에디터) |
 | React PDF | 10.x (주보 PDF 뷰어) |
 | Solapi | 5.x (SMS 인증) |
 | GSAP | 3.15 (ScrollTrigger, SplitText) + `@gsap/react` `useGSAP` |
@@ -40,12 +42,12 @@ src/
 │   │   ├── layout.tsx              # 관리자 가드 + AdminSidebar
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
-│   │   ├── members/page.tsx        # 교인 관리 (차단/권한 변경)
+│   │   ├── members/page.tsx        # 회원 관리 (가입 승인/차단/권한 변경)
 │   │   ├── boards/page.tsx         # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
 │   │   ├── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
-│   │   ├── groups/page.tsx
+│   │   ├── groups/page.tsx         # 부서 관리 (부서 게시판 글쓰기 권한)
 │   │   └── notices/page.tsx
 │   ├── auth/
 │   │   ├── login/page.tsx
@@ -70,7 +72,6 @@ src/
 │   ├── board/                      # 게시판: 전체글, [slug] 목록, [slug]/[id] 상세, new, edit
 │   ├── bulletins/[id]/page.tsx     # PdfViewer
 │   ├── events/page.tsx
-│   ├── groups/[id]/posts/[postId]/ # 소그룹 게시글 (detail, edit)
 │   └── notices/[id]/page.tsx
 ├── components/
 │   ├── site/                       # SiteHeader(메가 메뉴), PageHero, RichText, KakaoRoughMap
@@ -174,7 +175,7 @@ export async function GET() {
 
 ### Storage Buckets
 - `bulletins/` — PDF 주보, 최대 20MB
-- `group-images/` — 소그룹 게시글 이미지, 최대 10MB
+- `group-images/` — (삭제된 소그룹 기능의 이미지, 새로 쓰지 않음)
 - `board-images/` — 게시판 이미지(공개), `board-private/` — 회원 전용 글 이미지(비공개)
 
 ---
@@ -194,8 +195,10 @@ window.location.href = '/'
 ```
 
 **접근 제어:**
-- `proxy.ts`: `/admin/*`, `/groups/*` → 미로그인 시 `/auth/login` 리다이렉트
-- `admin/layout.tsx`, `groups/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
+- `proxy.ts`: `/admin/*` → 미로그인 시 `/auth/login` 리다이렉트
+- `admin/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
+- **가입 승인제** (`supabase/20261001_signup_approval.sql`): 새 가입자는 `profiles.is_approved = false` → 관리자가 회원 관리에서 승인해야 로그인 가능(로그인 화면이 미승인·차단 계정을 바로 로그아웃). DB에서도 `is_active_member()`·글 작성 트리거가 미승인 회원을 막음
+- 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
 
 **회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 SMS 인증 기록을 확인 후 `auth.admin.createUser`로 생성.
@@ -291,7 +294,7 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ## DB 변경 적용
 
 스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` 순서.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` 순서.
 
 리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)
 
@@ -303,5 +306,5 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 1. Supabase Dashboard → Authentication → Users → "Add user" (email: `admin@church.com`, Auto Confirm 체크)
 2. SQL Editor에서 실행:
    ```sql
-   UPDATE profiles SET role = 'admin' WHERE email = 'admin@church.com';
+   UPDATE profiles SET role = 'admin', is_approved = true WHERE email = 'admin@church.com';
    ```

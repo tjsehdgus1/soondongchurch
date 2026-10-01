@@ -14,8 +14,8 @@ const adminNav = [
   { href: '/admin/history', label: '연혁', icon: '🕰️' },
   { href: '/admin/people', label: '섬기는 분들', icon: '🙏' },
   { href: '/admin/missions', label: '선교지', icon: '🌏' },
-  { href: '/admin/groups', label: '소그룹 관리', icon: '🏘️' },
-  { href: '/admin/members', label: '교인 관리', icon: '👥' },
+  { href: '/admin/groups', label: '부서 관리', icon: '🏘️' },
+  { href: '/admin/members', label: '회원 관리', icon: '👥' },
 ]
 
 function isActive(navHref: string, pathname: string) {

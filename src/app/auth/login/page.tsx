@@ -23,6 +23,16 @@ function BlockedBanner() {
     )
 }
 
+function PendingBanner() {
+    const params = useSearchParams()
+    if (!params.get('pending')) return null
+    return (
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3 mb-4">
+            가입 승인 대기 중입니다. 관리자가 승인하면 로그인할 수 있습니다.
+        </div>
+    )
+}
+
 function ErrorBanner() {
     const params = useSearchParams()
     if (!params.get('error')) return null
@@ -48,10 +58,21 @@ export default function LoginPage() {
         setError(null)
 
         const internalEmail = `${username.trim().toLowerCase()}@internal.church`
-        const { error } = await supabase.auth.signInWithPassword({ email: internalEmail, password })
+        const { data, error } = await supabase.auth.signInWithPassword({ email: internalEmail, password })
 
         if (error) {
             setError('아이디 또는 비밀번호가 올바르지 않습니다.')
+            setLoading(false)
+            return
+        }
+
+        // 관리자 승인 전이거나 차단된 계정은 로그인 상태로 두지 않음
+        const { data: profile } = await supabase.from('profiles').select('is_approved, is_blocked').eq('id', data.user.id).single()
+        if (!profile?.is_approved || profile.is_blocked) {
+            await supabase.auth.signOut()
+            setError(profile?.is_blocked
+                ? '이 계정은 관리자에 의해 차단되었습니다. 문의사항은 교회로 연락해주세요.'
+                : '가입 승인 대기 중입니다. 관리자가 승인하면 로그인할 수 있습니다.')
             setLoading(false)
             return
         }
@@ -74,11 +95,12 @@ export default function LoginPage() {
                             <img src="/images/logo.svg" alt="순천순동교회 로고" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>로그인</h1>
-                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 교인 계정으로 로그인하세요</p>
+                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 홈페이지 회원 계정으로 로그인하세요</p>
                     </div>
 
                     <Suspense>
                         <BlockedBanner />
+                        <PendingBanner />
                         <ErrorBanner />
                     </Suspense>
 

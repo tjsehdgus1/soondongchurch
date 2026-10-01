@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('')
@@ -21,7 +20,6 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
-    const supabase = createClient()
 
     // 컴포넌트 언마운트 시 타이머 정리
     useEffect(() => {
@@ -145,17 +143,8 @@ export default function RegisterPage() {
             return
         }
 
-        // Supabase auth는 이메일이 필수이므로 내부 이메일로 로그인
-        const { data } = await supabase.auth.signInWithPassword({
-            email: `${username.toLowerCase()}@internal.church`,
-            password,
-        })
-
-        if (data.session) {
-            window.location.href = '/'
-        } else {
-            setSuccess(true)
-        }
+        // 관리자 승인 전에는 로그인할 수 없으므로 자동 로그인하지 않고 안내만 표시
+        setSuccess(true)
         setLoading(false)
     }
 
@@ -169,10 +158,10 @@ export default function RegisterPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-extrabold mb-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>회원가입 완료!</h2>
+                        <h2 className="text-2xl font-extrabold mb-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>가입 신청 완료</h2>
                         <p className="mb-6 text-sm" style={{ color: '#8B7355' }}>
-                            성공적으로 회원가입 되었습니다.<br />
-                            아래 버튼을 눌러 로그인해 주세요.
+                            관리자가 승인하면 로그인할 수 있습니다.<br />
+                            승인까지 조금 기다려 주세요.
                         </p>
                         <Link href="/auth/login"
                             className="block w-full py-3 text-white font-bold rounded-xl transition-colors" style={{ background: '#B8860B' }}>
@@ -193,8 +182,8 @@ export default function RegisterPage() {
                         <div className="w-16 h-16 rounded-md overflow-hidden mx-auto mb-4 shadow-lg">
                             <img src="/images/logo.svg" alt="순천순동교회 로고" className="w-full h-full object-cover" />
                         </div>
-                        <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>교인 등록</h1>
-                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 교인으로 등록하세요</p>
+                        <h1 className="text-2xl font-extrabold" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>회원가입</h1>
+                        <p className="text-sm mt-1" style={{ color: '#8B7355' }}>순천순동교회 홈페이지 회원으로 가입하세요</p>
                     </div>
 
                     <form onSubmit={handleRegister} className="space-y-4">
@@ -385,7 +374,7 @@ export default function RegisterPage() {
                                 </div>
                                 <div className="text-sm transition-colors" style={{ color: '#5C5650' }}>
                                     <span className="block">[필수] 개인정보 수집 및 이용에 동의합니다.</span>
-                                    <span className="block text-xs mt-0.5" style={{ color: '#A09890' }}>※ 수집항목: 이름, 휴대폰 번호 (교인 관리 및 교회 안내 문자 발송 목적)</span>
+                                    <span className="block text-xs mt-0.5" style={{ color: '#A09890' }}>※ 수집항목: 이름, 휴대폰 번호 (회원 관리 및 교회 안내 문자 발송 목적)</span>
                                 </div>
                             </label>
                         </div>
@@ -414,7 +403,7 @@ export default function RegisterPage() {
                                     </svg>
                                     처리 중...
                                 </span>
-                            ) : '교인 등록하기'}
+                            ) : '회원가입하기'}
                         </button>
                     </form>
 

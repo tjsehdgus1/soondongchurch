@@ -8,7 +8,8 @@ export default async function AdminDashboardPage() {
   const safe = (q: PromiseLike<{ count: number | null }>) =>
     Promise.resolve(q).then(r => r.count ?? 0).catch(() => 0)
 
-  const [memberCount, upcomingEventsCount, noticeCount] = await Promise.all([
+  const [pendingCount, memberCount, upcomingEventsCount, noticeCount] = await Promise.all([
+    safe(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_approved', false)),
     safe(supabase.from('profiles').select('id', { count: 'exact', head: true })),
     safe(supabase.from('events').select('*', { count: 'exact', head: true }).gte('event_date', new Date().toISOString().split('T')[0])),
     safe(supabase.from('notices').select('*', { count: 'exact', head: true })),
@@ -21,9 +22,16 @@ export default async function AdminDashboardPage() {
         <p className="mt-2 text-gray-600">순천순동교회 홈페이지 관리자 센터입니다.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <QuickCard
+          title="가입 승인 대기"
+          count={pendingCount || 0}
+          href="/admin/members"
+          icon="✋"
+          color="bg-orange-50 text-orange-600"
+        />
         <QuickCard 
-          title="등록된 교인" 
+          title="가입 회원" 
           count={memberCount || 0} 
           href="/admin/members" 
           icon="👥"
@@ -48,7 +56,7 @@ export default async function AdminDashboardPage() {
       <div className="bg-blue-50 border border-blue-100 rounded-2xl p-8">
         <h2 className="text-xl font-bold text-blue-900 mb-2">👋 환영합니다!</h2>
         <p className="text-blue-800 leading-relaxed">
-          좌측 메뉴를 이용해 교인 명부를 확인하거나 예배/행사 일정, 메인 화면의 공지사항을 직접 관리할 수 있습니다.<br/>
+          좌측 메뉴를 이용해 회원 목록을 확인하거나 예배/행사 일정, 메인 화면의 공지사항을 직접 관리할 수 있습니다.<br/>
           모든 변경 사항은 홈페이지에 실시간으로 반영됩니다.
         </p>
       </div>

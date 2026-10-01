@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import AdminActions from '@/components/admin/AdminActions'
 import { createClient } from '@/lib/supabase/server'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -86,6 +87,12 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
                 >
                     ← 목록으로
                 </Link>
+                <AdminActions
+                    editHref={`/admin/notices?edit=${notice.id}`}
+                    deleteUrl={`/api/admin/notices?id=${notice.id}`}
+                    deleteConfirm="이 공지사항을 삭제하시겠습니까?\n되돌릴 수 없습니다."
+                    afterDelete="/notices"
+                />
             </div>
         </div>
         </div>

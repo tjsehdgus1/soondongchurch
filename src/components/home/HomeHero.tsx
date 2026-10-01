@@ -7,7 +7,7 @@ interface HomeHeroProps {
     // 제목 위 표어 (관리자 수정)
     subtitle: string | null
     images: HeroImage[]
-    // 로그인하지 않았을 때만 '교인 등록하기' 버튼
+    // 로그인하지 않았을 때만 '회원가입하기' 버튼
     showRegister: boolean
 }
 
@@ -67,7 +67,7 @@ export default function HomeHero({ title, subtitle, images, showRegister }: Home
                     </a>
                     {showRegister && (
                         <MagneticButton href="/auth/register" className="inline-flex items-center justify-center px-7 py-3.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-md text-white text-base font-semibold hover:bg-white/20 transition-colors">
-                            교인 등록하기
+                            회원가입하기
                         </MagneticButton>
                     )}
                 </div>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
 
-// GET: 전체 교인 목록 + 소속 그룹 + 차단 여부
+// GET: 전체 회원 목록 + 소속 부서 + 차단·승인 여부
 export async function GET() {
   const admin = await verifyAdmin()
   if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
@@ -12,7 +12,7 @@ export async function GET() {
   const { data: members, error } = await service
     .from('profiles')
     .select(`
-      id, username, name, email, phone_number, role, is_blocked, created_at,
+      id, username, name, email, phone_number, role, is_blocked, is_approved, created_at,
       group_members (
         groups ( id, name )
       )
@@ -23,14 +23,14 @@ export async function GET() {
   return NextResponse.json({ data: members })
 }
 
-// PATCH: 교인 정보 수정 (username, name, email, phone_number, role, is_blocked)
+// PATCH: 회원 정보 수정 (username, name, email, phone_number, role, is_blocked, is_approved)
 export async function PATCH(req: Request) {
   if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
 
   const admin = await verifyAdmin()
   if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
 
-  const { id, username, name, email, phone_number, role, is_blocked } = await req.json()
+  const { id, username, name, email, phone_number, role, is_blocked, is_approved } = await req.json()
   if (!id) return NextResponse.json({ error: 'id가 필요합니다.' }, { status: 400 })
 
   if (role !== undefined && role !== 'admin' && role !== 'member') {
@@ -38,6 +38,9 @@ export async function PATCH(req: Request) {
   }
   if (is_blocked !== undefined && typeof is_blocked !== 'boolean') {
     return NextResponse.json({ error: '잘못된 차단 값입니다.' }, { status: 400 })
+  }
+  if (is_approved !== undefined && typeof is_approved !== 'boolean') {
+    return NextResponse.json({ error: '잘못된 승인 값입니다.' }, { status: 400 })
   }
   // 본인 계정 차단·강등으로 관리자가 사라지는 사고 방지
   if (id === admin.id && (is_blocked === true || role === 'member')) {
@@ -53,6 +56,7 @@ export async function PATCH(req: Request) {
   if (phone_number !== undefined) updates.phone_number = phone_number
   if (role !== undefined) updates.role = role
   if (is_blocked !== undefined) updates.is_blocked = is_blocked
+  if (is_approved !== undefined) updates.is_approved = is_approved
 
   const { error } = await service.from('profiles').update(updates).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

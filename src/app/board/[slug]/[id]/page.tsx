@@ -5,6 +5,8 @@ import DeleteBoardPostButton from '@/components/DeleteBoardPostButton'
 import { type Board, formatDate } from '@/lib/boards'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { hubPathForBoard } from '@/lib/hubs'
+import { splitGallery } from '@/lib/gallery'
+import ImageSlider from '@/components/board/ImageSlider'
 
 type Params = { params: Promise<{ slug: string, id: string }> }
 
@@ -42,6 +44,9 @@ export default async function BoardPostPage({ params }: Params) {
     }
 
     const listHref = hubPathForBoard(board)
+    const html = sanitizeHtml(post.content)
+    // 사진 게시판(카드형)에서 사진이 2장 이상이면 넘겨 보는 슬라이드로
+    const gallery = board.kind === 'card' ? splitGallery(html) : null
     let canManage = !!user && post.author_id === user.id
     if (user && !canManage) {
         const { data: isAdmin } = await supabase.rpc('is_admin')
@@ -83,11 +88,14 @@ export default async function BoardPostPage({ params }: Params) {
                                 />
                             </div>
                         )}
-                        <div
-                            className="prose prose-lg max-w-none overflow-x-auto"
-                            style={{ color: '#5C5650' }}
-                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
-                        />
+                        {gallery && <ImageSlider images={gallery.images} />}
+                        {(gallery ? gallery.rest : html) && (
+                            <div
+                                className="prose prose-lg max-w-none overflow-x-auto"
+                                style={{ color: '#5C5650' }}
+                                dangerouslySetInnerHTML={{ __html: gallery ? gallery.rest : html }}
+                            />
+                        )}
                     </div>
                 </article>
 

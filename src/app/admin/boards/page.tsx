@@ -145,7 +145,7 @@ export default function AdminBoardsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">게시판 관리</h1>
         <p className="mt-1 text-sm text-gray-500">
-          게시판이 어느 메뉴(허브)의 몇 번째 탭에 나올지 정합니다. &lsquo;부서 멤버&rsquo; 권한은 지정한 소그룹 멤버와 관리자만 글을 쓸 수 있습니다 (부서 멤버는 소그룹 관리에서 지정).
+          게시판이 어느 메뉴(허브)의 몇 번째 탭에 나올지 정합니다. &lsquo;부서 멤버&rsquo; 권한은 지정한 부서 멤버와 관리자만 글을 쓸 수 있습니다 (부서 멤버는 부서 관리에서 지정).
         </p>
       </div>
 
