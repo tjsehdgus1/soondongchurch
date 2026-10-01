@@ -175,19 +175,27 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     )}
                 </div>
 
-                <button
-                    className={`lg:hidden p-2 -mr-2 ${mobileOpen ? 'text-[#2D2A26]' : textColor}`}
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
-                    aria-expanded={mobileOpen}
-                    aria-controls="mobile-menu"
-                >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                        {mobileOpen
-                            ? <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
-                            : <path strokeLinecap="round" d="M4 8h16M4 16h16" />}
-                    </svg>
-                </button>
+                {/* 모바일: 로그인(비로그인 시)은 메뉴를 열지 않아도 바로 보이게 */}
+                <div className={`lg:hidden flex items-center gap-1 ${textColor}`}>
+                    {!loggedIn && (
+                        <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="px-3 py-2 text-[15px] font-semibold">
+                            로그인
+                        </Link>
+                    )}
+                    <button
+                        className="p-2 -mr-2"
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
+                        aria-expanded={mobileOpen}
+                        aria-controls="mobile-menu"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                            {mobileOpen
+                                ? <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+                                : <path strokeLinecap="round" d="M4 8h16M4 16h16" />}
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {/* 데스크톱 메가 메뉴: 5개 메뉴 전체를 한 번에 */}
