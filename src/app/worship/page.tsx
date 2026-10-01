@@ -23,7 +23,7 @@ export default async function WorshipPage() {
                 description={intro?.subtitle ?? '함께 드리는 예배는 가장 큰 기쁨입니다'}
             />
 
-            <section className="py-16 lg:py-20 bg-[#FAF8F5]">
+            <section className="pt-12 pb-8 lg:pt-16 lg:pb-10 bg-[#FAF8F5]">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
                     <SplitHeading className="text-4xl lg:text-5xl font-bold text-[#2D2A26] mb-10" style={{ fontFamily: 'var(--font-serif)' }}>
                         정기 예배
@@ -57,15 +57,22 @@ export default async function WorshipPage() {
                 </section>
             )}
 
-            <section className="py-14 bg-white border-t border-[#E8E4DE]">
-                <Reveal stagger className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid md:grid-cols-2 gap-6">
-                    <Link href="/bulletins" className="group rounded-3xl bg-[#2D2A26] text-white p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>주보 보기</p>
-                        <p className="mt-3 text-sm text-white/60">이번 주 예배 순서와 교회 소식</p>
+            {/* 주보·말씀 바로가기 — 위 목록에 바로 이어지게 (위쪽 여백 없음) */}
+            <section className="pb-12 lg:pb-16 bg-[#FAF8F5]">
+                <Reveal stagger className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid md:grid-cols-2 gap-3 md:gap-6">
+                    <Link href="/bulletins" className="group flex items-center justify-between gap-4 rounded-2xl bg-[#2D2A26] text-white px-6 py-5 lg:px-8 lg:py-7 hover:-translate-y-1 transition-transform duration-500">
+                        <span>
+                            <span className="block text-2xl lg:text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>주보 보기</span>
+                            <span className="block mt-1 text-sm text-white/60">이번 주 예배 순서와 교회 소식</span>
+                        </span>
+                        <span aria-hidden="true" className="text-xl transition-transform group-hover:translate-x-1">→</span>
                     </Link>
-                    <Link href="/sermons" className="group rounded-3xl bg-[#FAF8F5] border border-[#E8E4DE] text-[#2D2A26] p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>말씀 다시 듣기</p>
-                        <p className="mt-3 text-sm text-[#8B7355]">담임목사·협동목사·초청 설교 영상</p>
+                    <Link href="/sermons" className="group flex items-center justify-between gap-4 rounded-2xl bg-white border border-[#E8E4DE] text-[#2D2A26] px-6 py-5 lg:px-8 lg:py-7 hover:-translate-y-1 transition-transform duration-500">
+                        <span>
+                            <span className="block text-2xl lg:text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>말씀 다시 듣기</span>
+                            <span className="block mt-1 text-sm text-[#8B7355]">담임목사·협동목사·초청 설교 영상</span>
+                        </span>
+                        <span aria-hidden="true" className="text-xl transition-transform group-hover:translate-x-1">→</span>
                     </Link>
                 </Reveal>
             </section>

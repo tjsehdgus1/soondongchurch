@@ -20,6 +20,7 @@ export default async function HomePage() {
     missionFields,
     { data: sermonVideos },
     { data: eventPosts },
+    { data: { user } },
   ] = await Promise.all([
     getBlock('home.hero'),
     getMissionFields(),
@@ -31,6 +32,7 @@ export default async function HomePage() {
     supabase.from('board_posts').select('id, title, youtube_id, thumbnail_url, created_at, boards!inner(slug)')
       .eq('boards.slug', 'events-gallery').eq('members_only', false)
       .order('created_at', { ascending: false }).limit(6),
+    supabase.auth.getUser(),
   ])
 
   return (
@@ -39,6 +41,7 @@ export default async function HomePage() {
         title={hero?.title ?? '하나님이 기뻐하시는\n행복한 교회'}
         subtitle={hero?.subtitle ?? '하나님의 은혜 안에서 함께 성장하는 교회'}
         images={hero?.image_url ? [{ src: hero.image_url }, ...HERO_IMAGES] : HERO_IMAGES}
+        showRegister={!user}
       />
       <WorshipStrip />
       <RecentSermons videos={(sermonVideos ?? []) as unknown as SermonVideo[]} />

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useGSAP } from '@gsap/react'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
-import { buildSiteMenu, isMenuActive } from '@/lib/site-menu'
+import { activeItemHref, buildSiteMenu, isMenuActive } from '@/lib/site-menu'
 import { EASE_OUT, prefersReducedMotion, registerGsap } from '@/lib/motion'
 import { getLenis } from '@/components/motion/SmoothScroll'
 
@@ -32,11 +32,26 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     const [mobileOpenAt, setMobileOpenAt] = useState<string | null>(null)
     const megaOpen = megaOpenAt === pathname
     const mobileOpen = mobileOpenAt === pathname
-    const setMegaOpen = (open: boolean) => setMegaOpenAt(open ? pathname : null)
-    const setMobileOpen = (open: boolean) => setMobileOpenAt(open ? pathname : null)
+    // 메뉴를 연 시점의 쿼리(?tab=...) — 탭 항목의 현재 위치 표시용
+    const [search, setSearch] = useState('')
+    // 모바일 메뉴에서 펼친 묶음
+    const [openSection, setOpenSection] = useState<string | null>(null)
     const mobileRef = useRef<HTMLDivElement>(null)
 
     const menu = buildSiteMenu({ loggedIn, isAdmin: role === 'admin' })
+    const currentSection = menu.find((s) => s.items.some((i) => isMenuActive(pathname, i.href)))?.label ?? null
+
+    const setMegaOpen = (open: boolean) => {
+        if (open) setSearch(window.location.search)
+        setMegaOpenAt(open ? pathname : null)
+    }
+    const setMobileOpen = (open: boolean) => {
+        if (open) {
+            setSearch(window.location.search)
+            setOpenSection(currentSection)
+        }
+        setMobileOpenAt(open ? pathname : null)
+    }
 
     // 로그인 상태 동기화
     useEffect(() => {
@@ -102,7 +117,8 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
         window.location.href = '/auth/login'
     }
 
-    const light = overHero && !megaOpen
+    // 모바일 메뉴를 열면 헤더도 불투명 (사진 위에서 닫기 버튼이 묻히지 않게)
+    const light = overHero && !megaOpen && !mobileOpen
     const textColor = light ? 'text-white' : 'text-[#2D2A26]'
 
     return (
@@ -180,23 +196,27 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 onFocus={() => setMegaOpen(true)}
             >
                 <div className="max-w-[1400px] mx-auto px-10 py-10 grid grid-cols-5 gap-8">
-                    {menu.map((section) => (
-                        <div key={section.label}>
-                            <p className="text-sm font-bold text-[#2D2A26] mb-4 pb-3 border-b border-[#E8E4DE]">{section.label}</p>
-                            <ul className="space-y-2.5">
-                                {section.items.map((item) => (
-                                    <li key={item.href}>
-                                        <Link
-                                            href={item.href}
-                                            className={`text-[17px] transition-colors hover:text-[#8B7355] ${isMenuActive(pathname, item.href) ? 'text-[#2D2A26] font-bold underline underline-offset-4' : 'text-[#5C5650]'}`}
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    {menu.map((section) => {
+                        const activeHref = activeItemHref(section.items, pathname, search)
+                        return (
+                            <div key={section.label}>
+                                <p className="text-sm font-bold text-[#2D2A26] mb-4 pb-3 border-b border-[#E8E4DE]">{section.label}</p>
+                                <ul className="space-y-2.5">
+                                    {section.items.map((item) => (
+                                        <li key={item.href}>
+                                            <Link
+                                                href={item.href}
+                                                aria-current={item.href === activeHref ? 'page' : undefined}
+                                                className={`text-[17px] transition-colors hover:text-[#8B7355] ${item.href === activeHref ? 'text-[#2D2A26] font-bold underline underline-offset-4' : 'text-[#5C5650]'}`}
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
 
@@ -205,27 +225,49 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
         {/* 모바일 전체 화면 메뉴 — header의 transform 밖에 둬야 fixed가 화면 기준이 됨 */}
         {mobileOpen && (
             <div id="mobile-menu" ref={mobileRef} className="lg:hidden fixed inset-x-0 bottom-0 top-16 z-40 bg-[#FAF8F5] overflow-y-auto overscroll-contain">
-                <nav aria-label="모바일 메뉴" className="px-6 py-8 space-y-8">
-                    {menu.map((section) => (
-                        <div key={section.label}>
-                            <p data-menu-item className="text-sm font-bold text-[#8B7355] mb-3">{section.label}</p>
-                            <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
-                                {section.items.map((item) => (
-                                    <li key={item.href} data-menu-item>
-                                        <Link
-                                            href={item.href}
-                                            onClick={() => setMobileOpen(false)}
-                                            className={`text-xl ${isMenuActive(pathname, item.href) ? 'text-[#2D2A26] font-bold underline underline-offset-4' : 'text-[#2D2A26]'}`}
-                                            style={{ fontFamily: 'var(--font-serif)' }}
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                    <div data-menu-item className="pt-6 border-t border-[#E8E4DE] flex gap-3">
+                {/* 큰 메뉴 5개 → 누르면 하위 메뉴가 펼쳐짐 (현재 위치 묶음은 처음부터 펼침) */}
+                <nav aria-label="모바일 메뉴" className="px-6 pt-2 pb-8">
+                    <ul>
+                        {menu.map((section, idx) => {
+                            const open = openSection === section.label
+                            const activeHref = activeItemHref(section.items, pathname, search)
+                            return (
+                                <li key={section.label} data-menu-item className="border-b border-[#E8E4DE]">
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenSection(open ? null : section.label)}
+                                        aria-expanded={open}
+                                        aria-controls={`mobile-menu-${idx}`}
+                                        className="w-full flex items-center justify-between py-5 text-left text-[22px] font-bold text-[#2D2A26] cursor-pointer"
+                                    >
+                                        {section.label}
+                                        <svg className={`w-5 h-5 text-[#8B7355] transition-transform duration-300 ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                                        </svg>
+                                    </button>
+                                    <div id={`mobile-menu-${idx}`} inert={!open} className={`grid transition-[grid-template-rows] duration-300 ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+                                        <div className="overflow-hidden">
+                                            <ul className="mb-5 ml-1 pl-4 border-l border-[#E8E4DE] space-y-1">
+                                                {section.items.map((item) => (
+                                                    <li key={item.href}>
+                                                        <Link
+                                                            href={item.href}
+                                                            onClick={() => setMobileOpen(false)}
+                                                            aria-current={item.href === activeHref ? 'page' : undefined}
+                                                            className={`block py-2 text-[17px] ${item.href === activeHref ? 'text-[#2D2A26] font-bold' : 'text-[#5C5650]'}`}
+                                                        >
+                                                            {item.label}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                    <div data-menu-item className="pt-8 flex gap-3">
                         {loggedIn ? (
                             <button onClick={handleLogout} className="flex-1 py-3 rounded-full border border-red-200 text-red-500 text-sm cursor-pointer">로그아웃</button>
                         ) : (
@@ -235,7 +277,8 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                             </>
                         )}
                     </div>
-                    <a data-menu-item href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-full bg-red-50 text-red-600 text-sm">
+                    <a data-menu-item href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" className="mt-4 flex items-center justify-center gap-2 py-3 text-sm text-[#5C5650]">
+                        <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z" /></svg>
                         유튜브 채널
                     </a>
                 </nav>
