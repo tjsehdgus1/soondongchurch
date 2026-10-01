@@ -33,6 +33,17 @@ export async function PATCH(req: Request) {
   const { id, username, name, email, phone_number, role, is_blocked } = await req.json()
   if (!id) return NextResponse.json({ error: 'id가 필요합니다.' }, { status: 400 })
 
+  if (role !== undefined && role !== 'admin' && role !== 'member') {
+    return NextResponse.json({ error: '잘못된 권한 값입니다.' }, { status: 400 })
+  }
+  if (is_blocked !== undefined && typeof is_blocked !== 'boolean') {
+    return NextResponse.json({ error: '잘못된 차단 값입니다.' }, { status: 400 })
+  }
+  // 본인 계정 차단·강등으로 관리자가 사라지는 사고 방지
+  if (id === admin.id && (is_blocked === true || role === 'member')) {
+    return NextResponse.json({ error: '본인 계정은 차단하거나 권한을 낮출 수 없습니다.' }, { status: 400 })
+  }
+
   const service = getServiceClient()
 
   const updates: Record<string, unknown> = {}

@@ -1,6 +1,7 @@
 -- ============================================================
 -- 교회 홈페이지 Supabase DB Schema
 -- Supabase SQL Editor에서 실행하세요.
+-- 실행 후 반드시 supabase/20261001_security_fix.sql 도 이어서 실행하세요.
 -- ============================================================
 
 -- ---- profiles (사용자 프로필) --------------------------------
@@ -17,13 +18,8 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
--- 자신의 프로필은 누구나 조회 가능
-create policy "프로필 조회" on public.profiles
-  for select using (true);
-
--- 자신의 프로필만 수정 가능
-create policy "프로필 수정" on public.profiles
-  for update using (auth.uid() = id);
+-- 프로필 조회/수정 정책은 supabase/20261001_security_fix.sql 에서 정의
+-- (본인·관리자만 조회, 클라이언트 수정 불가 — role 자가 승격 방지)
 
 -- 회원가입 시 자동으로 profiles 행 생성
 create or replace function public.handle_new_user()
@@ -130,39 +126,6 @@ create policy "일정 삭제" on public.events
     exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
   );
 
-
--- ---- sermons (설교 요약 게시판) ---------------------------------
-create table if not exists public.sermons (
-  id          uuid primary key default gen_random_uuid(),
-  title       text not null,
-  youtube_id  text not null unique,
-  preacher    text not null default '김광선 목사',
-  sermon_date date not null default current_date,
-  summary     text,
-  raw_transcript text,
-  thumbnail_url text,
-  status      text not null default 'draft', -- 'draft' | 'published'
-  created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
-);
-
-alter table public.sermons enable row level security;
-
--- 누구나 조회 가능 (공개된 설교만)
-create policy "공개된 설교 조회" on public.sermons
-  for select using (status = 'published');
-
--- 관리자는 모든 설교 조회/작성/수정/삭제 가능
-create policy "관리자 모든 권한" on public.sermons
-  for all using (
-    exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
-  );
-
--- updated_at 자동 갱신 트리거
-drop trigger if exists sermons_updated_at on public.sermons;
-create trigger sermons_updated_at
-  before update on public.sermons
-  for each row execute procedure public.set_updated_at();
 
 -- (샘플 데이터 제외됨: 불필요한 공지사항 및 행사 이벤트 데이터 삭제 완료)
 

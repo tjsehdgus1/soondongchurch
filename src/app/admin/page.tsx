@@ -9,32 +9,10 @@ export default async function AdminDashboardPage() {
     Promise.resolve(q).then(r => r.count ?? 0).catch(() => 0)
 
   const [memberCount, upcomingEventsCount, noticeCount] = await Promise.all([
-    safe(supabase.from('profiles').select('*', { count: 'exact', head: true })),
+    safe(supabase.from('profiles').select('id', { count: 'exact', head: true })),
     safe(supabase.from('events').select('*', { count: 'exact', head: true }).gte('event_date', new Date().toISOString().split('T')[0])),
     safe(supabase.from('notices').select('*', { count: 'exact', head: true })),
   ])
-
-  // 퀵 메뉴 카드 컴포넌트
-  const QuickCard = ({ title, count, href, icon, color }: { title: string, count: number, href: string, icon: string, color: string }) => (
-    <Link href={href} className="group block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-700">{title}</h3>
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${color}`}>
-          {icon}
-        </div>
-      </div>
-      <div className="flex items-end gap-2">
-        <span className="text-4xl font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors">
-          {count ?? 0}
-        </span>
-        <span className="text-gray-500 mb-1">건</span>
-      </div>
-      <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center text-sm font-medium text-blue-600">
-        관리하기
-        <span className="group-hover:translate-x-1 transition-transform">→</span>
-      </div>
-    </Link>
-  )
 
   return (
     <div className="max-w-[1300px] mx-auto space-y-8">
@@ -75,5 +53,29 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+// 퀵 메뉴 카드 컴포넌트
+function QuickCard({ title, count, href, icon, color }: { title: string, count: number, href: string, icon: string, color: string }) {
+  return (
+    <Link href={href} className="group block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-gray-700">{title}</h3>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${color}`}>
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-end gap-2">
+        <span className="text-4xl font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors">
+          {count ?? 0}
+        </span>
+        <span className="text-gray-500 mb-1">건</span>
+      </div>
+      <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center text-sm font-medium text-blue-600">
+        관리하기
+        <span className="group-hover:translate-x-1 transition-transform">→</span>
+      </div>
+    </Link>
   )
 }

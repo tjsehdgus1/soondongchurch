@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.claude/settings.local.json
+
+# 네이버 카페 내보내기 원본 (355MB, 교인 사진 포함 — 커밋 금지)
+/scsdc-cafe-export/

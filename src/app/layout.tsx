@@ -23,7 +23,10 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [{ data: { user } }, { data: boards }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('boards').select('slug, name, section, sort_order').order('sort_order'),
+  ])
 
   let initialRole = 'member'
   let initialUserName = ''
@@ -50,6 +53,7 @@ export default async function RootLayout({
           initialUser={user}
           initialRole={initialRole}
           initialUserName={initialUserName}
+          boards={boards ?? []}
         />
         <main className="min-h-screen pt-16">
           {children}

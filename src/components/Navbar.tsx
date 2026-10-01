@@ -5,14 +5,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { SECTION_ORDER } from '@/lib/boards'
+
+type NavBoard = { slug: string, name: string, section: string }
+type NavItem = { href: string, label: string }
 
 interface NavbarProps {
     initialUser: User | null
     initialRole: string
     initialUserName: string
+    boards: NavBoard[]
 }
 
-export default function Navbar({ initialUser, initialRole, initialUserName }: NavbarProps) {
+export default function Navbar({ initialUser, initialRole, initialUserName, boards }: NavbarProps) {
     const [user, setUser] = useState<User | null>(initialUser)
     const [role, setRole] = useState(initialRole)
     const [userName, setUserName] = useState(initialUserName)
@@ -40,13 +45,27 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
         window.location.href = '/auth/login'
     }
 
-    const navLinks = [
-        { href: '/sermons', label: '설교영상' },
-        { href: '/bulletins', label: '주간예배일정' },
-        { href: '/events', label: '행사일정' },
-        { href: '/notices', label: '공지사항' },
-        { href: '/directions', label: '오시는길' },
-    ]
+    // 상단 메뉴: 고정 페이지 + boards 테이블의 게시판 (section별 묶음)
+    const fixedItems: Record<string, NavItem[]> = {
+        '교회소개': [{ href: '/directions', label: '오시는길' }],
+        '예배·소식': [
+            { href: '/bulletins', label: '주간예배일정' },
+            { href: '/events', label: '행사일정' },
+            { href: '/notices', label: '공지사항' },
+        ],
+        '커뮤니티': [
+            { href: '/board', label: '전체글' },
+            ...(user ? [{ href: '/groups', label: '소그룹' }] : []),
+        ],
+    }
+    const sections = SECTION_ORDER.map((section) => ({
+        section,
+        items: [
+            ...boards.filter((b) => b.section === section).map((b) => ({ href: `/board/${b.slug}`, label: b.name })),
+            ...(fixedItems[section] ?? []),
+        ],
+    })).filter((s) => s.items.length > 0)
+    const isActive = (href: string) => pathname === href || (href !== '/board' && pathname.startsWith(`${href}/`))
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E4DE] shadow-sm">
@@ -67,31 +86,42 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden lg:flex items-center gap-1">
-                        {navLinks.map(({ href, label }) => (
-                            <Link
-                                key={href}
-                                href={href}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname === href
-                                    ? 'bg-[#B8860B]/10 text-[#B8860B]'
-                                    : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
-                                    }`}
-                            >
-                                {label}
-                            </Link>
-                        ))}
-                        {/* 로그인 시 소그룹 메뉴 표출 */}
-                        {user && (
-                            <Link
-                                href="/groups"
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${pathname.startsWith('/groups')
-                                    ? 'bg-[#B8860B]/10 text-[#B8860B]'
-                                    : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
-                                    }`}
-                            >
-                                소그룹
-                            </Link>
-                        )}
+                    <nav className="hidden xl:flex items-center gap-1">
+                        {sections.map(({ section, items }) => {
+                            const active = items.some((i) => isActive(i.href))
+                            return (
+                                <div key={section} className="relative group">
+                                    <button
+                                        type="button"
+                                        aria-haspopup="true"
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-default ${active
+                                            ? 'bg-[#B8860B]/10 text-[#B8860B]'
+                                            : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
+                                            }`}
+                                    >
+                                        {section}
+                                    </button>
+                                    {/* 마우스 오버·키보드 포커스 시 하위 메뉴 */}
+                                    <div className="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50">
+                                        <ul className="min-w-44 bg-white border border-[#E8E4DE] rounded-xl shadow-lg py-2">
+                                            {items.map(({ href, label }) => (
+                                                <li key={href}>
+                                                    <Link
+                                                        href={href}
+                                                        className={`block px-4 py-2 text-sm whitespace-nowrap ${isActive(href)
+                                                            ? 'text-[#B8860B] font-semibold'
+                                                            : 'text-[#5C5650] hover:bg-[#F2EFE9] hover:text-[#2D2A26]'
+                                                            }`}
+                                                    >
+                                                        {label}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )
+                        })}
                         {/* 관리자 로그인 시 공지사항 옆에 관리자 홈 버튼 표출 */}
                         {user && role === 'admin' && (
                             <Link
@@ -110,7 +140,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
                     </nav>
 
                     {/* Desktop Right Side (Socials + Auth) */}
-                    <div className="hidden lg:flex items-center gap-4">
+                    <div className="hidden xl:flex items-center gap-4">
                         {/* YouTube Link */}
                         <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
                             target="_blank" rel="noopener noreferrer"
@@ -156,7 +186,7 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                        className="xl:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
                         onClick={() => setMenuOpen(!menuOpen)}
                         aria-label="메뉴 열기"
                     >
@@ -171,27 +201,24 @@ export default function Navbar({ initialUser, initialRole, initialUserName }: Na
 
                 {/* Mobile Menu */}
                 {menuOpen && (
-                    <div className="lg:hidden border-t border-[#E8E4DE] py-3 space-y-1">
-                        {navLinks.map(({ href, label }) => (
-                            <Link
-                                key={href}
-                                href={href}
-                                onClick={() => setMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === href ? 'bg-[#B8860B]/10 text-[#B8860B]' : 'text-[#5C5650] hover:bg-[#F2EFE9]'
-                                    }`}
-                            >
-                                {label}
-                            </Link>
+                    <div className="xl:hidden border-t border-[#E8E4DE] py-3 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                        {sections.map(({ section, items }) => (
+                            <div key={section} className="pb-2">
+                                <p className="px-4 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#B8860B]">{section}</p>
+                                <div className="grid grid-cols-2 gap-1">
+                                    {items.map(({ href, label }) => (
+                                        <Link
+                                            key={href}
+                                            href={href}
+                                            onClick={() => setMenuOpen(false)}
+                                            className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive(href) ? 'bg-[#B8860B]/10 text-[#B8860B]' : 'text-[#5C5650] hover:bg-[#F2EFE9]'}`}
+                                        >
+                                            {label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
                         ))}
-                        {user && (
-                            <Link
-                                href="/groups"
-                                onClick={() => setMenuOpen(false)}
-                                className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith('/groups') ? 'bg-[#B8860B]/10 text-[#B8860B]' : 'text-[#5C5650] hover:bg-[#F2EFE9]'}`}
-                            >
-                                소그룹
-                            </Link>
-                        )}
                         {user && role === 'admin' && (
                             <Link href="/admin" onClick={() => setMenuOpen(false)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold ${pathname.startsWith('/admin') ? 'bg-indigo-100 text-indigo-700' : 'text-indigo-600 hover:bg-indigo-50'}`}>
