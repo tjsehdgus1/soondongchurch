@@ -49,27 +49,6 @@ body {
 }
 
 /* ─────────────────────────────────────────
-   Scroll animations (IntersectionObserver)
-───────────────────────────────────────── */
-.animate-on-scroll {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.animate-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Stagger delays for child items */
-.stagger-children > *:nth-child(1) { transition-delay: 0ms; }
-.stagger-children > *:nth-child(2) { transition-delay: 70ms; }
-.stagger-children > *:nth-child(3) { transition-delay: 140ms; }
-.stagger-children > *:nth-child(4) { transition-delay: 210ms; }
-.stagger-children > *:nth-child(5) { transition-delay: 280ms; }
-
-/* ─────────────────────────────────────────
    Motion (GSAP) — 초기 숨김은 JS가 켜졌고 동작 줄이기가 아닐 때만
    (<html class="js">는 layout.tsx 인라인 스크립트가 첫 페인트 전에 추가)
 ───────────────────────────────────────── */
@@ -83,6 +62,32 @@ body {
   to   { transform: scale(1.12); }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 히어로 두 번째 사진 교차 전환 */
+@keyframes hero-crossfade {
+  0%, 40%   { opacity: 0; }
+  50%, 90%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+
+/* 스크롤 유도 선 */
+@keyframes scroll-line {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  50%  { transform: scaleY(1); transform-origin: top; }
+  51%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* 홈 선교 맛보기 지구 점 무늬 흐름 */
+@keyframes globe-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 280px 0; }
+}
+
 /* 갤러리 띠 무한 흐름 */
 @keyframes marquee {
   from { transform: translateX(0); }
@@ -92,7 +97,7 @@ body {
 .marquee-track:hover { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track, .ken-burns { animation: none !important; }
+  .marquee-track, .ken-burns, .hero-crossfade, .scroll-line, .globe-drift { animation: none !important; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 

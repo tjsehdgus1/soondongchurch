@@ -4,6 +4,7 @@ import { Noto_Serif_KR } from 'next/font/google'
 import './globals.css'
 import SiteHeader from '@/components/site/SiteHeader'
 import SmoothScroll from '@/components/motion/SmoothScroll'
+import VideoModalProvider from '@/components/video/VideoModal'
 import Footer from '@/components/Footer'
 import { createClient } from '@/lib/supabase/server'
 
@@ -56,11 +57,13 @@ export default async function RootLayout({
           initialRole={initialRole}
           initialUserName={initialUserName}
         />
-        <ViewTransition>
-          <main className="min-h-screen pt-16 lg:pt-20">
-            {children}
-          </main>
-        </ViewTransition>
+        <VideoModalProvider>
+          <ViewTransition>
+            <main className="min-h-screen pt-16 lg:pt-20">
+              {children}
+            </main>
+          </ViewTransition>
+        </VideoModalProvider>
         <Footer />
       </body>
     </html>
