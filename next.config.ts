@@ -17,6 +17,10 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+    // 페이지 전환 크로스페이드 (layout.tsx의 <ViewTransition>)
+    experimental: {
+        viewTransition: true,
+    },
     turbopack: {
         resolveAlias: {
             canvas: path.resolve('./src/lib/empty-module.js'),
@@ -25,6 +29,13 @@ const nextConfig: NextConfig = {
     webpack: (config) => {
         config.resolve.alias.canvas = false
         return config
+    },
+    // 교회 소개 게시판 → 콘텐츠 페이지 (허브 소속 게시판은 /board/[slug] 페이지에서 허브 탭으로 이동)
+    async redirects() {
+        return [
+            { source: '/board/about', destination: '/about', permanent: true },
+            { source: '/board/about/:id', destination: '/about', permanent: true },
+        ]
     },
     async headers() {
         return [

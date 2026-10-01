@@ -13,10 +13,10 @@ function Badges({ post }: { post: BoardPostSummary }) {
     return (
         <>
             {post.is_pinned && (
-                <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mr-1.5 align-middle" style={{ background: '#B8860B1A', color: '#B8860B' }}>📌 고정</span>
+                <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mr-1.5 align-middle" style={{ background: '#B8860B1A', color: '#B8860B' }}>고정</span>
             )}
             {post.members_only && (
-                <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mr-1.5 align-middle bg-gray-100 text-gray-500">🔒 회원</span>
+                <span className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full mr-1.5 align-middle bg-gray-100 text-gray-500">회원</span>
             )}
             {post.category && (
                 <span className="text-sm font-medium mr-1.5" style={{ color: '#B8860B' }}>[{post.category}]</span>
@@ -29,7 +29,6 @@ export default function BoardPostList({ posts, kind, slugOf, boardNameOf }: Boar
     if (posts.length === 0) {
         return (
             <div className="text-center py-24 text-gray-400">
-                <p className="text-4xl mb-3">📋</p>
                 <p className="font-medium">등록된 게시글이 없습니다.</p>
             </div>
         )
@@ -52,7 +51,7 @@ export default function BoardPostList({ posts, kind, slugOf, boardNameOf }: Boar
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={thumb} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-4xl" style={{ color: '#C8C2B8' }}>✝</div>
+                                    <div className="w-full h-full flex items-center justify-center px-6 text-center text-[#8B7355]">{post.title}</div>
                                 )}
                                 {post.youtube_id && (
                                     <div className="absolute inset-0 flex items-center justify-center">

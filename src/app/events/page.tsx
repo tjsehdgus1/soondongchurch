@@ -46,7 +46,7 @@ export default async function EventsPage() {
         {/* 헤더 */}
         <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: '#B8860B' }}>Schedule</span>
+                <span className="text-base font-medium" style={{ color: '#8B7355' }}>소식·나눔</span>
                 <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>행사일정</h1>
                 <p className="mt-2" style={{ color: '#8B7355' }}>순천순동교회의 예배 및 다양한 행사 일정을 안내합니다.</p>
             </div>
@@ -115,7 +115,6 @@ export default async function EventsPage() {
                     </div>
                 ) : (
                     <div className="text-center py-16 bg-white rounded-2xl border" style={{ borderColor: '#E8E4DE' }}>
-                        <p className="text-4xl mb-3">📅</p>
                         <p style={{ color: '#8B7355' }}>예정된 일정이 없습니다.</p>
                     </div>
                 )}

@@ -10,6 +10,9 @@ export type Board = {
     group_id: number | null
     categories: string[]
     sort_order: number
+    // 소속 허브(탭 화면), null이면 메뉴에서 숨김
+    hub: string | null
+    tab_order: number
 }
 
 export type BoardPostSummary = {
@@ -27,9 +30,6 @@ export type BoardPostSummary = {
 
 export const POST_SUMMARY_COLUMNS =
     'id, board_id, title, author_name, category, youtube_id, thumbnail_url, is_pinned, members_only, created_at'
-
-// 상단 메뉴 순서 — boards.section 값과 일치해야 함
-export const SECTION_ORDER = ['교회소개', '말씀', '예배·소식', '전도회', '교회학교', '선교·교육', '찬양', '커뮤니티']
 
 export const PAGE_SIZE = 20
 

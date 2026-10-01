@@ -6,6 +6,7 @@
 소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
 설교 AI 자동요약·설교 관리 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
 설교 영상은 네이버 카페 이관으로 만든 **일반 게시판(유튜브 영상 첨부, AI 없음)**으로 운영한다 (`doc/cafe_migration_design.md`).
+2026-10 리디자인: 메뉴 5개(교회소개/예배·말씀/다음세대/선교·사역/소식·나눔), 관리자 수정 콘텐츠 페이지, 시네마틱 모션, 3D 지구본(선교). 히어로 빛 셰이더와 밝은 금색 강조는 사용자 요청으로 제거됨 — 되살리지 말 것 — 설계 `doc/specs/2026-10-01-site-redesign-design.md`, 계획 `doc/plans/2026-10-01-site-redesign.md`.
 
 ## 스택
 
@@ -19,20 +20,29 @@
 | Tiptap | 3.x (소그룹 게시글 에디터) |
 | React PDF | 10.x (주보 PDF 뷰어) |
 | Solapi | 5.x (SMS 인증) |
+| GSAP | 3.15 (ScrollTrigger, SplitText) + `@gsap/react` `useGSAP` |
+| Lenis | 1.3 (부드러운 스크롤) |
+| react-globe.gl / three | 2.38 / 0.186 (선교 지구본, `/mission`에서만 로드) |
+| 테스트 | `node:test` (`npm test`, Node 24 타입 스트리핑) |
 
 ## 디렉토리 구조
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                    # 홈 (hero, 예배, 행사, 공지)
-│   ├── layout.tsx                  # 루트 레이아웃 (Navbar/Footer 포함)
+│   ├── page.tsx                    # 홈 (히어로·예배·숫자·말씀·선교·소식·오시는길)
+│   ├── layout.tsx                  # 루트 레이아웃 (SiteHeader/Footer, SmoothScroll, VideoModal, ViewTransition)
+│   ├── about/                      # 교회 소개 · history(걸어온 길) · people(섬기는 분들)
+│   ├── worship/ directions/        # 예배 안내 · 오시는 길 (콘텐츠 페이지)
+│   ├── sermons/ praise/ next-gen/ fellowship/ discipleship/  # 허브 (게시판 탭 묶음)
+│   ├── mission/                    # 3D 지구본 + 선교 허브
 │   ├── admin/
 │   │   ├── layout.tsx              # 관리자 가드 + AdminSidebar
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 교인 관리 (차단/권한 변경)
-│   │   ├── boards/page.tsx         # 게시판 관리 (추가·순서·글쓰기 권한·부서)
+│   │   ├── boards/page.tsx         # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
+│   │   ├── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
 │   │   ├── groups/page.tsx
@@ -47,7 +57,9 @@ src/
 │   │   │   ├── bulletins/presign/route.ts # Signed URL 발급
 │   │   │   ├── bulletins/[id]/route.ts    # DELETE
 │   │   │   ├── members/route.ts           # GET(목록), PATCH(수정)
-│   │   │   └── boards/route.ts            # 게시판 CRUD
+│   │   │   ├── boards/route.ts            # 게시판 CRUD
+│   │   │   ├── page-blocks|timeline|people|missions/route.ts  # createAdminCrud 생성기
+│   │   │   └── upload/route.ts            # 콘텐츠 이미지 (1920px webp, 비공개 옵션)
 │   │   ├── board-images/[...path]/route.ts # 회원 전용 글 이미지 → 서명 URL 리다이렉트
 │   │   ├── auth/
 │   │   │   ├── sms/send/route.ts
@@ -61,16 +73,26 @@ src/
 │   ├── groups/[id]/posts/[postId]/ # 소그룹 게시글 (detail, edit)
 │   └── notices/[id]/page.tsx
 ├── components/
-│   ├── Navbar.tsx                  # 고정 헤더, 섹션별 드롭다운 (boards 테이블 기반), auth 상태 동기화
+│   ├── site/                       # SiteHeader(메가 메뉴), PageHero, RichText, KakaoRoughMap
+│   ├── motion/                     # SmoothScroll(Lenis), Reveal, SplitHeading, CountUp, MagneticButton
+│   ├── home/                       # 홈 섹션 7개
+│   ├── hub/                        # HubPage, HubSection, HubTabs
+│   ├── video/                      # VideoModal(전역 provider), VideoCard
+│   ├── three/                      # MissionGlobe, MissionMapFallback
+│   ├── admin/                      # AdminRecordEditor(설정형 편집기), ImageUploadField
 │   ├── BoardPostList.tsx           # 게시글 목록 (list/card)
 │   ├── BoardPostForm.tsx           # 게시글 작성·수정
 │   ├── Footer.tsx
-│   ├── HeroSlider.tsx
 │   ├── PdfViewer.tsx               # react-pdf, resize 지원
 │   └── TiptapEditor.tsx            # 이미지 붙여넣기 + 업로드
 ├── lib/
 │   ├── admin.ts                    # getServiceClient, verifyAdmin (공통)
-│   ├── boards.ts                   # 게시판 타입, 메뉴 섹션 순서(SECTION_ORDER), 유튜브 파싱, KST 날짜
+│   ├── boards.ts                   # 게시판 타입, 유튜브 파싱, KST 날짜
+│   ├── hubs.ts / site-menu.ts      # 허브 정의, 5개 메뉴 트리
+│   ├── content.ts                  # page_blocks·timeline·people·mission_fields 조회
+│   ├── worship.ts                  # 예배 시간표 + nextWorship (KST)
+│   ├── motion.ts                   # GSAP 등록, 동작 줄이기·포인터 판별
+│   ├── fields.ts / admin-crud.ts   # 관리자 입력 검증, 콘텐츠 CRUD 라우트 생성기
 │   └── supabase/
 │       ├── server.ts               # SSR 쿠키 클라이언트
 │       └── client.ts               # 브라우저 클라이언트
@@ -117,11 +139,17 @@ export async function GET() {
 | created_at | timestamp | |
 
 ### boards / board_posts (게시판)
-- boards: slug, name, section(상단 메뉴 그룹), kind(`list`|`card`), write_level(`admin`|`group`|`member`), group_id(부서 = groups), categories(말머리), sort_order
+- boards: slug, name, hub(허브 키, null=숨김), tab_order, kind(`list`|`card`), write_level(`admin`|`group`|`member`), group_id(부서 = groups), categories(말머리). section은 이전 메뉴용 필수 컬럼(hub 값으로 채움)
 - board_posts: board_id, author_id/author_name(트리거가 설정), category, title, content(HTML), youtube_id, thumbnail_url, is_pinned, members_only, cafe_article_id(카페 원본)
 - 글쓰기 권한은 DB 함수 `can_write_board(bid)`, 회원 전용 글은 `members_only` + RLS
 - 이미지: `board-images`(공개), `board-private`(회원 전용 글, `/api/board-images/...`로만 접근)
-- 새 게시판 섹션을 추가하면 `src/lib/boards.ts`의 `SECTION_ORDER`에도 추가
+- 허브 소속 게시판의 `/board/[slug]` 목록은 허브 탭(`/sermons?tab=...`)으로 리다이렉트, 글 상세는 `/board/[slug]/[id]` 유지
+
+### 콘텐츠 (관리자 수정, 쓰기는 service role 전용)
+- page_blocks(key PK: `home.hero`, `about.greeting`, `about.vision`, `worship.intro`, `nextgen.intro`, `mission.intro`, `fellowship.intro`, `discipleship.intro`, `directions.guide`): title, subtitle, body(HTML), image_url
+- timeline_items: year, date_label, title, description, image_url, sort_order
+- people: category, name, role, period, photo_url, members_only(교인 사진 — RLS로 회원만), sort_order
+- mission_fields: country, region, lat, lng, missionaries, summary, image_url, board_slug, category
 
 ### bulletins
 | 컬럼 | 타입 |
@@ -226,6 +254,15 @@ const [width, setWidth] = useState(800)
 useEffect(() => { setWidth(window.innerWidth) }, [])
 ```
 
+### 모션·3D 규칙
+- 등장 애니메이션은 `Reveal` / `SplitHeading` 사용. 초기 숨김은 CSS `.js [data-reveal]`(동작 줄이기면 미적용) → JS 미실행 시에도 내용 노출
+- GSAP는 `registerGsap()` 후 `useGSAP`(자동 정리) 안에서만, 스크롤 연동 고정은 `gsap.matchMedia('(min-width:1024px) and (prefers-reduced-motion: no-preference)')`
+- `prefers-reduced-motion: reduce` → Lenis·지구본 자동회전·마퀴 모두 정지 (CSS 클래스 `ken-burns`, `marquee-track` 등은 globals.css에서 일괄 정지)
+- 마그네틱 버튼 등 포인터 효과는 `(pointer: fine)`에서만
+- three.js(지구본)는 `next/dynamic` + `ssr:false`로 `/mission`에서만. 국가 경계 `public/geo/countries-110m.json`(h3 오류 나는 면적 0 고리 제거본)
+- 히어로처럼 헤더 아래까지 덮는 섹션은 `data-hero` + `-mt-16 lg:-mt-20` (헤더가 투명 처리)
+- 헤더 transform 안에 `fixed` 요소를 두지 말 것 (모바일 메뉴는 header 밖 형제로)
+
 ### Supabase 브라우저 클라이언트
 ```typescript
 // 컴포넌트 최상단에 직접 호출 (모듈 레벨 싱글톤 금지)
@@ -252,8 +289,10 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 
 ## DB 변경 적용
 
-스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 **대시보드 SQL Editor에서 직접 실행**.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` 순서.
+스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` 순서.
+
+리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)
 
 카페 이관: `node --env-file=.env.local scripts/cafe-import.mjs [--dry-run]` (원본 `scsdc-cafe-export/`는 gitignore — 커밋 금지)
 

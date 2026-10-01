@@ -10,6 +10,10 @@ const adminNav = [
   { href: '/admin/events', label: '행사일정 관리', icon: '📅' },
   { href: '/admin/notices', label: '공지사항 관리', icon: '📢' },
   { href: '/admin/boards', label: '게시판 관리', icon: '🗂️' },
+  { href: '/admin/pages', label: '페이지 문구', icon: '✏️' },
+  { href: '/admin/history', label: '연혁', icon: '🕰️' },
+  { href: '/admin/people', label: '섬기는 분들', icon: '🙏' },
+  { href: '/admin/missions', label: '선교지', icon: '🌏' },
   { href: '/admin/groups', label: '소그룹 관리', icon: '🏘️' },
   { href: '/admin/members', label: '교인 관리', icon: '👥' },
 ]

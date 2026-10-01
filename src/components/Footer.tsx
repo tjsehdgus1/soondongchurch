@@ -1,83 +1,57 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { buildSiteMenu } from '@/lib/site-menu'
+
+const YOUTUBE_URL = 'https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C'
 
 export default function Footer() {
+    const menu = buildSiteMenu({ loggedIn: false, isAdmin: false })
+
     return (
         <footer className="bg-[#2D2A26] text-[#A09890]">
-            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Church Info */}
-                    <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-9 h-9 rounded-md overflow-hidden flex-shrink-0">
-                                <Image src="/images/logo.svg" alt="순천순동교회 로고" width={36} height={36} className="w-full h-full object-cover" />
-                            </div>
-                            <span className="font-bold text-[#FAF8F5] text-lg" style={{ fontFamily: 'var(--font-serif)' }}>순천순동교회</span>
-                        </div>
-                        <p className="text-sm leading-relaxed">
-                            하나님의 은혜 안에서 함께 성장하고<br />
-                            사랑을 나누는 교회입니다.
-                        </p>
-                    </div>
-
-                    {/* Quick Links */}
-                    <div>
-                        <h3 className="text-[#FAF8F5] font-semibold mb-4">빠른 링크</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li><Link href="/" className="hover:text-[#FAF8F5] transition-colors">홈</Link></li>
-                            <li><Link href="/events" className="hover:text-[#FAF8F5] transition-colors">예배/행사 일정</Link></li>
-                            <li><Link href="/notices" className="hover:text-[#FAF8F5] transition-colors">공지사항</Link></li>
-                            <li><Link href="/auth/register" className="hover:text-[#FAF8F5] transition-colors">회원가입</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Contact */}
-                    <div>
-                        <h3 className="text-[#FAF8F5] font-semibold mb-4">연락처</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li className="flex items-start gap-2">
-                                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span>전라남도 순천시 남신월 4길 3-13</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                                <span>061-721-6707 (FAX: 061-725-3927)</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span>담임목사 김광선 목사</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span>합동목사 노상춘 목사</span>
-                            </li>
-                        </ul>
-
-                        {/* Social Links */}
-                        <div className="mt-8 flex items-center gap-4">
-                            <Link href="https://www.youtube.com/@%EC%88%9C%EC%B2%9C%EC%88%9C%EB%8F%99%EA%B5%90%ED%9A%8C"
-                                target="_blank" rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-[#3D3835] flex items-center justify-center text-[#A09890] hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                                aria-label="순천순동교회 유튜브 채널">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.086 0 12 0 12s0 3.914.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.872.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.914 24 12 24 12s0-3.914-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                                </svg>
-                            </Link>
-                        </div>
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 pb-10">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 pb-12 border-b border-white/10">
+                    <p className="text-3xl sm:text-4xl lg:text-5xl leading-tight text-[#FAF8F5]" style={{ fontFamily: 'var(--font-serif)' }}>
+                        하나님이 기뻐하시는<br />
+                        <span className="text-white/60">행복한 교회</span>
+                    </p>
+                    <div className="flex gap-3">
+                        <Link href="/worship" className="px-6 py-3 rounded-full bg-white text-[#2D2A26] text-sm hover:bg-[#FAF8F5] transition">예배 안내</Link>
+                        <Link href="/directions" className="px-6 py-3 rounded-full border border-white/20 text-[#FAF8F5] text-sm hover:border-white/50 transition">오시는 길</Link>
                     </div>
                 </div>
 
-                <div className="mt-10 pt-6 border-t border-[#4A4540] text-center text-xs text-[#6B6560]">
-                    © {new Date().getFullYear()} 순천순동교회. All rights reserved.
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 py-12">
+                    <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3 text-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Image src="/images/logo.svg" alt="" width={32} height={32} className="rounded-md" />
+                            <span className="font-bold text-[#FAF8F5]" style={{ fontFamily: 'var(--font-serif)' }}>순천순동교회</span>
+                        </div>
+                        <p>전라남도 순천시 남신월 4길 3-13</p>
+                        <p>Tel 061-721-6707 · Fax 061-725-3927</p>
+                        <p>담임목사 김광선 · 협동목사 노상춘</p>
+                        <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 mt-2 text-[#FAF8F5] hover:text-red-400 transition">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z" /></svg>
+                            유튜브 채널
+                        </a>
+                    </div>
+                    {menu.map((section) => (
+                        <div key={section.label}>
+                            <p className="text-xs font-semibold tracking-[0.2em] text-white/60 mb-4">{section.label}</p>
+                            <ul className="space-y-2.5 text-sm">
+                                {section.items.map((item) => (
+                                    <li key={item.href}>
+                                        <Link href={item.href} className="hover:text-[#FAF8F5] transition-colors">{item.label}</Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="pt-8 border-t border-white/10 text-xs text-[#6B6560]">
+                    <p>© {new Date().getFullYear()} 순천순동교회. All rights reserved.</p>
                 </div>
             </div>
         </footer>

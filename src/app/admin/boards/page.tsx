@@ -1,29 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { type Board, SECTION_ORDER } from '@/lib/boards'
+import type { Board } from '@/lib/boards'
+import { HUBS, type HubKey } from '@/lib/hubs'
 
 type Group = { id: number, name: string }
-type Draft = Omit<Board, 'id' | 'categories'> & { categories: string }
+type Draft = Omit<Board, 'id' | 'categories' | 'section'> & { categories: string, hub: HubKey | null, tab_order: number }
+type BoardRow = Board & { hub: HubKey | null, tab_order: number }
 
 const LEVEL_LABEL = { admin: '관리자만', group: '부서 멤버', member: '로그인 회원' }
 const KIND_LABEL = { list: '목록형', card: '카드형(사진·영상)' }
 
 const emptyDraft: Draft = {
-  slug: '', name: '', section: SECTION_ORDER[0], kind: 'list', write_level: 'admin',
+  slug: '', name: '', hub: 'community', tab_order: 99, kind: 'list', write_level: 'admin',
   group_id: null, categories: '', sort_order: 100,
 }
 
 function toPayload(d: Draft) {
   return {
-    name: d.name, section: d.section, kind: d.kind, write_level: d.write_level,
+    name: d.name, hub: d.hub, tab_order: Number(d.tab_order) || 0, kind: d.kind, write_level: d.write_level,
     group_id: d.group_id, sort_order: Number(d.sort_order) || 0,
     categories: d.categories.split(',').map((c) => c.trim()).filter(Boolean),
   }
 }
 
 export default function AdminBoardsPage() {
-  const [boards, setBoards] = useState<Board[]>([])
+  const [boards, setBoards] = useState<BoardRow[]>([])
   const [drafts, setDrafts] = useState<Record<number, Draft>>({})
   const [groups, setGroups] = useState<Group[]>([])
   const [postCounts, setPostCounts] = useState<Record<number, number>>({})
@@ -40,7 +42,7 @@ export default function AdminBoardsPage() {
       setBoards(data.boards)
       setGroups(data.groups)
       setPostCounts(data.postCounts)
-      setDrafts(Object.fromEntries((data.boards as Board[]).map((b) => [b.id, { ...b, categories: b.categories.join(', ') }])))
+      setDrafts(Object.fromEntries((data.boards as BoardRow[]).map((b) => [b.id, { ...b, categories: b.categories.join(', ') }])))
     } catch (e) {
       alert(e instanceof Error ? e.message : '목록 조회 실패')
     } finally {
@@ -89,7 +91,7 @@ export default function AdminBoardsPage() {
     }
   }
 
-  const handleDelete = async (board: Board) => {
+  const handleDelete = async (board: BoardRow) => {
     if (!confirm(`'${board.name}' 게시판을 삭제하시겠습니까?`)) return
     try {
       await request(`/api/admin/boards?id=${board.id}`, 'DELETE')
@@ -106,10 +108,14 @@ export default function AdminBoardsPage() {
       <label className="text-xs text-gray-500">이름
         <input className={fieldClass} value={d.name} onChange={(e) => onChange({ name: e.target.value })} />
       </label>
-      <label className="text-xs text-gray-500">메뉴 그룹
-        <select className={fieldClass} value={d.section} onChange={(e) => onChange({ section: e.target.value })}>
-          {SECTION_ORDER.map((s) => <option key={s} value={s}>{s}</option>)}
+      <label className="text-xs text-gray-500">메뉴 위치
+        <select className={fieldClass} value={d.hub ?? ''} onChange={(e) => onChange({ hub: (e.target.value || null) as HubKey | null })}>
+          {(Object.keys(HUBS) as HubKey[]).map((k) => <option key={k} value={k}>{HUBS[k].title}</option>)}
+          <option value="">숨김</option>
         </select>
+      </label>
+      <label className="text-xs text-gray-500">탭 순서
+        <input type="number" className={fieldClass} value={d.tab_order} onChange={(e) => onChange({ tab_order: Number(e.target.value) })} />
       </label>
       <label className="text-xs text-gray-500">목록 형태
         <select className={fieldClass} value={d.kind} onChange={(e) => onChange({ kind: e.target.value as Draft['kind'] })}>
@@ -131,9 +137,6 @@ export default function AdminBoardsPage() {
       <label className="text-xs text-gray-500">말머리 (쉼표 구분)
         <input className={fieldClass} value={d.categories} onChange={(e) => onChange({ categories: e.target.value })} />
       </label>
-      <label className="text-xs text-gray-500">순서
-        <input type="number" className={fieldClass} value={d.sort_order} onChange={(e) => onChange({ sort_order: Number(e.target.value) })} />
-      </label>
     </>
   )
 
@@ -142,7 +145,7 @@ export default function AdminBoardsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">게시판 관리</h1>
         <p className="mt-1 text-sm text-gray-500">
-          상단 메뉴에 표시되는 게시판입니다. &lsquo;부서 멤버&rsquo; 권한은 지정한 소그룹 멤버와 관리자만 글을 쓸 수 있습니다 (부서 멤버는 소그룹 관리에서 지정).
+          게시판이 어느 메뉴(허브)의 몇 번째 탭에 나올지 정합니다. &lsquo;부서 멤버&rsquo; 권한은 지정한 소그룹 멤버와 관리자만 글을 쓸 수 있습니다 (부서 멤버는 소그룹 관리에서 지정).
         </p>
       </div>
 
