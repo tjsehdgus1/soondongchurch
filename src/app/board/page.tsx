@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import PageHero from '@/components/site/PageHero'
 import BoardPostList from '@/components/BoardPostList'
 import Pagination from '@/components/Pagination'
 import { type BoardPostSummary, PAGE_SIZE, POST_SUMMARY_COLUMNS } from '@/lib/boards'
@@ -30,12 +31,7 @@ export default async function AllPostsPage({ searchParams }: { searchParams: Pro
 
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
-            <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
-                <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>전체글</h1>
-                    <p className="mt-2" style={{ color: '#8B7355' }}>모든 게시판의 최신 글을 모아 봅니다.</p>
-                </div>
-            </div>
+            <PageHero eyebrow="소식·나눔" title="전체글" description="모든 게시판의 최신 글을 모아 봅니다." />
 
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <BoardPostList

@@ -16,7 +16,8 @@
 
 - 너비: `max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10`, 섹션 간격 `py-16 lg:py-24` (그 이상 키우지 않음)
 - 글자 크기: Tailwind 기본보다 한 단계 큼 (`globals.css` @theme — xs 13, sm 15, base 17, lg 19px). 본문·메뉴는 17px 이상
-- 섹션 머리: 세리프 대제목(`SplitHeading`, `text-4xl sm:text-5xl`)만. 하위 페이지 상단은 한글 메뉴 위치(예: `교회소개`)를 작은 글씨로
+- 섹션 머리: 세리프 대제목(`SplitHeading`, `text-4xl sm:text-5xl`)만
+- 하위 페이지 상단: `PageHero` 얇은 사진 띠(모바일 약 200px·데스크톱 약 260px) — 메뉴 위치·제목·한 줄 소개만. 소개 문단을 따로 크게 두지 않음, 내용(탭·목록)이 바로 이어지게
 
 ### 쓰지 않는 것 (2026-10 "슬롭 UI" 점검 — news.hada.io/topic?id=34370)
 - 장식용 영문 라벨(WORSHIP, MISSION FIELDS, Since 1946 …) — 한글 정보가 아니면 넣지 않음

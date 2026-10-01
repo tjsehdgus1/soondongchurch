@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageHero from '@/components/site/PageHero'
 import { createPublicClient } from '@/lib/supabase/public'
 
 export const revalidate = 60 // 1분 캐시
@@ -27,14 +28,7 @@ export default async function NoticesPage() {
 
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
-            {/* 헤더 */}
-            <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
-                <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <span className="text-base font-medium" style={{ color: '#8B7355' }}>소식·나눔</span>
-                    <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>공지사항</h1>
-                    <p className="mt-2" style={{ color: '#8B7355' }}>순천순동교회의 새로운 소식을 확인하세요.</p>
-                </div>
-            </div>
+            <PageHero eyebrow="소식·나눔" title="공지사항" description="순천순동교회의 새로운 소식을 확인하세요." />
 
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {notices?.length === 0 ? (

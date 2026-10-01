@@ -46,9 +46,9 @@ export default async function HubSection({ hub, tab, page: pageParam }: HubSecti
     const tabHref = (slug: string, p = 1) => `${path}?tab=${slug}${p > 1 ? `&page=${p}` : ''}`
 
     return (
-        <section className="py-12 lg:py-16 bg-[#FAF8F5]">
+        <section className="py-8 lg:py-12 bg-[#FAF8F5]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                     <HubTabs
                         label={`${title} 게시판`}
                         active={board.slug}
@@ -63,10 +63,7 @@ export default async function HubSection({ hub, tab, page: pageParam }: HubSecti
 
                 <div id="hub-panel" role="tabpanel" aria-label={board.name}>
                     {list.length === 0 ? (
-                        <div className="py-20 text-center rounded-3xl border border-dashed border-[#C8C2B8]">
-                            <p className="text-2xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>준비 중입니다</p>
-                            <p className="mt-3 text-sm text-[#8B7355]">{board.name} 소식이 곧 올라옵니다.</p>
-                        </div>
+                        <p className="py-10 text-center text-[#8B7355] border-y border-[#E8E4DE]">아직 올라온 {board.name} 소식이 없습니다.</p>
                     ) : kind === 'video' ? (
                         // key로 탭이 바뀔 때마다 등장 애니메이션 재생
                         <Reveal key={`${board.slug}-${page}`} stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
