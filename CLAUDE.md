@@ -4,7 +4,8 @@
 
 순천순동교회 공식 홈페이지. Next.js 16 App Router + Supabase 기반.
 소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
-설교 자동요약·설교 게시 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
+설교 AI 자동요약·설교 관리 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
+설교 영상은 네이버 카페 이관으로 만든 **일반 게시판(유튜브 영상 첨부, AI 없음)**으로 운영한다 (`doc/cafe_migration_design.md`).
 
 ## 스택
 
@@ -31,6 +32,7 @@ src/
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 교인 관리 (차단/권한 변경)
+│   │   ├── boards/page.tsx         # 게시판 관리 (추가·순서·글쓰기 권한·부서)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
 │   │   ├── groups/page.tsx
@@ -44,25 +46,31 @@ src/
 │   │   │   ├── bulletins/route.ts         # GET(목록), POST(메타저장)
 │   │   │   ├── bulletins/presign/route.ts # Signed URL 발급
 │   │   │   ├── bulletins/[id]/route.ts    # DELETE
-│   │   │   └── members/route.ts           # GET(목록), PATCH(수정)
+│   │   │   ├── members/route.ts           # GET(목록), PATCH(수정)
+│   │   │   └── boards/route.ts            # 게시판 CRUD
+│   │   ├── board-images/[...path]/route.ts # 회원 전용 글 이미지 → 서명 URL 리다이렉트
 │   │   ├── auth/
 │   │   │   ├── sms/send/route.ts
 │   │   │   ├── sms/verify/route.ts
 │   │   │   ├── register/route.ts   # SMS 인증 확인 후 계정 생성 (service role)
 │   │   │   └── logout/route.ts
 │   │   └── setup/migrate/route.ts  # DB 초기화 (MIGRATE_SECRET 필요)
+│   ├── board/                      # 게시판: 전체글, [slug] 목록, [slug]/[id] 상세, new, edit
 │   ├── bulletins/[id]/page.tsx     # PdfViewer
 │   ├── events/page.tsx
 │   ├── groups/[id]/posts/[postId]/ # 소그룹 게시글 (detail, edit)
 │   └── notices/[id]/page.tsx
 ├── components/
-│   ├── Navbar.tsx                  # 고정 헤더, auth 상태 동기화
+│   ├── Navbar.tsx                  # 고정 헤더, 섹션별 드롭다운 (boards 테이블 기반), auth 상태 동기화
+│   ├── BoardPostList.tsx           # 게시글 목록 (list/card)
+│   ├── BoardPostForm.tsx           # 게시글 작성·수정
 │   ├── Footer.tsx
 │   ├── HeroSlider.tsx
 │   ├── PdfViewer.tsx               # react-pdf, resize 지원
 │   └── TiptapEditor.tsx            # 이미지 붙여넣기 + 업로드
 ├── lib/
 │   ├── admin.ts                    # getServiceClient, verifyAdmin (공통)
+│   ├── boards.ts                   # 게시판 타입, 메뉴 섹션 순서(SECTION_ORDER), 유튜브 파싱, KST 날짜
 │   └── supabase/
 │       ├── server.ts               # SSR 쿠키 클라이언트
 │       └── client.ts               # 브라우저 클라이언트
@@ -108,6 +116,13 @@ export async function GET() {
 | is_blocked | boolean | true 시 접근 차단 |
 | created_at | timestamp | |
 
+### boards / board_posts (게시판)
+- boards: slug, name, section(상단 메뉴 그룹), kind(`list`|`card`), write_level(`admin`|`group`|`member`), group_id(부서 = groups), categories(말머리), sort_order
+- board_posts: board_id, author_id/author_name(트리거가 설정), category, title, content(HTML), youtube_id, thumbnail_url, is_pinned, members_only, cafe_article_id(카페 원본)
+- 글쓰기 권한은 DB 함수 `can_write_board(bid)`, 회원 전용 글은 `members_only` + RLS
+- 이미지: `board-images`(공개), `board-private`(회원 전용 글, `/api/board-images/...`로만 접근)
+- 새 게시판 섹션을 추가하면 `src/lib/boards.ts`의 `SECTION_ORDER`에도 추가
+
 ### bulletins
 | 컬럼 | 타입 |
 |------|------|
@@ -132,6 +147,7 @@ export async function GET() {
 ### Storage Buckets
 - `bulletins/` — PDF 주보, 최대 20MB
 - `group-images/` — 소그룹 게시글 이미지, 최대 10MB
+- `board-images/` — 게시판 이미지(공개), `board-private/` — 회원 전용 글 이미지(비공개)
 
 ---
 
@@ -237,7 +253,9 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ## DB 변경 적용
 
 스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 **대시보드 SQL Editor에서 직접 실행**.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` 순서.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` 순서.
+
+카페 이관: `node --env-file=.env.local scripts/cafe-import.mjs [--dry-run]` (원본 `scsdc-cafe-export/`는 gitignore — 커밋 금지)
 
 ## 관리자 계정 생성 방법
 

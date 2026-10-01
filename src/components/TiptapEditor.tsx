@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
+import { TableKit } from '@tiptap/extension-table'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -44,15 +45,19 @@ interface TiptapEditorProps {
   content: string
   onChange: (html: string) => void
   onSizeError?: (exceeded: boolean) => void
+  // 붙여넣은 이미지를 올릴 Storage 버킷
+  bucket?: string
 }
 
-export default function TiptapEditor({ content, onChange, onSizeError }: TiptapEditorProps) {
+export default function TiptapEditor({ content, onChange, onSizeError, bucket = 'group-images' }: TiptapEditorProps) {
   const [uploading, setUploading] = useState(false)
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Image.configure({ inline: false, allowBase64: false }),
+      // 이관된 카페 글의 표 보존
+      TableKit,
     ],
     content,
     editorProps: {
@@ -80,7 +85,7 @@ export default function TiptapEditor({ content, onChange, onSizeError }: TiptapE
               const blob = await compressImage(file)
               const path = `${user.id}/${Date.now()}.jpg`
               const { error: uploadError } = await supabase.storage
-                .from('group-images')
+                .from(bucket)
                 .upload(path, blob, { contentType: 'image/jpeg' })
 
               if (uploadError) {
@@ -88,7 +93,7 @@ export default function TiptapEditor({ content, onChange, onSizeError }: TiptapE
                 return
               }
 
-              const { data: urlData } = supabase.storage.from('group-images').getPublicUrl(path)
+              const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path)
               view.dispatch(
                 view.state.tr.replaceSelectionWith(
                   view.state.schema.nodes.paragraph.create()

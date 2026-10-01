@@ -9,6 +9,7 @@ const adminNav = [
   { href: '/admin/bulletins', label: '주간예배일정 관리', icon: '📄' },
   { href: '/admin/events', label: '행사일정 관리', icon: '📅' },
   { href: '/admin/notices', label: '공지사항 관리', icon: '📢' },
+  { href: '/admin/boards', label: '게시판 관리', icon: '🗂️' },
   { href: '/admin/groups', label: '소그룹 관리', icon: '🏘️' },
   { href: '/admin/members', label: '교인 관리', icon: '👥' },
 ]
