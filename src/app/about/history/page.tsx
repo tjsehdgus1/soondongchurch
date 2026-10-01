@@ -41,7 +41,7 @@ export default async function HistoryPage() {
                     <div className="space-y-2">
                         {[...byYear.entries()].map(([year, list]: [number, TimelineItem[]]) => (
                             <Reveal key={year} className="grid grid-cols-[72px_1fr] sm:grid-cols-[140px_1fr] gap-6 border-t border-[#E8E4DE] pt-6 pb-4">
-                                <p className="text-2xl sm:text-4xl font-bold text-[#B8860B] tabular-nums sm:sticky sm:top-28 self-start" style={{ fontFamily: 'var(--font-serif)' }}>{year}</p>
+                                <p className="text-2xl sm:text-4xl font-bold text-[#2D2A26] tabular-nums sm:sticky sm:top-28 self-start" style={{ fontFamily: 'var(--font-serif)' }}>{year}</p>
                                 <ul className="space-y-5">
                                     {list.map((item) => (
                                         <li key={item.id} className="grid sm:grid-cols-[90px_1fr] gap-1 sm:gap-4">

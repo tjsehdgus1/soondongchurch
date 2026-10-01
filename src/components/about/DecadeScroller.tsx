@@ -45,10 +45,10 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
     }, { scope: sectionRef })
 
     return (
-        <section ref={sectionRef} className="relative bg-[#1F1D1A] text-white overflow-hidden lg:h-screen">
+        <section ref={sectionRef} className="relative bg-[#2D2A26] text-white overflow-hidden lg:h-screen">
             <div ref={trackRef} className="flex h-full overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none">
                 <div className="shrink-0 w-[85vw] lg:w-[45vw] flex flex-col justify-center px-6 lg:px-16 py-20 snap-start">
-                    <p className="text-xs tracking-[0.35em] uppercase text-[#D4A843] mb-6">Chapters</p>
+                    <p className="text-xs tracking-[0.35em] uppercase text-white/60 mb-6">Chapters</p>
                     <p className="text-4xl lg:text-6xl font-bold leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
                         {chapters[0]?.decade}년대부터<br />오늘까지
                     </p>
@@ -57,14 +57,14 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
                 </div>
                 {chapters.map((c) => (
                     <article key={c.decade} className="shrink-0 w-[85vw] sm:w-[60vw] lg:w-[34vw] border-l border-white/10 px-6 lg:px-12 py-20 flex flex-col justify-center snap-start">
-                        <p className="text-7xl lg:text-[9rem] leading-none font-bold text-[#E9C46A]/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
+                        <p className="text-7xl lg:text-[9rem] leading-none font-bold text-white/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
                             {c.decade}<span className="text-4xl lg:text-6xl">s</span>
                         </p>
                         <p className="mt-4 text-xs tracking-[0.3em] text-white/50">{c.count}개의 기록</p>
                         <ul className="mt-8 space-y-4">
                             {c.highlights.map((h, i) => (
                                 <li key={i} className="flex gap-4 text-sm lg:text-base leading-relaxed text-white/80">
-                                    <span className="shrink-0 font-semibold text-[#D4A843] tabular-nums">{h.year}</span>
+                                    <span className="shrink-0 font-semibold text-white/60 tabular-nums">{h.year}</span>
                                     <span className="line-clamp-3">{h.title}</span>
                                 </li>
                             ))}
@@ -74,7 +74,7 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
                 <div className="shrink-0 w-[10vw] hidden lg:block" />
             </div>
             <div className="hidden lg:block absolute bottom-10 left-16 right-16 h-px bg-white/15">
-                <div ref={progressRef} className="h-full bg-[#D4A843] origin-left" style={{ transform: 'scaleX(0)' }} />
+                <div ref={progressRef} className="h-full bg-white origin-left" style={{ transform: 'scaleX(0)' }} />
             </div>
         </section>
     )

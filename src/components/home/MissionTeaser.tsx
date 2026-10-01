@@ -27,28 +27,28 @@ export default function MissionTeaser({ fields }: { fields: MissionField[] }) {
                         ))}
                     </Reveal>
                     <Reveal className="mt-10">
-                        <MagneticButton href="/mission" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#2D2A26] text-white text-sm font-semibold hover:bg-[#1F1D1A] transition-colors">
+                        <MagneticButton href="/mission" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#2D2A26] text-white text-sm font-semibold hover:bg-black transition-colors">
                             선교 이야기 보기 →
                         </MagneticButton>
                     </Reveal>
                 </div>
 
                 <Reveal variant="mask" className="relative aspect-square max-w-[560px] w-full mx-auto">
-                    <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_30%,#3a352f,#1F1D1A_70%)] shadow-[0_0_120px_rgba(212,168,67,0.35)]" />
+                    <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_30%,#3a352f,#2D2A26_70%)] shadow-[0_40px_80px_-30px_rgba(45,42,38,0.6)]" />
                     <div
                         aria-hidden="true"
                         className="globe-drift absolute inset-0 rounded-full opacity-70"
                         style={{
-                            backgroundImage: 'radial-gradient(circle, rgba(233,196,106,0.75) 1.2px, transparent 1.8px)',
+                            backgroundImage: 'radial-gradient(circle, rgba(250,248,245,0.55) 1.2px, transparent 1.8px)',
                             backgroundSize: '14px 14px',
                             maskImage: 'radial-gradient(circle at 40% 40%, black 30%, transparent 70%)',
                             WebkitMaskImage: 'radial-gradient(circle at 40% 40%, black 30%, transparent 70%)',
                             animation: 'globe-drift 40s linear infinite',
                         }}
                     />
-                    <div className="absolute inset-0 rounded-full ring-1 ring-[#E9C46A]/30" />
+                    <div className="absolute inset-0 rounded-full ring-1 ring-white/30" />
                     <p className="absolute bottom-[12%] left-1/2 -translate-x-1/2 text-center text-white">
-                        <span className="block text-6xl font-bold text-[#E9C46A]" style={{ fontFamily: 'var(--font-serif)' }}>{fields.length}</span>
+                        <span className="block text-6xl font-bold text-white" style={{ fontFamily: 'var(--font-serif)' }}>{fields.length}</span>
                         <span className="text-xs tracking-[0.3em] text-white/60">MISSION FIELDS</span>
                     </p>
                 </Reveal>

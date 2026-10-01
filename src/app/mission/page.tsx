@@ -41,8 +41,8 @@ export default async function MissionPage({ searchParams }: { searchParams: HubS
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={f.image_url} alt="" loading="lazy" className="w-full aspect-[4/3] object-cover" />
                                 ) : (
-                                    <div className="aspect-[4/3] bg-[radial-gradient(circle_at_30%_30%,#3a352f,#1F1D1A)] flex items-end p-6">
-                                        <span className="text-5xl font-bold text-[#E9C46A]/80" style={{ fontFamily: 'var(--font-serif)' }}>{f.country.slice(0, 2)}</span>
+                                    <div className="aspect-[4/3] bg-[radial-gradient(circle_at_30%_30%,#3a352f,#2D2A26)] flex items-end p-6">
+                                        <span className="text-5xl font-bold text-white/80" style={{ fontFamily: 'var(--font-serif)' }}>{f.country.slice(0, 2)}</span>
                                     </div>
                                 )}
                                 <div className="p-6">

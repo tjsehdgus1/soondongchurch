@@ -55,7 +55,7 @@ export default async function HubSection({ hub, tab, page: pageParam }: HubSecti
                         tabs={tabs.map((b) => ({ slug: b.slug, label: b.name, href: tabHref(b.slug) }))}
                     />
                     {canWrite && (
-                        <Link href={`/board/${board.slug}/new`} className="px-5 py-2.5 rounded-full bg-[#B8860B] text-white text-sm font-semibold hover:bg-[#9A7209] transition-colors">
+                        <Link href={`/board/${board.slug}/new`} className="px-5 py-2.5 rounded-full bg-[#2D2A26] text-white text-sm font-semibold hover:bg-black transition-colors">
                             글쓰기
                         </Link>
                     )}

@@ -43,9 +43,9 @@ export default async function PeoplePage() {
                                 const current = i === pastors.length - 1
                                 return (
                                     <div key={p.id} className="relative">
-                                        <span className={`absolute -left-[37px] top-2 w-[9px] h-[9px] rounded-full ${current ? 'bg-[#B8860B] ring-4 ring-[#B8860B]/20' : 'bg-[#C8C2B8]'}`} />
+                                        <span className={`absolute -left-[37px] top-2 w-[9px] h-[9px] rounded-full ${current ? 'bg-[#2D2A26] ring-4 ring-[#2D2A26]/15' : 'bg-[#C8C2B8]'}`} />
                                         <p className="text-sm text-[#8B7355] tabular-nums">{p.period}</p>
-                                        <p className={`mt-1 text-xl font-bold ${current ? 'text-[#B8860B]' : 'text-[#2D2A26]'}`} style={{ fontFamily: 'var(--font-serif)' }}>
+                                        <p className={`mt-1 text-xl font-bold text-[#2D2A26]`} style={{ fontFamily: 'var(--font-serif)' }}>
                                             {p.name} <span className="text-base font-normal text-[#8B7355]">{p.role}</span>
                                         </p>
                                     </div>
@@ -86,13 +86,13 @@ export default async function PeoplePage() {
                         ))}
 
                         {hiddenCategories.length > 0 && (
-                            <Reveal className="rounded-3xl bg-[#1F1D1A] text-white p-10 lg:p-14 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                            <Reveal className="rounded-3xl bg-[#2D2A26] text-white p-10 lg:p-14 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                                 <div>
-                                    <p className="text-xs tracking-[0.3em] uppercase text-[#D4A843] mb-4">Members only</p>
+                                    <p className="text-xs tracking-[0.3em] uppercase text-white/60 mb-4">Members only</p>
                                     <p className="text-2xl lg:text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>교인 사진은 로그인하면 볼 수 있어요</p>
                                     <p className="mt-3 text-sm text-white/60">{hiddenCategories.join(' · ')}</p>
                                 </div>
-                                <Link href="/auth/login" className="shrink-0 px-7 py-3.5 rounded-full bg-[#B8860B] text-white text-sm font-semibold hover:bg-[#9A7209] transition-colors self-start lg:self-auto">
+                                <Link href="/auth/login" className="shrink-0 px-7 py-3.5 rounded-full bg-white text-[#2D2A26] text-sm font-semibold hover:bg-[#FAF8F5] transition-colors self-start lg:self-auto">
                                     로그인
                                 </Link>
                             </Reveal>

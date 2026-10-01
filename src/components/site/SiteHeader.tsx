@@ -134,7 +134,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                                         className={`relative px-4 py-2 text-[15px] font-medium transition-colors ${textColor} hover:text-[#B8860B]`}
                                     >
                                         {section.label}
-                                        <span className={`absolute left-4 right-4 -bottom-0.5 h-px bg-[#B8860B] origin-left transition-transform duration-500 ${active ? 'scale-x-100' : 'scale-x-0'}`} />
+                                        <span className={`absolute left-4 right-4 -bottom-0.5 h-px bg-current origin-left transition-transform duration-500 ${active ? 'scale-x-100' : 'scale-x-0'}`} />
                                     </Link>
                                 </li>
                             )
@@ -154,7 +154,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     ) : (
                         <>
                             <Link href="/auth/login" className="px-4 py-2 rounded-full hover:text-[#B8860B] transition">로그인</Link>
-                            <Link href="/auth/register" className="px-5 py-2 rounded-full bg-[#B8860B] text-white hover:bg-[#9A7209] transition">회원가입</Link>
+                            <Link href="/auth/register" className={`px-5 py-2 rounded-full transition ${light ? 'bg-white text-[#2D2A26] hover:bg-[#FAF8F5]' : 'bg-[#2D2A26] text-white hover:bg-black'}`}>회원가입</Link>
                         </>
                     )}
                 </div>
@@ -231,7 +231,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                         ) : (
                             <>
                                 <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full border border-[#E8E4DE] text-sm">로그인</Link>
-                                <Link href="/auth/register" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full bg-[#B8860B] text-white text-sm">회원가입</Link>
+                                <Link href="/auth/register" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full bg-[#2D2A26] text-white text-sm">회원가입</Link>
                             </>
                         )}
                     </div>

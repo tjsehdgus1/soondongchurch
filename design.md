@@ -7,16 +7,16 @@
 | 토큰 | 값 | 용도 |
 |---|---|---|
 | 배경 | `#FAF8F5` / `#F2EFE9` / `#FFFFFF` | 기본 · 보조 섹션 · 카드 |
-| 다크 | `#1F1D1A` | 히어로·숫자 띠·푸터·선교 |
+| 다크 | `#2D2A26` | 히어로·숫자 띠·푸터·선교 |
 | 본문 | `#2D2A26` / `#5C5650` / `#8B7355` | 제목 · 본문 · 보조 |
-| 포인트 | `#B8860B`(버튼·강조) / `#D4A843`·`#E9C46A`(다크 위 금색) | |
+| 포인트 | `#B8860B` — **작은 영문 라벨에만**. 버튼·큰 숫자·제목·지구본에 금색 쓰지 않음 (2026-10 사용자 피드백: 금색 과다는 촌스러움) | |
 | 선 | `#E8E4DE` | 구분선 |
 | 제목 글꼴 | Noto Serif KR (`var(--font-serif)`) | 섹션 제목 4xl~8xl, `leading-[1.1]` |
 | 본문 글꼴 | Pretendard | |
 
 - 너비: `max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10`, 섹션 간격 `py-24 lg:py-36`
 - 섹션 머리: 영문 eyebrow(`text-xs tracking-[0.3em] uppercase text-[#B8860B]`) + 세리프 대제목(`SplitHeading`)
-- 버튼: 둥근 pill(`rounded-full px-7 py-3.5`), 주 버튼 금색 · 보조 버튼 테두리, 데스크톱은 `MagneticButton`
+- 버튼: 둥근 pill(`rounded-full px-7 py-3.5`), 주 버튼 차콜(다크 배경 위에서는 흰색) · 보조 버튼 테두리, 데스크톱은 `MagneticButton`
 - 카드: `rounded-2xl`~`rounded-3xl`, 그림자 대신 테두리 `#E8E4DE` + hover 시 `-translate-y-1`·사진 `scale-105`
 
 ## 모션 원칙
@@ -24,7 +24,7 @@
 - 이징 `expo.out`, 길이 0.6~1.4s, 화면 하단 15% 지점에서 1회 재생
 - 제목: 줄 단위 마스크 등장 / 본문·카드: 48px 떠오름 + stagger 0.09s / 사진: clip-path 마스크 걷힘
 - 스크롤 연동(고정·가로 이동)은 데스크톱 + 동작 허용일 때만
-- 히어로: Ken Burns 확대(16s) + 교차 전환 + 빛 셰이더(투명도 ≤ 0.35)
+- 히어로: Ken Burns 확대(16s) + 교차 전환 (빛·광채 효과는 넣지 않음 — 사용자 요청으로 제거)
 - `prefers-reduced-motion`이면 모든 움직임 정지, 내용은 즉시 표시
 
 

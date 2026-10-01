@@ -41,10 +41,10 @@ export default async function WorshipPage() {
                                 <p className="relative hidden sm:block text-sm tracking-[0.2em] text-[#8B7355]">{w.dayLabel}</p>
                                 <p className="relative text-2xl lg:text-3xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
                                     {w.name}
-                                    {w.key === next.worship.key && <span className="ml-3 align-middle px-2.5 py-1 rounded-full bg-[#B8860B] text-white text-xs font-semibold">다음 예배</span>}
+                                    {w.key === next.worship.key && <span className="ml-3 align-middle px-2.5 py-1 rounded-full bg-[#2D2A26] text-white text-xs font-semibold">다음 예배</span>}
                                     <span className="block sm:hidden text-sm font-normal text-[#8B7355] mt-1">{w.dayLabel}</span>
                                 </p>
-                                <p className="relative text-2xl lg:text-4xl font-bold text-[#B8860B] tabular-nums">{w.timeLabel}</p>
+                                <p className="relative text-2xl lg:text-4xl font-bold text-[#2D2A26] tabular-nums">{w.timeLabel}</p>
                             </div>
                         ))}
                     </Reveal>
@@ -61,15 +61,15 @@ export default async function WorshipPage() {
 
             <section className="py-20 bg-white border-t border-[#E8E4DE]">
                 <Reveal stagger className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid md:grid-cols-2 gap-6">
-                    <Link href="/bulletins" className="group rounded-3xl bg-[#1F1D1A] text-white p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="text-xs tracking-[0.3em] uppercase text-[#D4A843]">Bulletin</p>
+                    <Link href="/bulletins" className="group rounded-3xl bg-[#2D2A26] text-white p-10 hover:-translate-y-1 transition-transform duration-500">
+                        <p className="text-xs tracking-[0.3em] uppercase text-white/60">Bulletin</p>
                         <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>주보 보기</p>
                         <p className="mt-3 text-sm text-white/60">이번 주 예배 순서와 교회 소식</p>
                     </Link>
-                    <Link href="/sermons" className="group rounded-3xl bg-[#B8860B] text-white p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="text-xs tracking-[0.3em] uppercase text-white/70">Sermons</p>
+                    <Link href="/sermons" className="group rounded-3xl bg-[#FAF8F5] border border-[#E8E4DE] text-[#2D2A26] p-10 hover:-translate-y-1 transition-transform duration-500">
+                        <p className="text-xs tracking-[0.3em] uppercase text-[#B8860B]">Sermons</p>
                         <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>말씀 다시 듣기</p>
-                        <p className="mt-3 text-sm text-white/70">담임목사·협동목사·초청 설교 영상</p>
+                        <p className="mt-3 text-sm text-[#8B7355]">담임목사·협동목사·초청 설교 영상</p>
                     </Link>
                 </Reveal>
             </section>

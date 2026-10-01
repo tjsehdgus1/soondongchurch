@@ -16,11 +16,11 @@ export default function NumbersBand({ years, missionCount, nextGenCount }: Numbe
     ].filter((i) => i.value > 0)
 
     return (
-        <section className="bg-[#1F1D1A] text-white py-24 lg:py-32">
+        <section className="bg-[#2D2A26] text-white py-24 lg:py-32">
             <Reveal stagger className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid sm:grid-cols-3 gap-12 sm:gap-6">
                 {items.map((item) => (
                     <div key={item.label} className="sm:border-l sm:border-white/10 sm:pl-8 first:border-0 first:pl-0">
-                        <p className="text-6xl lg:text-8xl font-bold text-[#E9C46A] tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
+                        <p className="text-6xl lg:text-8xl font-bold text-white tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
                             <CountUp to={item.value} suffix={item.suffix} />
                         </p>
                         <p className="mt-4 text-sm lg:text-base text-white/60">{item.label}</p>

@@ -25,7 +25,7 @@ export default function MissionMapFallback({ fields, selectedId, onSelect }: Mis
                         const to = project(f.lat, f.lng)
                         const midX = (home.x + to.x) / 2
                         const midY = Math.min(home.y, to.y) - 60
-                        return <path key={f.id} d={`M${home.x},${home.y} Q${midX},${midY} ${to.x},${to.y}`} fill="none" stroke="#E9C46A" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.8" />
+                        return <path key={f.id} d={`M${home.x},${home.y} Q${midX},${midY} ${to.x},${to.y}`} fill="none" stroke="#FAF8F5" strokeWidth="1.2" strokeDasharray="4 4" opacity="0.8" />
                     })}
                     <circle cx={home.x} cy={home.y} r="5" fill="#fff" />
                 </svg>
@@ -42,7 +42,7 @@ export default function MissionMapFallback({ fields, selectedId, onSelect }: Mis
                             className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
                             style={{ left: `${p.x / 10}%`, top: `${p.y / 5}%` }}
                         >
-                            <span className={`block rounded-full bg-[#E9C46A] ring-4 ring-[#E9C46A]/30 transition-transform ${selected ? 'w-4 h-4 scale-125' : 'w-3 h-3 group-hover:scale-125'}`} />
+                            <span className={`block rounded-full bg-white ring-4 ring-white/30 transition-transform ${selected ? 'w-4 h-4 scale-125' : 'w-3 h-3 group-hover:scale-125'}`} />
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap text-xs text-white/90">{f.country}</span>
                         </button>
                     )

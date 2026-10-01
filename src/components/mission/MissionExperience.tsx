@@ -74,7 +74,7 @@ export default function MissionExperience({ fields, title, subtitle }: MissionEx
             </div>
 
             <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-16 lg:pb-24 pointer-events-none">
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.35em] uppercase text-[#D4A843] mb-5">Mission</p>
+                <p className="text-xs sm:text-sm font-semibold tracking-[0.35em] uppercase text-white/60 mb-5">Mission</p>
                 <SplitHeading as="h1" immediate className="text-5xl sm:text-6xl lg:text-8xl font-bold leading-[1.08]" style={{ fontFamily: 'var(--font-serif)' }}>
                     {title}
                 </SplitHeading>

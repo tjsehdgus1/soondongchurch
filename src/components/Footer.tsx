@@ -8,15 +8,15 @@ export default function Footer() {
     const menu = buildSiteMenu({ loggedIn: false, isAdmin: false })
 
     return (
-        <footer className="bg-[#1F1D1A] text-[#A09890]">
+        <footer className="bg-[#2D2A26] text-[#A09890]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-10">
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 pb-14 border-b border-white/10">
                     <p className="text-3xl sm:text-4xl lg:text-5xl leading-tight text-[#FAF8F5]" style={{ fontFamily: 'var(--font-serif)' }}>
                         하나님이 기뻐하시는<br />
-                        <span className="text-[#D4A843]">행복한 교회</span>
+                        <span className="text-white/60">행복한 교회</span>
                     </p>
                     <div className="flex gap-3">
-                        <Link href="/worship" className="px-6 py-3 rounded-full bg-[#B8860B] text-white text-sm hover:bg-[#9A7209] transition">예배 안내</Link>
+                        <Link href="/worship" className="px-6 py-3 rounded-full bg-white text-[#2D2A26] text-sm hover:bg-[#FAF8F5] transition">예배 안내</Link>
                         <Link href="/directions" className="px-6 py-3 rounded-full border border-white/20 text-[#FAF8F5] text-sm hover:border-white/50 transition">오시는 길</Link>
                     </div>
                 </div>
@@ -38,7 +38,7 @@ export default function Footer() {
                     </div>
                     {menu.map((section) => (
                         <div key={section.label}>
-                            <p className="text-xs font-semibold tracking-[0.2em] text-[#D4A843] mb-4">{section.label}</p>
+                            <p className="text-xs font-semibold tracking-[0.2em] text-white/60 mb-4">{section.label}</p>
                             <ul className="space-y-2.5 text-sm">
                                 {section.items.map((item) => (
                                     <li key={item.href}>

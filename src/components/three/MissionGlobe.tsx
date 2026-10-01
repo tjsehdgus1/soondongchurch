@@ -85,9 +85,10 @@ export default function MissionGlobe({ fields, selectedId, onSelect, reducedMoti
         el.style.pointerEvents = 'auto'
         el.innerHTML = home
             ? '<span class="block w-3 h-3 rounded-full bg-white ring-4 ring-white/30"></span>'
-            : '<span class="block w-3.5 h-3.5 rounded-full bg-[#E9C46A] ring-4 ring-[#E9C46A]/30 transition-transform group-hover:scale-150"></span>'
+            : '<span class="block w-3.5 h-3.5 rounded-full bg-white ring-4 ring-white/30 transition-transform group-hover:scale-150"></span>'
         const label = document.createElement('span')
-        label.className = 'absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-black/60 px-3 py-1 text-xs text-white backdrop-blur'
+        // 가까운 선교지(태국·캄보디아) 이름이 겹치지 않게 마우스를 올렸을 때만 표시
+        label.className = `absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-black/60 px-3 py-1 text-xs text-white backdrop-blur transition-opacity ${home ? '' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'}`
         label.textContent = pin.label
         el.appendChild(label)
         if (!home) el.addEventListener('click', () => onSelect(pin.id as number))
@@ -105,22 +106,22 @@ export default function MissionGlobe({ fields, selectedId, onSelect, reducedMoti
                     globeImageUrl={null}
                     globeMaterial={material}
                     showAtmosphere
-                    atmosphereColor="#D4A843"
+                    atmosphereColor="#d9d3c9"
                     atmosphereAltitude={0.16}
                     hexPolygonsData={countries}
                     hexPolygonResolution={3}
                     hexPolygonMargin={0.45}
                     hexPolygonUseDots
-                    hexPolygonColor={() => 'rgba(233, 196, 106, 0.55)'}
+                    hexPolygonColor={() => 'rgba(250, 248, 245, 0.5)'}
                     arcsData={arcs}
-                    arcColor={() => ['rgba(233,196,106,0.05)', 'rgba(233,196,106,0.95)']}
+                    arcColor={() => ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.9)']}
                     arcStroke={0.7}
                     arcAltitudeAutoScale={0.45}
                     arcDashLength={0.5}
                     arcDashGap={1.2}
                     arcDashAnimateTime={reducedMotion ? 0 : 2800}
                     ringsData={reducedMotion ? [] : fields}
-                    ringColor={() => (t: number) => `rgba(233,196,106,${1 - t})`}
+                    ringColor={() => (t: number) => `rgba(255,255,255,${1 - t})`}
                     ringMaxRadius={3.2}
                     ringPropagationSpeed={1.6}
                     ringRepeatPeriod={1600}

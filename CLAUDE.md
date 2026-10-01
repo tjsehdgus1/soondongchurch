@@ -6,7 +6,7 @@
 소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
 설교 AI 자동요약·설교 관리 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
 설교 영상은 네이버 카페 이관으로 만든 **일반 게시판(유튜브 영상 첨부, AI 없음)**으로 운영한다 (`doc/cafe_migration_design.md`).
-2026-10 리디자인: 메뉴 5개(교회소개/예배·말씀/다음세대/선교·사역/소식·나눔), 관리자 수정 콘텐츠 페이지, 시네마틱 모션, 3D 2곳 — 설계 `doc/specs/2026-10-01-site-redesign-design.md`, 계획 `doc/plans/2026-10-01-site-redesign.md`.
+2026-10 리디자인: 메뉴 5개(교회소개/예배·말씀/다음세대/선교·사역/소식·나눔), 관리자 수정 콘텐츠 페이지, 시네마틱 모션, 3D 지구본(선교). 히어로 빛 셰이더와 밝은 금색 강조는 사용자 요청으로 제거됨 — 되살리지 말 것 — 설계 `doc/specs/2026-10-01-site-redesign-design.md`, 계획 `doc/plans/2026-10-01-site-redesign.md`.
 
 ## 스택
 
@@ -22,7 +22,6 @@
 | Solapi | 5.x (SMS 인증) |
 | GSAP | 3.15 (ScrollTrigger, SplitText) + `@gsap/react` `useGSAP` |
 | Lenis | 1.3 (부드러운 스크롤) |
-| ogl | 1.0 (홈 히어로 빛 셰이더) |
 | react-globe.gl / three | 2.38 / 0.186 (선교 지구본, `/mission`에서만 로드) |
 | 테스트 | `node:test` (`npm test`, Node 24 타입 스트리핑) |
 
@@ -79,7 +78,7 @@ src/
 │   ├── home/                       # 홈 섹션 7개
 │   ├── hub/                        # HubPage, HubSection, HubTabs
 │   ├── video/                      # VideoModal(전역 provider), VideoCard
-│   ├── three/                      # HeroLight(ogl), MissionGlobe, MissionMapFallback
+│   ├── three/                      # MissionGlobe, MissionMapFallback
 │   ├── admin/                      # AdminRecordEditor(설정형 편집기), ImageUploadField
 │   ├── BoardPostList.tsx           # 게시글 목록 (list/card)
 │   ├── BoardPostForm.tsx           # 게시글 작성·수정
@@ -258,7 +257,7 @@ useEffect(() => { setWidth(window.innerWidth) }, [])
 ### 모션·3D 규칙
 - 등장 애니메이션은 `Reveal` / `SplitHeading` 사용. 초기 숨김은 CSS `.js [data-reveal]`(동작 줄이기면 미적용) → JS 미실행 시에도 내용 노출
 - GSAP는 `registerGsap()` 후 `useGSAP`(자동 정리) 안에서만, 스크롤 연동 고정은 `gsap.matchMedia('(min-width:1024px) and (prefers-reduced-motion: no-preference)')`
-- `prefers-reduced-motion: reduce` → Lenis·셰이더·지구본 자동회전·마퀴 모두 정지 (CSS 클래스 `ken-burns`, `marquee-track` 등은 globals.css에서 일괄 정지)
+- `prefers-reduced-motion: reduce` → Lenis·지구본 자동회전·마퀴 모두 정지 (CSS 클래스 `ken-burns`, `marquee-track` 등은 globals.css에서 일괄 정지)
 - 마그네틱 버튼 등 포인터 효과는 `(pointer: fine)`에서만
 - three.js(지구본)는 `next/dynamic` + `ssr:false`로 `/mission`에서만. 국가 경계 `public/geo/countries-110m.json`(h3 오류 나는 면적 0 고리 제거본)
 - 히어로처럼 헤더 아래까지 덮는 섹션은 `data-hero` + `-mt-16 lg:-mt-20` (헤더가 투명 처리)

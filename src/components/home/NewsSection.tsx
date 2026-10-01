@@ -31,7 +31,7 @@ export default function NewsSection({ notices, events, gallery }: { notices: Not
                                 <li key={n.id} className="border-b border-[#E8E4DE]">
                                     <Link href={`/notices/${n.id}`} className="group flex items-center justify-between gap-4 py-5">
                                         <span className="font-medium text-[#2D2A26] group-hover:text-[#B8860B] transition-colors line-clamp-1">
-                                            {n.is_pinned && <span className="text-[#B8860B] mr-2">●</span>}{n.title}
+                                            {n.is_pinned && <span className="text-[#2D2A26] mr-2">●</span>}{n.title}
                                         </span>
                                         <span className="text-sm text-[#A09890] shrink-0">{formatDate(n.created_at)}</span>
                                     </Link>
@@ -49,7 +49,7 @@ export default function NewsSection({ notices, events, gallery }: { notices: Not
                             {events.length === 0 && <li className="py-6 text-sm text-[#A09890]">예정된 행사가 없습니다.</li>}
                             {events.map((e) => (
                                 <li key={e.id} className="border-b border-[#E8E4DE] py-5 flex gap-6">
-                                    <span className="w-28 shrink-0 text-sm font-semibold text-[#B8860B]">{EVENT_DATE.format(new Date(`${e.event_date}T00:00:00`))}</span>
+                                    <span className="w-28 shrink-0 text-sm font-semibold text-[#8B7355]">{EVENT_DATE.format(new Date(`${e.event_date}T00:00:00`))}</span>
                                     <span>
                                         <span className="block font-medium text-[#2D2A26]">{e.title}</span>
                                         <span className="block text-sm text-[#A09890] mt-0.5">{[e.event_time?.slice(0, 5), e.location].filter(Boolean).join(' · ')}</span>
