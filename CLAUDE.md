@@ -289,7 +289,7 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 
 ## DB 변경 적용
 
-스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 **대시보드 SQL Editor에서 직접 실행**.
+스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
 신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` 순서.
 
 리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)

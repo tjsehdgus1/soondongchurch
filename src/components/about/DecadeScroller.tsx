@@ -44,7 +44,9 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
         return () => mm.revert()
     }, { scope: sectionRef })
 
+    // GSAP pin이 section을 pin-spacer로 감싸므로, 바깥 div로 한 번 더 감싸 형제 요소 하이드레이션과 충돌하지 않게 함
     return (
+        <div>
         <section ref={sectionRef} className="relative bg-[#2D2A26] text-white overflow-hidden lg:h-screen">
             <div ref={trackRef} className="flex h-full overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none">
                 <div className="shrink-0 w-[85vw] lg:w-[45vw] flex flex-col justify-center px-6 lg:px-16 py-20 snap-start">
@@ -56,9 +58,9 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
                     <p className="mt-6 text-white/60 lg:hidden">옆으로 넘겨 보세요 →</p>
                 </div>
                 {chapters.map((c) => (
-                    <article key={c.decade} className="shrink-0 w-[85vw] sm:w-[60vw] lg:w-[34vw] border-l border-white/10 px-6 lg:px-12 py-20 flex flex-col justify-center snap-start">
-                        <p className="text-7xl lg:text-[9rem] leading-none font-bold text-white/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
-                            {c.decade}<span className="text-4xl lg:text-6xl">s</span>
+                    <article key={c.decade} className="shrink-0 w-[85vw] sm:w-[60vw] lg:w-[34vw] border-l border-white/10 px-6 lg:px-12 py-20 flex flex-col justify-center snap-start overflow-hidden">
+                        <p className="text-6xl sm:text-7xl xl:text-[8rem] leading-none font-bold text-white/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
+                            {c.decade}<span className="text-3xl sm:text-4xl xl:text-5xl">s</span>
                         </p>
                         <p className="mt-4 text-xs tracking-[0.3em] text-white/50">{c.count}개의 기록</p>
                         <ul className="mt-8 space-y-4">
@@ -77,5 +79,6 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
                 <div ref={progressRef} className="h-full bg-white origin-left" style={{ transform: 'scaleX(0)' }} />
             </div>
         </section>
+        </div>
     )
 }
