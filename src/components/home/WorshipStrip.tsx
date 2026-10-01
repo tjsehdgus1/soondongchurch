@@ -27,7 +27,8 @@ export default function WorshipStrip() {
                     </Reveal>
                 </div>
 
-                <Reveal stagger className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 lg:mx-0 lg:px-0 pb-2 lg:pb-0">
+                {/* 좁은 화면: 옆으로 넘기는 띠 — 화면 끝까지 넘기되, 카드는 본문 좌우 여백(scroll-px)에 맞춰 멈춤 */}
+                <Reveal stagger className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-px-4 sm:-mx-6 sm:px-6 sm:scroll-px-6 lg:mx-0 lg:px-0 lg:scroll-px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {WORSHIPS.map((w) => {
                         const isNext = w.key === next.worship.key
                         return (
