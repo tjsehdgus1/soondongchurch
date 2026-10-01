@@ -21,7 +21,6 @@ export default async function WorshipPage() {
                 eyebrow="예배·말씀"
                 title={intro?.title ?? '함께 드리는 예배'}
                 description={intro?.subtitle ?? '함께 드리는 예배는 가장 큰 기쁨입니다'}
-                image="/images/worship_schedule_bg.png"
             />
 
             <section className="py-16 lg:py-20 bg-[#FAF8F5]">

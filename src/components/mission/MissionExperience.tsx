@@ -76,7 +76,7 @@ export default function MissionExperience({ fields, title, subtitle }: MissionEx
     }, { scope: sectionRef })
 
     return (
-        <section ref={sectionRef} data-hero className="relative -mt-16 lg:-mt-20 h-[100svh] min-h-[680px] overflow-hidden bg-[radial-gradient(ellipse_at_60%_45%,#2d2924,#14120f_70%)] text-white">
+        <section ref={sectionRef} data-hero className="relative -mt-16 lg:-mt-20 h-[72svh] min-h-[520px] max-h-[820px] overflow-hidden bg-[radial-gradient(ellipse_at_60%_45%,#2d2924,#14120f_70%)] text-white">
             <div ref={stageRef} className="absolute inset-0 lg:left-[22%]">
                 {mode === 'globe' && idle && (
                     <MissionGlobe fields={fields} selectedId={selectedId} onSelect={setSelectedId} reducedMotion={false} />
@@ -86,8 +86,8 @@ export default function MissionExperience({ fields, title, subtitle }: MissionEx
                 )}
             </div>
 
-            <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-16 lg:pb-24 pointer-events-none">
-                <SplitHeading as="h1" immediate className="text-5xl sm:text-6xl lg:text-8xl font-bold leading-[1.08]" style={{ fontFamily: 'var(--font-serif)' }}>
+            <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-10 lg:pb-14 pointer-events-none">
+                <SplitHeading as="h1" immediate className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1]" style={{ fontFamily: 'var(--font-serif)' }}>
                     {title}
                 </SplitHeading>
                 {subtitle && <p className="mt-5 text-white/70 max-w-md">{subtitle}</p>}

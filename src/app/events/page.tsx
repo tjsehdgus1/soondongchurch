@@ -1,4 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public'
+import PageHero from '@/components/site/PageHero'
 
 const eventTypeMap: Record<string, { label: string; color: string; bg: string }> = {
     worship: { label: '예배', color: 'text-blue-700', bg: 'bg-blue-100' },
@@ -43,14 +44,7 @@ export default async function EventsPage() {
 
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
-        {/* 헤더 */}
-        <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
-            <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <span className="text-base font-medium" style={{ color: '#8B7355' }}>소식·나눔</span>
-                <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>행사일정</h1>
-                <p className="mt-2" style={{ color: '#8B7355' }}>순천순동교회의 예배 및 다양한 행사 일정을 안내합니다.</p>
-            </div>
-        </div>
+        <PageHero eyebrow="소식·나눔" title="행사일정" description="예배와 교회 행사 일정을 안내합니다." />
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
             {/* Upcoming Events */}

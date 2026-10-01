@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageHero from '@/components/site/PageHero'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BoardPostList from '@/components/BoardPostList'
@@ -53,25 +54,16 @@ export default async function BoardPage({ params, searchParams }: Params) {
 
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
-            <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
-                <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-wrap items-end justify-between gap-4">
-                    <div>
-                        <span className="font-semibold text-sm tracking-wider" style={{ color: '#B8860B' }}>소식·나눔</span>
-                        <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{board.name}</h1>
-                    </div>
-                    {canWrite && (
-                        <Link
-                            href={`/board/${slug}/new`}
-                            className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow-sm"
-                            style={{ background: '#B8860B' }}
-                        >
-                            글쓰기
-                        </Link>
-                    )}
-                </div>
-            </div>
+            <PageHero eyebrow="소식·나눔" title={board.name} />
 
             <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {canWrite && (
+                    <div className="flex justify-end mb-6">
+                        <Link href={`/board/${slug}/new`} className="px-5 py-2.5 rounded-full bg-[#2D2A26] text-white text-sm font-semibold hover:bg-black transition-colors">
+                            글쓰기
+                        </Link>
+                    </div>
+                )}
                 {board.categories.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-6">
                         {[undefined, ...board.categories].map((c) => {

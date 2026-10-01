@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageHero from '@/components/site/PageHero'
 import { createPublicClient } from '@/lib/supabase/public'
 
 interface Bulletin {
@@ -32,14 +33,7 @@ export default async function BulletinsPage() {
 
     return (
         <div className="min-h-screen" style={{ background: '#FAF8F5' }}>
-            {/* 헤더 */}
-            <div className="bg-white border-b" style={{ borderColor: '#E8E4DE' }}>
-                <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <span className="text-base font-medium" style={{ color: '#8B7355' }}>예배·말씀</span>
-                    <h1 className="text-3xl md:text-4xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>주간예배일정 (주보)</h1>
-                    <p className="mt-2" style={{ color: '#8B7355' }}>매주 주보를 확인하세요.</p>
-                </div>
-            </div>
+            <PageHero eyebrow="예배·말씀" title="주보" description="매주 예배 순서와 교회 소식" />
 
             <div className="max-w-[1300px] mx-auto px-4 py-8 space-y-8">
                 {bulletins.length === 0 ? (
