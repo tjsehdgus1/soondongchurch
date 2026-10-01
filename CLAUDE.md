@@ -3,7 +3,8 @@
 ## 프로젝트 개요
 
 순천순동교회 공식 홈페이지. Next.js 16 App Router + Supabase 기반.
-AI 설교 자동 요약, 소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
+소그룹 게시판, 교인 관리, 주보 PDF 뷰어 포함.
+설교 자동요약·설교 게시 기능은 2026-10-01 **의도적으로 삭제**됨 — 임의로 되살리지 말 것.
 
 ## 스택
 
@@ -17,21 +18,19 @@ AI 설교 자동 요약, 소그룹 게시판, 교인 관리, 주보 PDF 뷰어 �
 | Tiptap | 3.x (소그룹 게시글 에디터) |
 | React PDF | 10.x (주보 PDF 뷰어) |
 | Solapi | 5.x (SMS 인증) |
-| Google Gemini | `gemini-2.5-flash` (설교 요약) |
 
 ## 디렉토리 구조
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                    # 홈 (hero, 예배, 설교, 행사, 공지)
+│   ├── page.tsx                    # 홈 (hero, 예배, 행사, 공지)
 │   ├── layout.tsx                  # 루트 레이아웃 (Navbar/Footer 포함)
 │   ├── admin/
 │   │   ├── layout.tsx              # 관리자 가드 + AdminSidebar
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 교인 관리 (차단/권한 변경)
-│   │   ├── sermons/page.tsx        # 설교 AI 파싱 + 발행
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
 │   │   ├── groups/page.tsx
@@ -49,17 +48,13 @@ src/
 │   │   ├── auth/
 │   │   │   ├── sms/send/route.ts
 │   │   │   ├── sms/verify/route.ts
+│   │   │   ├── register/route.ts   # SMS 인증 확인 후 계정 생성 (service role)
 │   │   │   └── logout/route.ts
-│   │   ├── sermons/
-│   │   │   ├── parse/route.ts      # YouTube → Gemini → DB (maxDuration=60)
-│   │   │   ├── transcript/route.ts # Edge runtime, YouTube 자막 취득
-│   │   │   └── manage/route.ts     # CRUD (GET/PUT/PATCH/DELETE)
 │   │   └── setup/migrate/route.ts  # DB 초기화 (MIGRATE_SECRET 필요)
 │   ├── bulletins/[id]/page.tsx     # PdfViewer
 │   ├── events/page.tsx
 │   ├── groups/[id]/posts/[postId]/ # 소그룹 게시글 (detail, edit)
-│   ├── notices/[id]/page.tsx
-│   └── sermons/[id]/page.tsx
+│   └── notices/[id]/page.tsx
 ├── components/
 │   ├── Navbar.tsx                  # 고정 헤더, auth 상태 동기화
 │   ├── Footer.tsx
@@ -71,7 +66,7 @@ src/
 │   └── supabase/
 │       ├── server.ts               # SSR 쿠키 클라이언트
 │       └── client.ts               # 브라우저 클라이언트
-└── middleware.ts                   # 세션 갱신, 접근 제어, is_blocked
+└── proxy.ts                        # 세션 갱신, 로그인 필요 경로 보호 (Next 16: middleware → proxy)
 ```
 
 ---
@@ -112,18 +107,6 @@ export async function GET() {
 | role | text | `'admin'` \| `'member'` (기본값) |
 | is_blocked | boolean | true 시 접근 차단 |
 | created_at | timestamp | |
-
-### sermons
-| 컬럼 | 타입 | 비고 |
-|------|------|------|
-| id | bigserial | PK |
-| youtube_id | text | UNIQUE |
-| title | text | YouTube oEmbed 또는 AI 생성 |
-| sermon_date | date | |
-| summary | text | Gemini AI 생성 요약 |
-| raw_transcript | text | YouTube 자막 원문 |
-| thumbnail_url | text | maxresdefault.jpg |
-| status | text | `'draft'` \| `'published'` |
 
 ### bulletins
 | 컬럼 | 타입 |
@@ -166,30 +149,22 @@ window.location.href = '/'
 // 이유: router.push()는 세션 쿠키가 미확립된 상태로 이동해 무한 pending 발생
 ```
 
-**Middleware 접근 제어:**
-- `/admin/*`, `/groups/*` → 미로그인 시 `/auth/login` 리다이렉트
-- `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
+**접근 제어:**
+- `proxy.ts`: `/admin/*`, `/groups/*` → 미로그인 시 `/auth/login` 리다이렉트
+- `admin/layout.tsx`, `groups/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
+- DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
+
+**회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 SMS 인증 기록을 확인 후 `auth.admin.createUser`로 생성.
+Supabase 대시보드 Authentication → Sign In / Providers → **Allow new users to sign up 끔** (우회 가입 차단).
+
+**RLS 원칙 (supabase/20261001_security_fix.sql):**
+- profiles: 본인·관리자만 SELECT, 클라이언트 UPDATE 불가 (수정은 관리자 API만)
+- sms_verifications: 정책 없음 → service role 전용
+- group_posts/comments: author_id·author_name은 트리거가 강제 설정
 
 **로그아웃:**
 - `POST /api/auth/logout` (서버사이드 쿠키 삭제)
 - 클라이언트에서 `window.location.href = '/auth/login'`
-
----
-
-## 설교 파싱 플로우
-
-```
-관리자 → YouTube URL 입력
-  → /api/sermons/transcript (Edge, 자막 취득)
-  → /api/sermons/parse (Gemini 요약 → DB draft 저장)
-  → 관리자 검토/수정
-  → PATCH /api/sermons/manage (status: 'published')
-  → /sermons 공개 노출
-```
-
-**YouTube IP 차단 우회:** Vercel AWS IP를 YouTube가 차단 → Edge 런타임 사용
-- `/api/sermons/transcript` → `export const runtime = 'edge'`
-- InnerTube ANDROID 클라이언트 API 직접 호출
 
 ---
 
@@ -251,8 +226,6 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ACCESS_TOKEN=       # DB 초기화 migrate API 전용
-GEMINI_API_KEY=
-YOUTUBE_API_KEY=
 SOLAPI_API_KEY=
 SOLAPI_API_SECRET=
 SOLAPI_SENDER=               # SMS 발신 번호
@@ -261,10 +234,15 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 
 ---
 
+## DB 변경 적용
+
+스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 **대시보드 SQL Editor에서 직접 실행**.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` 순서.
+
 ## 관리자 계정 생성 방법
 
 이메일 인증 Rate Limit 우회를 위해 수동 생성:
-1. Supabase Dashboard → Authentication → Users → "Add user" (email: `admin@church.com`)
+1. Supabase Dashboard → Authentication → Users → "Add user" (email: `admin@church.com`, Auto Confirm 체크)
 2. SQL Editor에서 실행:
    ```sql
    UPDATE profiles SET role = 'admin' WHERE email = 'admin@church.com';

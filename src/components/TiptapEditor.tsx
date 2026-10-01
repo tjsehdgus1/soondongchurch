@@ -150,7 +150,7 @@ export default function TiptapEditor({ content, onChange, onSizeError }: TiptapE
           1.
         </ToolBtn>
         <ToolBtn onClick={() => editor?.chain().focus().toggleBlockquote().run()} active={editor?.isActive('blockquote')} title="인용">
-          "
+          &ldquo;
         </ToolBtn>
         <div className="w-px bg-gray-200 mx-1 self-stretch" />
         <ToolBtn onClick={() => editor?.chain().focus().undo().run()} title="실행 취소">↩</ToolBtn>

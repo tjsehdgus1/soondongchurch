@@ -36,13 +36,13 @@ export default function DirectionsPage() {
         const phase = 'prod'
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum = (window.daum || {}) as any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         window.daum.roughmap = {
             phase,
             cdn: cdnKey,
             URL_KEY_DATA_LOAD_PRE: `${protocol}//t1.kakaocdn.net/roughmap/`,
             url_protocal: protocol,
             url_cdn_domain: '//t1.kakaocdn.net',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any
 
         const landerScript = document.createElement('script')

@@ -126,31 +126,30 @@ export default function RegisterPage() {
 
         setLoading(true)
 
-        // Supabase auth는 이메일이 필수이므로 내부 이메일을 자동 생성합니다.
-        const internalEmail = `${username.toLowerCase()}@internal.church`
-
-        const { error, data } = await supabase.auth.signUp({
-            email: internalEmail,
-            password,
-            options: {
-                data: {
-                    username,
-                    name,
-                    real_email: email.trim() || '',
-                    phone_number: phone,
-                },
-            },
-        })
-
-        if (error) {
-            if (error.message.includes('already registered') || error.message.includes('already been registered')) {
-                setError('이미 사용 중인 아이디입니다.')
-            } else {
-                setError(error.message)
+        // 계정 생성은 서버에서 SMS 인증 여부를 확인한 뒤 수행
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, name, email, phone }),
+            })
+            const result = await res.json()
+            if (!res.ok) {
+                setError(result.error || '회원가입에 실패했습니다.')
+                setLoading(false)
+                return
             }
+        } catch {
+            setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.')
             setLoading(false)
             return
         }
+
+        // Supabase auth는 이메일이 필수이므로 내부 이메일로 로그인
+        const { data } = await supabase.auth.signInWithPassword({
+            email: `${username.toLowerCase()}@internal.church`,
+            password,
+        })
 
         if (data.session) {
             window.location.href = '/'

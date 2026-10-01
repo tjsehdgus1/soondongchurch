@@ -3,14 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import HeroSlider from '@/components/HeroSlider'
 import ScrollReveal from '@/components/ScrollReveal'
 
-type Sermon = {
-  id: number
-  title: string
-  sermon_date: string
-  thumbnail_url: string | null
-  summary: string | null
-}
-
 const worshipSchedule = [
   { day: '주일', time: '오전 11:00', name: '주일오전예배', gradient: ['#3b82f6', '#1d4ed8'], image: '/images/worships/sun_morning.png' },
   { day: '주일', time: '오후 1:30', name: '주일오후예배', gradient: ['#f59e0b', '#b45309'], image: '/images/worships/sun_afternoon.png' },
@@ -26,7 +18,6 @@ export default async function HomePage() {
   const [
     { data: notices },
     { data: events },
-    { data: sermons },
     { data: { user } },
   ] = await Promise.all([
     supabase
@@ -41,12 +32,6 @@ export default async function HomePage() {
       .gte('event_date', today)
       .order('event_date', { ascending: true })
       .limit(3),
-    supabase
-      .from('sermons')
-      .select('id, title, sermon_date, thumbnail_url, summary')
-      .eq('status', 'published')
-      .order('sermon_date', { ascending: false })
-      .limit(2),
     supabase.auth.getUser(),
   ])
 
@@ -133,58 +118,6 @@ export default async function HomePage() {
               </div>
             ))}
           </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ─── Recent Sermons ─── */}
-      <section className="py-20 bg-white border-y" style={{ borderColor: '#E8E4DE' }}>
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal className="flex items-center justify-between mb-10">
-            <div>
-              <span className="font-semibold text-sm uppercase tracking-wider" style={{ color: '#B8860B' }}>Sermons</span>
-              <h2 className="text-3xl font-bold mt-2" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>목사님 설교</h2>
-            </div>
-            <Link href="/sermons" className="text-sm font-medium px-4 py-2 rounded-full border shadow-sm transition-all hover:shadow-md" style={{ color: '#B8860B', borderColor: '#E8E4DE', background: '#FAF8F5' }}>
-              전체 설교 보기 →
-            </Link>
-          </ScrollReveal>
-
-          {!sermons || sermons.length === 0 ? (
-            <div className="py-20 text-center rounded-3xl border-2 border-dashed text-gray-400" style={{ borderColor: '#E8E4DE' }}>
-              <p className="text-lg">설교 영상을 준비 중입니다.</p>
-              <p className="text-sm mt-1">관리자 페이지에서 첫 설교 요약을 등록해 보세요!</p>
-            </div>
-          ) : (
-            <ScrollReveal className="grid grid-cols-1 md:grid-cols-2 gap-6" stagger>
-              {(sermons as Sermon[]).map((s) => (
-                <Link key={s.id} href={`/sermons/${s.id}`} className="group bg-white rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col" style={{ borderColor: '#E8E4DE' }}>
-                  <div className="relative aspect-video overflow-hidden bg-gray-100">
-                    <img src={s.thumbnail_url ?? undefined} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all">
-                        <svg className="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24" style={{ color: '#B8860B' }}><path d="M8 5v14l11-7z" /></svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <p className="text-xs font-semibold mb-2" style={{ color: '#B8860B' }}>
-                      {new Date(s.sermon_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </p>
-                    <h3 className="font-bold text-base line-clamp-2 leading-snug transition-colors mb-3" style={{ color: '#2D2A26' }}>{s.title}</h3>
-                    {s.summary && (
-                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: '#8B7355' }}>{s.summary}</p>
-                    )}
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold group-hover:gap-2 transition-all" style={{ color: '#B8860B' }}>
-                      말씀 보기
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </ScrollReveal>
-          )}
         </div>
       </section>
 
