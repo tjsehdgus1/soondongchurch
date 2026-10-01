@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────
@@ -67,6 +68,38 @@ body {
 .stagger-children > *:nth-child(3) { transition-delay: 140ms; }
 .stagger-children > *:nth-child(4) { transition-delay: 210ms; }
 .stagger-children > *:nth-child(5) { transition-delay: 280ms; }
+
+/* ─────────────────────────────────────────
+   Motion (GSAP) — 초기 숨김은 JS가 켜졌고 동작 줄이기가 아닐 때만
+   (<html class="js">는 layout.tsx 인라인 스크립트가 첫 페인트 전에 추가)
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] { visibility: hidden; }
+}
+
+/* 히어로 사진 천천히 확대 (Ken Burns) */
+@keyframes ken-burns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.12); }
+}
+
+/* 갤러리 띠 무한 흐름 */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 60s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .ken-burns { animation: none !important; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+
+/* 페이지 전환 크로스페이드 */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 0.35s;
+}
 
 /* ─────────────────────────────────────────
    Tiptap editor

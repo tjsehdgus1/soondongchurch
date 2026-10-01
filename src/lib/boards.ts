@@ -28,9 +28,6 @@ export type BoardPostSummary = {
 export const POST_SUMMARY_COLUMNS =
     'id, board_id, title, author_name, category, youtube_id, thumbnail_url, is_pinned, members_only, created_at'
 
-// 상단 메뉴 순서 — boards.section 값과 일치해야 함
-export const SECTION_ORDER = ['교회소개', '말씀', '예배·소식', '전도회', '교회학교', '선교·교육', '찬양', '커뮤니티']
-
 export const PAGE_SIZE = 20
 
 // 유튜브 URL 또는 11자리 ID → 영상 ID
