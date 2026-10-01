@@ -25,7 +25,7 @@ export default function VideoCard({ youtubeId, title, href, meta, size = 'md', p
             className="group text-left w-full h-full flex flex-col cursor-pointer"
             aria-label={`${title} 영상 재생`}
         >
-            <div className={`relative overflow-hidden rounded-2xl bg-[#2D2A26] ${large ? 'aspect-video lg:aspect-auto lg:flex-1 lg:min-h-[420px]' : 'aspect-video'}`}>
+            <div className="relative overflow-hidden rounded-2xl bg-[#2D2A26] aspect-video">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={`https://img.youtube.com/vi/${youtubeId}/${large ? 'maxresdefault' : 'hqdefault'}.jpg`}
@@ -43,8 +43,8 @@ export default function VideoCard({ youtubeId, title, href, meta, size = 'md', p
                 </div>
             </div>
             <div className="pt-4">
-                {meta && <p className="text-xs font-semibold tracking-wider text-[#B8860B] mb-1.5">{meta}</p>}
-                <p className={`font-bold leading-snug text-[#2D2A26] group-hover:text-[#B8860B] transition-colors line-clamp-2 ${large ? 'text-xl lg:text-2xl' : 'text-base'}`} style={large ? { fontFamily: 'var(--font-serif)' } : undefined}>
+                {meta && <p className="text-sm text-[#8B7355] mb-1">{meta}</p>}
+                <p className={`font-bold leading-snug text-[#2D2A26] group-hover:underline underline-offset-4 ${large ? 'text-xl lg:text-2xl' : 'text-lg'}`} style={large ? { fontFamily: 'var(--font-serif)' } : undefined}>
                     {title}
                 </p>
             </div>

@@ -117,7 +117,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 <Link href="/" className={`flex items-center gap-3 ${textColor}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/logo.svg" alt="" className="w-9 h-9 rounded-md" />
-                    <span className="font-bold text-lg tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>순천순동교회</span>
+                    <span className="font-bold text-xl tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>순천순동교회</span>
                 </Link>
 
                 {/* 데스크톱 메뉴 */}
@@ -131,7 +131,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                                         href={section.href}
                                         aria-expanded={megaOpen}
                                         aria-haspopup="true"
-                                        className={`relative px-4 py-2 text-[15px] font-medium transition-colors ${textColor} hover:text-[#B8860B]`}
+                                        className={`relative px-4 py-2 text-[17px] font-semibold transition-colors ${textColor} hover:text-[#8B7355]`}
                                     >
                                         {section.label}
                                         <span className={`absolute left-4 right-4 -bottom-0.5 h-px bg-current origin-left transition-transform duration-500 ${active ? 'scale-x-100' : 'scale-x-0'}`} />
@@ -153,7 +153,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                         </>
                     ) : (
                         <>
-                            <Link href="/auth/login" className="px-4 py-2 rounded-full hover:text-[#B8860B] transition">로그인</Link>
+                            <Link href="/auth/login" className="px-4 py-2 rounded-full hover:text-[#8B7355] transition">로그인</Link>
                             <Link href="/auth/register" className={`px-5 py-2 rounded-full transition ${light ? 'bg-white text-[#2D2A26] hover:bg-[#FAF8F5]' : 'bg-[#2D2A26] text-white hover:bg-black'}`}>회원가입</Link>
                         </>
                     )}
@@ -182,13 +182,13 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 <div className="max-w-[1400px] mx-auto px-10 py-10 grid grid-cols-5 gap-8">
                     {menu.map((section) => (
                         <div key={section.label}>
-                            <p className="text-xs font-semibold tracking-[0.2em] text-[#B8860B] mb-4">{section.label}</p>
+                            <p className="text-sm font-bold text-[#2D2A26] mb-4 pb-3 border-b border-[#E8E4DE]">{section.label}</p>
                             <ul className="space-y-2.5">
                                 {section.items.map((item) => (
                                     <li key={item.href}>
                                         <Link
                                             href={item.href}
-                                            className={`text-[15px] transition-colors hover:text-[#B8860B] ${isMenuActive(pathname, item.href) ? 'text-[#B8860B] font-semibold' : 'text-[#5C5650]'}`}
+                                            className={`text-[17px] transition-colors hover:text-[#8B7355] ${isMenuActive(pathname, item.href) ? 'text-[#2D2A26] font-bold underline underline-offset-4' : 'text-[#5C5650]'}`}
                                         >
                                             {item.label}
                                         </Link>
@@ -208,14 +208,14 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 <nav aria-label="모바일 메뉴" className="px-6 py-8 space-y-8">
                     {menu.map((section) => (
                         <div key={section.label}>
-                            <p data-menu-item className="text-xs font-semibold tracking-[0.2em] text-[#B8860B] mb-3">{section.label}</p>
+                            <p data-menu-item className="text-sm font-bold text-[#8B7355] mb-3">{section.label}</p>
                             <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
                                 {section.items.map((item) => (
                                     <li key={item.href} data-menu-item>
                                         <Link
                                             href={item.href}
                                             onClick={() => setMobileOpen(false)}
-                                            className={`text-lg ${isMenuActive(pathname, item.href) ? 'text-[#B8860B] font-semibold' : 'text-[#2D2A26]'}`}
+                                            className={`text-xl ${isMenuActive(pathname, item.href) ? 'text-[#2D2A26] font-bold underline underline-offset-4' : 'text-[#2D2A26]'}`}
                                             style={{ fontFamily: 'var(--font-serif)' }}
                                         >
                                             {item.label}

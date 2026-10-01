@@ -22,7 +22,7 @@ export default async function HubPage({ hub, searchParams, heroImage }: { hub: H
                 image={intro?.image_url ?? heroImage}
             />
             {intro?.body && (
-                <section className="pt-16 lg:pt-24 bg-[#FAF8F5]">
+                <section className="pt-12 lg:pt-16 bg-[#FAF8F5]">
                     <Reveal className="max-w-3xl mx-auto px-4 sm:px-6">
                         <RichText html={intro.body} />
                     </Reveal>

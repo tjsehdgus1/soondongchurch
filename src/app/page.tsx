@@ -2,13 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { getBlock, getMissionFields } from '@/lib/content'
 import HomeHero from '@/components/home/HomeHero'
 import WorshipStrip from '@/components/home/WorshipStrip'
-import NumbersBand from '@/components/home/NumbersBand'
 import RecentSermons, { type SermonVideo } from '@/components/home/RecentSermons'
 import MissionTeaser from '@/components/home/MissionTeaser'
-import NewsSection from '@/components/home/NewsSection'
+import NewsSection, { type EventPost } from '@/components/home/NewsSection'
 import VisitBand from '@/components/home/VisitBand'
 
-const FOUNDED_YEAR = 1946
 // 원본 6000px → 2400/1200px webp (모바일은 작은 파일)
 const HERO_IMAGES = [
   { src: '/images/hero-bg-1.webp', srcSet: '/images/hero-bg-1-sm.webp 1200w, /images/hero-bg-1.webp 2400w' },
@@ -17,34 +15,22 @@ const HERO_IMAGES = [
 
 export default async function HomePage() {
   const supabase = await createClient()
-  // 한국 날짜 기준 (서버는 UTC)
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
-  const thisYear = Number(today.slice(0, 4))
-
   const [
     hero,
     missionFields,
-    { data: notices },
-    { data: events },
     { data: sermonVideos },
-    { data: gallery },
-    { count: nextGenCount },
+    { data: eventPosts },
   ] = await Promise.all([
     getBlock('home.hero'),
     getMissionFields(),
-    supabase.from('notices').select('id, title, created_at, is_pinned')
-      .order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(4),
-    supabase.from('events').select('id, title, event_date, event_time, location')
-      .gte('event_date', today).order('event_date', { ascending: true }).limit(4),
     // 최근 말씀: '말씀' 허브 게시판의 영상 글
     supabase.from('board_posts').select('id, title, youtube_id, created_at, boards!inner(slug, name, hub)')
       .eq('boards.hub', 'sermons').not('youtube_id', 'is', null)
-      .order('created_at', { ascending: false }).limit(3),
-    // 사진 띠: 공개 글 중 사진이 있는 최신 글
-    supabase.from('board_posts').select('id, title, thumbnail_url, boards!inner(slug)')
-      .not('thumbnail_url', 'is', null).eq('members_only', false)
-      .order('created_at', { ascending: false }).limit(14),
-    supabase.from('boards').select('id', { count: 'exact', head: true }).eq('hub', 'next-gen'),
+      .order('created_at', { ascending: false }).limit(2),
+    // 교회 소식: '교회 행사' 게시판 최신 글
+    supabase.from('board_posts').select('id, title, youtube_id, thumbnail_url, created_at, boards!inner(slug)')
+      .eq('boards.slug', 'events-gallery').eq('members_only', false)
+      .order('created_at', { ascending: false }).limit(6),
   ])
 
   return (
@@ -55,19 +41,9 @@ export default async function HomePage() {
         images={hero?.image_url ? [{ src: hero.image_url }, ...HERO_IMAGES] : HERO_IMAGES}
       />
       <WorshipStrip />
-      <NumbersBand years={thisYear - FOUNDED_YEAR} missionCount={missionFields.length} nextGenCount={nextGenCount ?? 0} />
       <RecentSermons videos={(sermonVideos ?? []) as unknown as SermonVideo[]} />
       <MissionTeaser fields={missionFields} />
-      <NewsSection
-        notices={notices ?? []}
-        events={events ?? []}
-        gallery={(gallery ?? []).map((g) => ({
-          id: g.id,
-          title: g.title,
-          thumbnail_url: g.thumbnail_url as string,
-          slug: (g.boards as unknown as { slug: string }).slug,
-        }))}
-      />
+      <NewsSection posts={(eventPosts ?? []) as unknown as EventPost[]} />
       <VisitBand />
     </>
   )

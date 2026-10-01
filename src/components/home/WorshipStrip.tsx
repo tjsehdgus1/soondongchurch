@@ -10,26 +10,19 @@ export default function WorshipStrip() {
     const next = nextWorship(new Date())
 
     return (
-        <section className="py-24 lg:py-36 bg-[#FAF8F5]">
+        <section className="py-16 lg:py-24 bg-[#FAF8F5]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-                <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-14">
+                <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-end mb-10">
                     <div className="lg:col-span-7">
-                        <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">Worship</p>
-                        <SplitHeading className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
+                        <SplitHeading className="text-4xl sm:text-5xl font-bold leading-[1.2] text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
                             함께 드리는 예배는<br />가장 큰 기쁨입니다
                         </SplitHeading>
                     </div>
                     <Reveal className="lg:col-span-5">
-                        <div className="rounded-2xl bg-[#2D2A26] text-white p-7 flex items-center gap-5">
-                            <span className="relative flex h-3 w-3 shrink-0" aria-hidden="true">
-                                <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-75 animate-ping" />
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
-                            </span>
-                            <div>
-                                <p className="text-xs tracking-[0.2em] text-white/60 mb-1">{next.isToday ? '오늘 드리는 예배' : '다음 예배'}</p>
-                                <p className="text-xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>{next.worship.name}</p>
-                                <p className="text-sm text-white/70 mt-0.5">{KST_TIME.format(next.startsAt)}</p>
-                            </div>
+                        <div className="border-l-2 border-[#2D2A26] pl-6">
+                            <p className="text-base text-[#8B7355]">{next.isToday ? '오늘 드리는 예배' : '다음 예배'}</p>
+                            <p className="mt-1 text-2xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>{next.worship.name}</p>
+                            <p className="mt-1 text-lg text-[#5C5650]">{KST_TIME.format(next.startsAt)}</p>
                         </div>
                     </Reveal>
                 </div>

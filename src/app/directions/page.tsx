@@ -20,8 +20,8 @@ export default async function DirectionsPage() {
 
     return (
         <>
-            <PageHero eyebrow="Location" title={guide?.title ?? '오시는 길'} description={guide?.subtitle ?? '전라남도 순천시 남신월 4길 3-13'} />
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 lg:py-24 space-y-14">
+            <PageHero eyebrow="교회소개" title={guide?.title ?? '오시는 길'} description={guide?.subtitle ?? '전라남도 순천시 남신월 4길 3-13'} />
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12 lg:py-16 space-y-14">
                 <Reveal variant="mask" className="rounded-3xl overflow-hidden border border-[#E8E4DE] bg-white">
                     <KakaoRoughMap />
                 </Reveal>

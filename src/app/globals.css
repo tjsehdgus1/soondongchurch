@@ -1,5 +1,14 @@
 @import "tailwindcss";
 @import "lenis/dist/lenis.css";
+
+/* 글자 크기 한 단계씩 키움 (교인 연령대 고려 — 2026-10 사용자 피드백 "폰트가 작다")
+   xs 12→13, sm 14→15, base 16→17, lg 18→19px. 줄간격 비율은 기본값 유지 */
+@theme {
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+}
 @plugin "@tailwindcss/typography";
 
 /* ─────────────────────────────────────────
@@ -38,6 +47,7 @@
    Base
 ───────────────────────────────────────── */
 body {
+  font-size: 1.0625rem;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -86,30 +96,8 @@ body {
   100%      { opacity: 0; }
 }
 
-/* 스크롤 유도 선 */
-@keyframes scroll-line {
-  0%   { transform: scaleY(0); transform-origin: top; }
-  50%  { transform: scaleY(1); transform-origin: top; }
-  51%  { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
-
-/* 홈 선교 맛보기 지구 점 무늬 흐름 */
-@keyframes globe-drift {
-  from { background-position: 0 0; }
-  to   { background-position: 280px 0; }
-}
-
-/* 갤러리 띠 무한 흐름 */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.marquee-track { animation: marquee 60s linear infinite; }
-.marquee-track:hover { animation-play-state: paused; }
-
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track, .ken-burns, .hero-crossfade, .scroll-line, .globe-drift, .hero-rise, .line-up { animation: none !important; }
+  .ken-burns, .hero-crossfade, .hero-rise, .line-up { animation: none !important; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 

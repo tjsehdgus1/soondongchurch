@@ -18,16 +18,15 @@ export default async function WorshipPage() {
     return (
         <>
             <PageHero
-                eyebrow="Worship"
+                eyebrow="예배·말씀"
                 title={intro?.title ?? '함께 드리는 예배'}
                 description={intro?.subtitle ?? '함께 드리는 예배는 가장 큰 기쁨입니다'}
                 image="/images/worship_schedule_bg.png"
             />
 
-            <section className="py-24 lg:py-32 bg-[#FAF8F5]">
+            <section className="py-16 lg:py-20 bg-[#FAF8F5]">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-                    <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">Schedule</p>
-                    <SplitHeading className="text-4xl lg:text-5xl font-bold text-[#2D2A26] mb-14" style={{ fontFamily: 'var(--font-serif)' }}>
+                    <SplitHeading className="text-4xl lg:text-5xl font-bold text-[#2D2A26] mb-10" style={{ fontFamily: 'var(--font-serif)' }}>
                         정기 예배
                     </SplitHeading>
 
@@ -52,22 +51,20 @@ export default async function WorshipPage() {
             </section>
 
             {intro?.body && (
-                <section className="pb-24 bg-[#FAF8F5]">
+                <section className="pb-16 bg-[#FAF8F5]">
                     <Reveal className="max-w-3xl mx-auto px-4 sm:px-6">
                         <RichText html={intro.body} />
                     </Reveal>
                 </section>
             )}
 
-            <section className="py-20 bg-white border-t border-[#E8E4DE]">
+            <section className="py-14 bg-white border-t border-[#E8E4DE]">
                 <Reveal stagger className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid md:grid-cols-2 gap-6">
                     <Link href="/bulletins" className="group rounded-3xl bg-[#2D2A26] text-white p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="text-xs tracking-[0.3em] uppercase text-white/60">Bulletin</p>
                         <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>주보 보기</p>
                         <p className="mt-3 text-sm text-white/60">이번 주 예배 순서와 교회 소식</p>
                     </Link>
                     <Link href="/sermons" className="group rounded-3xl bg-[#FAF8F5] border border-[#E8E4DE] text-[#2D2A26] p-10 hover:-translate-y-1 transition-transform duration-500">
-                        <p className="text-xs tracking-[0.3em] uppercase text-[#B8860B]">Sermons</p>
                         <p className="mt-6 text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>말씀 다시 듣기</p>
                         <p className="mt-3 text-sm text-[#8B7355]">담임목사·협동목사·초청 설교 영상</p>
                     </Link>

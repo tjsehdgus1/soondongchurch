@@ -9,8 +9,8 @@ export default function Footer() {
 
     return (
         <footer className="bg-[#2D2A26] text-[#A09890]">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-20 pb-10">
-                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 pb-14 border-b border-white/10">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 pb-10">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 pb-12 border-b border-white/10">
                     <p className="text-3xl sm:text-4xl lg:text-5xl leading-tight text-[#FAF8F5]" style={{ fontFamily: 'var(--font-serif)' }}>
                         하나님이 기뻐하시는<br />
                         <span className="text-white/60">행복한 교회</span>
@@ -21,7 +21,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 py-14">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 py-12">
                     <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3 text-sm">
                         <div className="flex items-center gap-2 mb-4">
                             <Image src="/images/logo.svg" alt="" width={32} height={32} className="rounded-md" />

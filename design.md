@@ -14,8 +14,18 @@
 | 제목 글꼴 | Noto Serif KR (`var(--font-serif)`) | 섹션 제목 4xl~8xl, `leading-[1.1]` |
 | 본문 글꼴 | Pretendard | |
 
-- 너비: `max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10`, 섹션 간격 `py-24 lg:py-36`
-- 섹션 머리: 영문 eyebrow(`text-xs tracking-[0.3em] uppercase text-[#B8860B]`) + 세리프 대제목(`SplitHeading`)
+- 너비: `max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10`, 섹션 간격 `py-16 lg:py-24` (그 이상 키우지 않음)
+- 글자 크기: Tailwind 기본보다 한 단계 큼 (`globals.css` @theme — xs 13, sm 15, base 17, lg 19px). 본문·메뉴는 17px 이상
+- 섹션 머리: 세리프 대제목(`SplitHeading`, `text-4xl sm:text-5xl`)만. 하위 페이지 상단은 한글 메뉴 위치(예: `교회소개`)를 작은 글씨로
+
+### 쓰지 않는 것 (2026-10 "슬롭 UI" 점검 — news.hada.io/topic?id=34370)
+- 장식용 영문 라벨(WORSHIP, MISSION FIELDS, Since 1946 …) — 한글 정보가 아니면 넣지 않음
+- 이모지 아이콘·배지 (📌🔒📋 등) — 필요한 정보는 글자로
+- 숫자 카운트업 통계 띠, 의미 없는 수치(게시판 수 등)
+- 사진 없는 카드에 그라데이션+이니셜 같은 가짜 이미지
+- 같은 둥근 카드의 반복 — 목록은 선 구분 행(row)으로
+- 관리자용 안내문이 공개 화면에 보이는 것 (빈 콘텐츠는 섹션째 숨김)
+- 빛·광채·금색 강조, 스크롤 유도 문구, 깜빡이는 점
 - 버튼: 둥근 pill(`rounded-full px-7 py-3.5`), 주 버튼 차콜(다크 배경 위에서는 흰색) · 보조 버튼 테두리, 데스크톱은 `MagneticButton`
 - 카드: `rounded-2xl`~`rounded-3xl`, 그림자 대신 테두리 `#E8E4DE` + hover 시 `-translate-y-1`·사진 `scale-105`
 

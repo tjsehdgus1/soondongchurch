@@ -13,14 +13,14 @@ export type Hub = {
 }
 
 export const HUBS: Record<HubKey, Hub> = {
-    sermons: { path: '/sermons', title: '말씀', eyebrow: 'Sermons', kind: 'video' },
-    praise: { path: '/praise', title: '찬양', eyebrow: 'Praise', kind: 'video' },
-    'next-gen': { path: '/next-gen', title: '다음세대', eyebrow: 'Next Generation', introKey: 'nextgen.intro', kind: 'mixed' },
-    mission: { path: '/mission', title: '선교', eyebrow: 'Mission', introKey: 'mission.intro', kind: 'mixed' },
-    fellowship: { path: '/fellowship', title: '전도회', eyebrow: 'Fellowship', introKey: 'fellowship.intro', kind: 'mixed' },
-    discipleship: { path: '/discipleship', title: '양육', eyebrow: 'Discipleship', introKey: 'discipleship.intro', kind: 'mixed' },
+    sermons: { path: '/sermons', title: '말씀', eyebrow: '예배·말씀', kind: 'video' },
+    praise: { path: '/praise', title: '찬양', eyebrow: '예배·말씀', kind: 'video' },
+    'next-gen': { path: '/next-gen', title: '다음세대', eyebrow: '다음세대', introKey: 'nextgen.intro', kind: 'mixed' },
+    mission: { path: '/mission', title: '선교', eyebrow: '선교·사역', introKey: 'mission.intro', kind: 'mixed' },
+    fellowship: { path: '/fellowship', title: '전도회', eyebrow: '선교·사역', introKey: 'fellowship.intro', kind: 'mixed' },
+    discipleship: { path: '/discipleship', title: '양육', eyebrow: '선교·사역', introKey: 'discipleship.intro', kind: 'mixed' },
     // 소식·나눔 게시판은 허브 화면 없이 각 게시판으로 바로 이동
-    community: { path: '/board', title: '소식·나눔', eyebrow: 'Community', kind: 'mixed' },
+    community: { path: '/board', title: '소식·나눔', eyebrow: '소식·나눔', kind: 'mixed' },
 }
 
 export function isHubKey(value: string | null | undefined): value is HubKey {

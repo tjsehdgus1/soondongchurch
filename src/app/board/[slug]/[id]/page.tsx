@@ -60,8 +60,8 @@ export default async function BoardPostPage({ params }: Params) {
                 <article className="bg-white rounded-2xl shadow-sm border overflow-hidden" style={{ borderColor: '#E8E4DE' }}>
                     <div className="px-6 sm:px-8 py-7 border-b" style={{ borderColor: '#E8E4DE' }}>
                         <div className="flex flex-wrap gap-1.5 mb-3">
-                            {post.is_pinned && <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: '#B8860B1A', color: '#B8860B' }}>📌 고정</span>}
-                            {post.members_only && <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">🔒 회원 전용</span>}
+                            {post.is_pinned && <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: '#B8860B1A', color: '#B8860B' }}>고정</span>}
+                            {post.members_only && <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">회원 전용</span>}
                             {post.category && <span className="text-xs font-semibold px-2.5 py-1 rounded-full border" style={{ borderColor: '#E8E4DE', color: '#8B7355' }}>{post.category}</span>}
                         </div>
                         <h1 className="text-2xl md:text-3xl font-extrabold leading-snug" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{post.title}</h1>

@@ -41,7 +41,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
                 <div className="px-8 py-7 border-b" style={{ borderColor: '#E8E4DE' }}>
                     {notice.is_pinned && (
                         <span className="inline-flex items-center gap-1 bg-red-100 text-red-600 text-xs font-bold px-2.5 py-1 rounded-full mb-3">
-                            📌 중요 공지
+                            중요 공지
                         </span>
                     )}
                     <h1 className="text-2xl md:text-3xl font-extrabold leading-snug" style={{ color: '#2D2A26', fontFamily: 'var(--font-serif)' }}>{notice.title}</h1>

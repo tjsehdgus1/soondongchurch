@@ -30,9 +30,9 @@ export default function HomeHero({ title, subtitle, images }: HomeHeroProps) {
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-[#2D2A26] via-[#2D2A26]/45 to-[#2D2A26]/55" />
 
-            <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-28 lg:pb-32">
-                <p className="hero-rise text-xs sm:text-sm font-semibold tracking-[0.35em] uppercase text-white/60 mb-6" style={{ animationDelay: '0.2s' }}>
-                    Since 1946 · Suncheon
+            <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-20 lg:pb-24">
+                <p className="hero-rise text-base sm:text-lg font-medium text-white/75 mb-5" style={{ animationDelay: '0.2s' }}>
+                    1946년부터 순천과 함께
                 </p>
                 <h1 className="text-[2.6rem] leading-[1.12] sm:text-6xl lg:text-8xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
                     {lines.map((line, i) => (
@@ -56,10 +56,6 @@ export default function HomeHero({ title, subtitle, images }: HomeHeroProps) {
                 </div>
             </div>
 
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-[10px] tracking-[0.4em] uppercase text-white/60" aria-hidden="true">
-                Scroll
-                <span className="scroll-line block w-px h-12 bg-white/60" style={{ animation: 'scroll-line 2.2s cubic-bezier(0.65,0,0.35,1) infinite' }} />
-            </div>
         </section>
     )
 }

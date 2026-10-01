@@ -6,9 +6,8 @@ import MagneticButton from '@/components/motion/MagneticButton'
 export default function VisitBand() {
     return (
         <section className="bg-[#F2EFE9] text-[#2D2A26] border-t border-[#E8E4DE]">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24 lg:py-28 grid lg:grid-cols-2 gap-10 items-end">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 lg:py-20 grid lg:grid-cols-2 gap-10 items-end">
                 <div>
-                    <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">Visit</p>
                     <SplitHeading className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.15]" style={{ fontFamily: 'var(--font-serif)' }}>
                         언제든 오세요,<br />함께 예배해요
                     </SplitHeading>

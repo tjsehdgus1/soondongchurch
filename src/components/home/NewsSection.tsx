@@ -1,82 +1,55 @@
 import Link from 'next/link'
 import SplitHeading from '@/components/motion/SplitHeading'
 import Reveal from '@/components/motion/Reveal'
-import { formatDate } from '@/lib/boards'
+import VideoCard from '@/components/video/VideoCard'
+import { formatDate, postThumbnail } from '@/lib/boards'
 
-type Notice = { id: number, title: string, created_at: string, is_pinned: boolean }
-type Event = { id: number, title: string, event_date: string, event_time: string | null, location: string | null }
-type GalleryItem = { id: number, title: string, thumbnail_url: string, slug: string }
+export type EventPost = {
+    id: number
+    title: string
+    youtube_id: string | null
+    thumbnail_url: string | null
+    created_at: string
+}
 
-const EVENT_DATE = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+// 교회 소식: '교회 행사' 게시판 최신 글 (영상은 바로 재생)
+export default function NewsSection({ posts }: { posts: EventPost[] }) {
+    if (posts.length === 0) return null
 
-// 소식: 공지 · 다가오는 행사 · 사진 띠
-export default function NewsSection({ notices, events, gallery }: { notices: Notice[], events: Event[], gallery: GalleryItem[] }) {
     return (
-        <section className="py-24 lg:py-36 bg-[#FAF8F5] overflow-hidden">
+        <section className="py-16 lg:py-24 bg-[#FAF8F5]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-                <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">News</p>
-                <SplitHeading className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D2A26] mb-14" style={{ fontFamily: 'var(--font-serif)' }}>
-                    교회 소식
-                </SplitHeading>
-
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-                    <Reveal>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-[#2D2A26]">공지사항</h3>
-                            <Link href="/notices" className="text-sm text-[#8B7355] hover:text-[#B8860B]">전체 →</Link>
-                        </div>
-                        <ul className="border-t border-[#2D2A26]">
-                            {notices.length === 0 && <li className="py-6 text-sm text-[#A09890]">등록된 공지가 없습니다.</li>}
-                            {notices.map((n) => (
-                                <li key={n.id} className="border-b border-[#E8E4DE]">
-                                    <Link href={`/notices/${n.id}`} className="group flex items-center justify-between gap-4 py-5">
-                                        <span className="font-medium text-[#2D2A26] group-hover:text-[#B8860B] transition-colors line-clamp-1">
-                                            {n.is_pinned && <span className="text-[#2D2A26] mr-2">●</span>}{n.title}
-                                        </span>
-                                        <span className="text-sm text-[#A09890] shrink-0">{formatDate(n.created_at)}</span>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </Reveal>
-
-                    <Reveal delay={0.1}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-[#2D2A26]">다가오는 행사</h3>
-                            <Link href="/events" className="text-sm text-[#8B7355] hover:text-[#B8860B]">전체 →</Link>
-                        </div>
-                        <ul className="border-t border-[#2D2A26]">
-                            {events.length === 0 && <li className="py-6 text-sm text-[#A09890]">예정된 행사가 없습니다.</li>}
-                            {events.map((e) => (
-                                <li key={e.id} className="border-b border-[#E8E4DE] py-5 flex gap-6">
-                                    <span className="w-28 shrink-0 text-sm font-semibold text-[#8B7355]">{EVENT_DATE.format(new Date(`${e.event_date}T00:00:00`))}</span>
-                                    <span>
-                                        <span className="block font-medium text-[#2D2A26]">{e.title}</span>
-                                        <span className="block text-sm text-[#A09890] mt-0.5">{[e.event_time?.slice(0, 5), e.location].filter(Boolean).join(' · ')}</span>
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    </Reveal>
+                <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+                    <SplitHeading className="text-4xl sm:text-5xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
+                        교회 소식
+                    </SplitHeading>
+                    <Link href="/board/events-gallery" className="text-base font-medium text-[#5C5650] hover:text-[#2D2A26] underline-offset-4 hover:underline">
+                        교회 행사 전체 보기 →
+                    </Link>
                 </div>
-            </div>
 
-            {gallery.length > 0 && (
-                <div className="mt-20" aria-label="교회 사진">
-                    <div className="marquee-track flex gap-4 w-max" style={{ animation: 'marquee 70s linear infinite' }}>
-                        {/* 끊김 없는 반복을 위해 두 번 나열 */}
-                        {[...gallery, ...gallery].map((g, i) => (
-                            <Link key={`${g.id}-${i}`} href={`/board/${g.slug}/${g.id}`} tabIndex={i >= gallery.length ? -1 : undefined}
-                                aria-hidden={i >= gallery.length ? true : undefined}
-                                className="group relative w-64 sm:w-80 aspect-[4/3] shrink-0 overflow-hidden rounded-2xl bg-[#E8E4DE]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={g.thumbnail_url} alt={g.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                <span className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity line-clamp-1">{g.title}</span>
+                <Reveal stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+                    {posts.map((post) => {
+                        const href = `/board/events-gallery/${post.id}`
+                        if (post.youtube_id) {
+                            return <VideoCard key={post.id} youtubeId={post.youtube_id} title={post.title} href={href} meta={formatDate(post.created_at)} />
+                        }
+                        const thumb = postThumbnail(post)
+                        return (
+                            <Link key={post.id} href={href} className="group block">
+                                <div className="aspect-video rounded-2xl overflow-hidden bg-[#E8E4DE]">
+                                    {thumb && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={thumb} alt="" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                    )}
+                                </div>
+                                <p className="pt-4 text-sm text-[#8B7355]">{formatDate(post.created_at)}</p>
+                                <p className="mt-1 font-bold text-[#2D2A26] group-hover:underline underline-offset-4">{post.title}</p>
                             </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
+                        )
+                    })}
+                </Reveal>
+            </div>
         </section>
     )
 }

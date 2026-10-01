@@ -1,6 +1,7 @@
 import SplitHeading from '@/components/motion/SplitHeading'
 
 interface PageHeroProps {
+    // 메뉴 위치 (예: 교회소개)
     eyebrow: string
     title: string
     description?: string | null
@@ -19,7 +20,7 @@ export default function PageHero({ eyebrow, title, description, image, children 
                     style={{ animation: 'ken-burns 14s ease-out forwards' }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#2D2A26] via-[#2D2A26]/40 to-[#2D2A26]/30" />
                 <div className="relative max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-10 pb-16 pt-40">
-                    <p className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-white/60 mb-5">{eyebrow}</p>
+                    <p className="text-base font-medium text-white/70 mb-4">{eyebrow}</p>
                     <SplitHeading as="h1" immediate className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] max-w-4xl" style={{ fontFamily: 'var(--font-serif)' }}>
                         {title}
                     </SplitHeading>
@@ -34,8 +35,8 @@ export default function PageHero({ eyebrow, title, description, image, children 
 
     return (
         <section className="bg-[#FAF8F5] border-b border-[#E8E4DE]">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 pb-14 lg:pt-24 lg:pb-20">
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">{eyebrow}</p>
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-10 lg:pt-16 lg:pb-14">
+                <p className="text-base font-medium text-[#8B7355] mb-4">{eyebrow}</p>
                 <SplitHeading as="h1" immediate className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] text-[#2D2A26] max-w-4xl" style={{ fontFamily: 'var(--font-serif)' }}>
                     {title}
                 </SplitHeading>

@@ -14,7 +14,8 @@ const ARTICLE = { history: 69, vision: 70, staff: 71, pastors: 75 }
 
 const PAGE_BLOCKS = [
     { key: 'home.hero', title: '하나님이 기뻐하시는\n행복한 교회', subtitle: '하나님의 은혜 안에서 함께 성장하는 교회' },
-    { key: 'about.greeting', title: '순천순동교회에 오신 것을 환영합니다', subtitle: '1946년부터 순천과 함께한 교회', body: '<p>이 문구는 관리자 화면(페이지 문구)에서 담임목사 인사말로 바꿔 주세요.</p>' },
+    // 인사말 본문은 비워 둠 → 관리자가 넣으면 교회 소개 페이지에 표시
+    { key: 'about.greeting', title: '순천순동교회에 오신 것을 환영합니다', subtitle: '1946년부터 순천과 함께한 교회' },
     { key: 'about.vision', title: '비전과 목표', subtitle: '하나님이 기뻐하시는 행복한 교회' },
     { key: 'worship.intro', title: '함께 드리는 예배', subtitle: '함께 드리는 예배는 가장 큰 기쁨입니다' },
     { key: 'nextgen.intro', title: '다음세대', subtitle: '말씀 안에서 자라나는 아이들과 청년들', body: '<p>유아 유치반부터 청년회까지, 각 부서 소식을 전합니다.</p>' },

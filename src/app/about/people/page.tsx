@@ -24,14 +24,13 @@ export default async function PeoplePage() {
 
     return (
         <>
-            <PageHero eyebrow="People" title="섬기는 분들" description="하나님과 교회를 섬기는 귀한 분들을 소개합니다" />
+            <PageHero eyebrow="교회소개" title="섬기는 분들" description="하나님과 교회를 섬기는 귀한 분들을 소개합니다" />
 
             {pastors.length > 0 && (
-                <section className="py-24 lg:py-32 bg-white">
+                <section className="py-16 lg:py-20 bg-white">
                     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-12 gap-12">
                         <div className="lg:col-span-4">
                             <div className="lg:sticky lg:top-32">
-                                <p className="text-xs font-semibold tracking-[0.3em] uppercase text-[#B8860B] mb-5">Pastors</p>
                                 <SplitHeading className="text-4xl lg:text-5xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
                                     역대 담임교역자
                                 </SplitHeading>
@@ -57,7 +56,7 @@ export default async function PeoplePage() {
             )}
 
             {(groups.size > 0 || hiddenCategories.length > 0) && (
-                <section className="py-24 lg:py-32 bg-[#FAF8F5]">
+                <section className="py-16 lg:py-20 bg-[#FAF8F5]">
                     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 space-y-20">
                         {[...groups.entries()].map(([category, people]) => (
                             <div key={category}>
@@ -72,7 +71,7 @@ export default async function PeoplePage() {
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={p.photo_url} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-3xl text-[#C8C2B8]" aria-hidden="true">✝</div>
+                                                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-[#B5ADA2]" aria-hidden="true">{p.name.slice(0, 1)}</div>
                                                 )}
                                             </div>
                                             <figcaption className="mt-3 text-center">
@@ -88,7 +87,6 @@ export default async function PeoplePage() {
                         {hiddenCategories.length > 0 && (
                             <Reveal className="rounded-3xl bg-[#2D2A26] text-white p-10 lg:p-14 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                                 <div>
-                                    <p className="text-xs tracking-[0.3em] uppercase text-white/60 mb-4">Members only</p>
                                     <p className="text-2xl lg:text-3xl font-bold" style={{ fontFamily: 'var(--font-serif)' }}>교인 사진은 로그인하면 볼 수 있어요</p>
                                     <p className="mt-3 text-sm text-white/60">{hiddenCategories.join(' · ')}</p>
                                 </div>

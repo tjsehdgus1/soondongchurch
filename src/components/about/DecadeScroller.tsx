@@ -47,38 +47,37 @@ export default function DecadeScroller({ chapters }: { chapters: DecadeChapter[]
     // GSAP pin이 section을 pin-spacer로 감싸므로, 바깥 div로 한 번 더 감싸 형제 요소 하이드레이션과 충돌하지 않게 함
     return (
         <div>
-        <section ref={sectionRef} className="relative bg-[#2D2A26] text-white overflow-hidden lg:h-screen">
-            <div ref={trackRef} className="flex h-full overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none">
-                <div className="shrink-0 w-[85vw] lg:w-[45vw] flex flex-col justify-center px-6 lg:px-16 py-20 snap-start">
-                    <p className="text-xs tracking-[0.35em] uppercase text-white/60 mb-6">Chapters</p>
-                    <p className="text-4xl lg:text-6xl font-bold leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-                        {chapters[0]?.decade}년대부터<br />오늘까지
-                    </p>
-                    <p className="mt-6 text-white/60 hidden lg:block">스크롤하면 연대별 이야기가 이어집니다 →</p>
-                    <p className="mt-6 text-white/60 lg:hidden">옆으로 넘겨 보세요 →</p>
-                </div>
-                {chapters.map((c) => (
-                    <article key={c.decade} className="shrink-0 w-[85vw] sm:w-[60vw] lg:w-[34vw] border-l border-white/10 px-6 lg:px-12 py-20 flex flex-col justify-center snap-start overflow-hidden">
-                        <p className="text-6xl sm:text-7xl xl:text-[8rem] leading-none font-bold text-white/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
-                            {c.decade}<span className="text-3xl sm:text-4xl xl:text-5xl">s</span>
+            <section ref={sectionRef} className="relative bg-[#2D2A26] text-white overflow-hidden lg:h-screen">
+                <div ref={trackRef} className="flex h-full overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none">
+                    <div className="shrink-0 w-[85vw] lg:w-[32vw] flex flex-col justify-center px-6 lg:px-14 py-16 snap-start">
+                        <p className="text-4xl lg:text-6xl font-bold leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+                            {chapters[0]?.decade}년대부터<br />오늘까지
                         </p>
-                        <p className="mt-4 text-xs tracking-[0.3em] text-white/50">{c.count}개의 기록</p>
-                        <ul className="mt-8 space-y-4">
-                            {c.highlights.map((h, i) => (
-                                <li key={i} className="flex gap-4 text-sm lg:text-base leading-relaxed text-white/80">
-                                    <span className="shrink-0 font-semibold text-white/60 tabular-nums">{h.year}</span>
-                                    <span className="line-clamp-3">{h.title}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </article>
-                ))}
-                <div className="shrink-0 w-[10vw] hidden lg:block" />
-            </div>
-            <div className="hidden lg:block absolute bottom-10 left-16 right-16 h-px bg-white/15">
-                <div ref={progressRef} className="h-full bg-white origin-left" style={{ transform: 'scaleX(0)' }} />
-            </div>
-        </section>
+                        <p className="mt-6 text-white/60 hidden lg:block">스크롤하면 연대별 이야기가 이어집니다 →</p>
+                        <p className="mt-6 text-white/60 lg:hidden">옆으로 넘겨 보세요 →</p>
+                    </div>
+                    {chapters.map((c) => (
+                        <article key={c.decade} className="shrink-0 w-[85vw] sm:w-[60vw] lg:w-[25vw] border-l border-white/10 px-6 lg:px-10 py-16 flex flex-col justify-center snap-start overflow-hidden">
+                            <p className="text-6xl sm:text-7xl leading-none font-bold text-white/90 tabular-nums" style={{ fontFamily: 'var(--font-serif)' }}>
+                                {c.decade}<span className="text-3xl sm:text-4xl">s</span>
+                            </p>
+                            <p className="mt-4 text-xs tracking-[0.3em] text-white/50">{c.count}개의 기록</p>
+                            <ul className="mt-8 space-y-4">
+                                {c.highlights.map((h, i) => (
+                                    <li key={i} className="flex gap-4 text-sm lg:text-base leading-relaxed text-white/80">
+                                        <span className="shrink-0 font-semibold text-white/60 tabular-nums">{h.year}</span>
+                                        <span className="line-clamp-3">{h.title}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </article>
+                    ))}
+                    <div className="shrink-0 w-[6vw] hidden lg:block" />
+                </div>
+                <div className="hidden lg:block absolute bottom-10 left-16 right-16 h-px bg-white/15">
+                    <div ref={progressRef} className="h-full bg-white origin-left" style={{ transform: 'scaleX(0)' }} />
+                </div>
+            </section>
         </div>
     )
 }
