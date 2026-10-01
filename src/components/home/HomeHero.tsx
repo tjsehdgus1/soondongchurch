@@ -1,7 +1,6 @@
 import SplitHeading from '@/components/motion/SplitHeading'
 import Reveal from '@/components/motion/Reveal'
 import MagneticButton from '@/components/motion/MagneticButton'
-import HeroLight from '@/components/three/HeroLight'
 
 interface HomeHeroProps {
     title: string
@@ -9,7 +8,7 @@ interface HomeHeroProps {
     images: string[]
 }
 
-// 첫 화면: 사진 천천히 확대·교차 전환 + 빛 셰이더 + 줄 단위 제목 등장
+// 첫 화면: 사진 천천히 확대·교차 전환 + 줄 단위 제목 등장
 export default function HomeHero({ title, subtitle, images }: HomeHeroProps) {
     const [first, second] = images
     const lines = title.split('\n')
@@ -26,10 +25,7 @@ export default function HomeHero({ title, subtitle, images }: HomeHeroProps) {
                         style={{ animation: 'hero-crossfade 16s ease-in-out infinite, ken-burns 16s ease-out infinite alternate-reverse' }} />
                 )}
             </div>
-            {/* 대체 빛 (셰이더가 없을 때도 분위기 유지) */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_0%,rgba(212,168,67,0.35),transparent_55%)]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A] via-[#1F1D1A]/45 to-[#1F1D1A]/55" />
-            <HeroLight className="absolute inset-0 mix-blend-screen" />
 
             <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col justify-end pb-28 lg:pb-32">
                 <Reveal delay={0.2}>

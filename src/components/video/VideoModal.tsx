@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { getLenis } from '@/components/motion/SmoothScroll'
 
@@ -23,18 +23,11 @@ export default function VideoModalProvider({ children }: { children: ReactNode }
         getLenis()?.stop()
     }, [])
 
-    const close = useCallback(() => dialogRef.current?.close(), [])
-
-    useEffect(() => {
-        const dialog = dialogRef.current
-        if (!dialog) return
-        // 닫히면 iframe을 제거해 재생 중지
-        const onClose = () => {
-            setVideo(null)
-            getLenis()?.start()
-        }
-        dialog.addEventListener('close', onClose)
-        return () => dialog.removeEventListener('close', onClose)
+    // 닫기: iframe을 바로 제거해 재생 중지 (close 이벤트에만 기대지 않음)
+    const close = useCallback(() => {
+        setVideo(null)
+        dialogRef.current?.close()
+        getLenis()?.start()
     }, [])
 
     return (
@@ -42,6 +35,9 @@ export default function VideoModalProvider({ children }: { children: ReactNode }
             {children}
             <dialog
                 ref={dialogRef}
+                // 브라우저 기본 닫힘(Esc 등)도 같은 정리 경로로
+                onCancel={(e) => { e.preventDefault(); close() }}
+                onClose={() => setVideo(null)}
                 aria-label={video?.title ?? '영상'}
                 className="m-auto w-[min(1100px,94vw)] bg-transparent p-0 backdrop:bg-black/85 backdrop:backdrop-blur-sm open:animate-[fade-in_0.3s_ease-out]"
                 // 바깥(배경) 클릭 시 닫기
