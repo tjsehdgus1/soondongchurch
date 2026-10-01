@@ -203,7 +203,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 className={`hidden lg:block absolute inset-x-0 top-full bg-[#FAF8F5] border-t border-[#E8E4DE] shadow-[0_24px_48px_-24px_rgba(45,42,38,0.25)] transition-all duration-500 ${megaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
                 onFocus={() => setMegaOpen(true)}
             >
-                <div className="max-w-[1400px] mx-auto px-10 py-10 grid grid-cols-5 gap-8">
+                <div className={`max-w-[1400px] mx-auto px-10 py-10 grid gap-8 ${menu.length > 5 ? 'grid-cols-6' : 'grid-cols-5'}`}>
                     {menu.map((section) => {
                         const activeHref = activeItemHref(section.items, pathname, search)
                         return (

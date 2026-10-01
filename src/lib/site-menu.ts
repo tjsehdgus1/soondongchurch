@@ -45,11 +45,27 @@ export function buildSiteMenu({ loggedIn, isAdmin }: { loggedIn: boolean, isAdmi
                 { href: '/board/testimony', label: '간증' },
                 { href: '/board/free', label: '자유게시판' },
                 ...(loggedIn ? [{ href: '/groups', label: '소그룹' }] : []),
-                ...(isAdmin ? [{ href: '/admin', label: '관리자' }] : []),
             ],
         },
+        // 관리자로 로그인하면 메뉴 오른쪽 끝에 관리 화면 묶음
+        ...(isAdmin ? [{ label: '관리자', href: '/admin', items: ADMIN_ITEMS }] : []),
     ]
 }
+
+// 관리 화면 (src/app/admin/AdminSidebar.tsx 와 같은 순서)
+const ADMIN_ITEMS: MenuItem[] = [
+    { href: '/admin', label: '대시보드' },
+    { href: '/admin/bulletins', label: '주보' },
+    { href: '/admin/events', label: '행사일정' },
+    { href: '/admin/notices', label: '공지사항' },
+    { href: '/admin/boards', label: '게시판' },
+    { href: '/admin/pages', label: '페이지 문구' },
+    { href: '/admin/history', label: '연혁' },
+    { href: '/admin/people', label: '섬기는 분들' },
+    { href: '/admin/missions', label: '선교지' },
+    { href: '/admin/groups', label: '소그룹' },
+    { href: '/admin/members', label: '교인' },
+]
 
 // 현재 경로가 메뉴 항목에 해당하는지 (쿼리 제외 경로 비교)
 export function isMenuActive(pathname: string, href: string): boolean {
