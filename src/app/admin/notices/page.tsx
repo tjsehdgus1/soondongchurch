@@ -19,6 +19,23 @@ export default function AdminNoticesPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [isPinned, setIsPinned] = useState(false)
+  // 수정 중인 공지 (null이면 새 글 작성)
+  const [editingId, setEditingId] = useState<number | null>(null)
+
+  const startEdit = (notice: Notice) => {
+    setEditingId(notice.id)
+    setTitle(notice.title)
+    setContent(notice.content)
+    setIsPinned(notice.is_pinned)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const resetForm = () => {
+    setEditingId(null)
+    setTitle('')
+    setContent('')
+    setIsPinned(false)
+  }
 
   const fetchNotices = async () => {
     setLoading(true)
@@ -38,22 +55,36 @@ export default function AdminNoticesPage() {
     fetchNotices()
   }, [])
 
+  // 사용자 화면의 '수정' 버튼으로 들어온 경우 (?edit=공지번호) 해당 공지를 바로 수정 상태로
+  const [editParamHandled, setEditParamHandled] = useState(false)
+  useEffect(() => {
+    if (editParamHandled || loading) return
+    setEditParamHandled(true)
+    const id = Number(new URLSearchParams(window.location.search).get('edit'))
+    const target = notices.find((n) => n.id === id)
+    if (target) startEdit(target)
+  }, [loading, notices, editParamHandled])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title || !content) return
     setFormLoading(true)
     try {
-      const res = await fetch('/api/admin/notices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, is_pinned: isPinned, author_name: '관리자' }),
-      })
+      const res = editingId
+        ? await fetch(`/api/admin/notices?id=${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content, is_pinned: isPinned }),
+        })
+        : await fetch('/api/admin/notices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content, is_pinned: isPinned, author_name: '관리자' }),
+        })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? '등록 실패')
-      alert('공지사항이 등록되었습니다.')
-      setTitle('')
-      setContent('')
-      setIsPinned(false)
+      if (!res.ok) throw new Error(data.error ?? '저장 실패')
+      alert(editingId ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.')
+      resetForm()
       fetchNotices()
     } catch (e) {
       alert('오류가 발생했습니다: ' + (e instanceof Error ? e.message : '알 수 없는 오류'))
@@ -102,7 +133,7 @@ export default function AdminNoticesPage() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-               <span className="text-blue-500">✍️</span> 새 공지사항 작성
+               <span className="text-blue-500">✍️</span> {editingId ? '공지사항 수정' : '새 공지사항 작성'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -123,8 +154,13 @@ export default function AdminNoticesPage() {
                 </label>
               </div>
               <button disabled={formLoading} type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 mt-4 shadow-sm hover:shadow-md">
-                {formLoading ? '등록 중...' : '새 공지사항 올리기'}
+                {formLoading ? '저장 중...' : editingId ? '수정 내용 저장' : '새 공지사항 올리기'}
               </button>
+              {editingId && (
+                <button type="button" onClick={resetForm} className="w-full py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
+                  수정 취소
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -152,6 +188,13 @@ export default function AdminNoticesPage() {
                         <h3 className="text-lg font-bold text-gray-900">{notice.title}</h3>
                       </div>
                       <div className="flex gap-2">
+                        <button
+                          onClick={() => startEdit(notice)}
+                          title="수정"
+                          className="px-2 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
+                        >
+                          수정
+                        </button>
                         <button
                           onClick={() => togglePin(notice.id, notice.is_pinned)}
                           title="고정 상태 변경"

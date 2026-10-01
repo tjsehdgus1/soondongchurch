@@ -38,7 +38,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     const [openSection, setOpenSection] = useState<string | null>(null)
     const mobileRef = useRef<HTMLDivElement>(null)
 
-    const menu = buildSiteMenu({ loggedIn, isAdmin: role === 'admin' })
+    const menu = buildSiteMenu({ isAdmin: role === 'admin' })
     const currentSection = menu.find((s) => s.items.some((i) => isMenuActive(pathname, i.href)))?.label ?? null
 
     const setMegaOpen = (open: boolean) => {

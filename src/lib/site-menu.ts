@@ -3,7 +3,7 @@
 export type MenuItem = { href: string, label: string }
 export type MenuSection = { label: string, href: string, items: MenuItem[] }
 
-export function buildSiteMenu({ loggedIn, isAdmin }: { loggedIn: boolean, isAdmin: boolean }): MenuSection[] {
+export function buildSiteMenu({ isAdmin }: { isAdmin: boolean }): MenuSection[] {
     return [
         {
             label: '교회소개', href: '/about', items: [
@@ -44,7 +44,6 @@ export function buildSiteMenu({ loggedIn, isAdmin }: { loggedIn: boolean, isAdmi
                 { href: '/board/events-gallery', label: '교회 행사' },
                 { href: '/board/testimony', label: '간증' },
                 { href: '/board/free', label: '자유게시판' },
-                ...(loggedIn ? [{ href: '/groups', label: '소그룹' }] : []),
             ],
         },
         // 관리자로 로그인하면 메뉴 오른쪽 끝에 관리 화면 묶음
@@ -63,8 +62,8 @@ const ADMIN_ITEMS: MenuItem[] = [
     { href: '/admin/history', label: '연혁' },
     { href: '/admin/people', label: '섬기는 분들' },
     { href: '/admin/missions', label: '선교지' },
-    { href: '/admin/groups', label: '소그룹' },
-    { href: '/admin/members', label: '교인' },
+    { href: '/admin/groups', label: '부서' },
+    { href: '/admin/members', label: '회원' },
 ]
 
 // 현재 경로가 메뉴 항목에 해당하는지 (쿼리 제외 경로 비교)

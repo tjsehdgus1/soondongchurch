@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin, getServiceClient } from '@/lib/admin'
 
-// GET: 소그룹 목록 + 멤버 수
+// GET: 부서 목록 + 멤버 수
 export async function GET() {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
@@ -34,7 +34,7 @@ export async function GET() {
     return NextResponse.json({ groups: result })
 }
 
-// POST: 소그룹 생성
+// POST: 부서 생성
 export async function POST(req: NextRequest) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
 }
 
-// DELETE: 소그룹 삭제
+// DELETE: 부서 삭제
 export async function DELETE(req: NextRequest) {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })

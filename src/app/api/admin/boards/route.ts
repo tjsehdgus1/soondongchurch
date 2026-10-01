@@ -46,7 +46,7 @@ function pickBoardFields(body: Record<string, unknown>): { updates: Record<strin
     return { updates }
 }
 
-// GET: 게시판 목록 + 글쓰기 부서 선택용 소그룹 목록 + 게시판별 글 수
+// GET: 게시판 목록 + 글쓰기 부서 선택용 부서 목록 + 게시판별 글 수
 export async function GET() {
     const admin = await verifyAdmin()
     if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })

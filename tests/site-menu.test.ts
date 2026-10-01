@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { activeItemHref, buildSiteMenu } from '../src/lib/site-menu.ts'
 
-const menu = buildSiteMenu({ loggedIn: false, isAdmin: false })
+const menu = buildSiteMenu({ isAdmin: false })
 const items = (label: string) => menu.find((s) => s.label === label)!.items
 
 test('picks the most specific path, not every prefix match', () => {
@@ -22,7 +22,7 @@ test('board detail pages keep their board active', () => {
 
 test('admin menu is the last section, only for admins', () => {
     assert.equal(menu.some((s) => s.label === '관리자'), false)
-    const adminMenu = buildSiteMenu({ loggedIn: true, isAdmin: true })
+    const adminMenu = buildSiteMenu({ isAdmin: true })
     const last = adminMenu[adminMenu.length - 1]
     assert.equal(last.label, '관리자')
     assert.equal(last.href, '/admin')

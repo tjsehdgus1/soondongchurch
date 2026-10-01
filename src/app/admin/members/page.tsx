@@ -12,6 +12,8 @@ type Member = {
   phone_number: string
   role: string
   is_blocked: boolean
+  // false면 가입 승인 대기
+  is_approved: boolean
   created_at: string
   group_members: { groups: GroupInfo }[]
 }
@@ -81,7 +83,7 @@ export default function AdminMembersPage() {
 
   const handleToggleBlock = async (member: Member) => {
     const action = member.is_blocked ? '차단을 해제' : '차단'
-    if (!confirm(`${member.name} 교인을 ${action}하시겠습니까?`)) return
+    if (!confirm(`${member.name} 회원을 ${action}하시겠습니까?`)) return
     const res = await fetch('/api/admin/members', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -92,20 +94,36 @@ export default function AdminMembersPage() {
     else fetchMembers()
   }
 
-  const filtered = members.filter((m) =>
-    m.name.includes(search) ||
-    m.username?.includes(search) ||
-    m.email?.includes(search) ||
-    m.phone_number?.includes(search)
-  )
+  const handleApprove = async (member: Member) => {
+    if (!confirm(`${member.name}(${member.username}) 님의 가입을 승인하시겠습니까?`)) return
+    const res = await fetch('/api/admin/members', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: member.id, is_approved: true }),
+    })
+    const json = await res.json()
+    if (json.error) alert('오류: ' + json.error)
+    else fetchMembers()
+  }
+
+  const pendingCount = members.filter((m) => !m.is_approved).length
+  // 승인 대기자를 맨 위에
+  const filtered = members
+    .filter((m) =>
+      m.name.includes(search) ||
+      m.username?.includes(search) ||
+      m.email?.includes(search) ||
+      m.phone_number?.includes(search)
+    )
+    .sort((a, b) => Number(a.is_approved) - Number(b.is_approved))
 
   return (
     <div className="max-w-[1300px] mx-auto px-4 py-6 md:px-0 md:py-0">
       {/* 헤더 */}
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between md:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">교인 관리</h1>
-          <p className="mt-1 text-sm text-gray-500">교인 정보 수정, 소그룹 확인, 차단 관리를 할 수 있습니다.</p>
+          <h1 className="text-2xl font-bold text-gray-900">회원 관리</h1>
+          <p className="mt-1 text-sm text-gray-500">가입 승인, 회원 정보 수정, 부서 확인, 차단 관리를 할 수 있습니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <input
@@ -115,6 +133,11 @@ export default function AdminMembersPage() {
             placeholder="이름·아이디·전화번호 검색"
             className="flex-1 min-w-0 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 md:w-56 md:flex-none"
           />
+          {pendingCount > 0 && (
+            <div className="bg-amber-50 text-amber-700 px-4 py-2 rounded-lg font-semibold border border-amber-200 text-sm whitespace-nowrap flex-shrink-0">
+              승인 대기 {pendingCount}명
+            </div>
+          )}
           <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold border border-blue-100 text-sm whitespace-nowrap flex-shrink-0">
             총 {members.length}명
           </div>
@@ -135,7 +158,7 @@ export default function AdminMembersPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-          {search ? '검색 결과가 없습니다.' : '등록된 교인이 없습니다.'}
+          {search ? '검색 결과가 없습니다.' : '가입한 회원이 없습니다.'}
         </div>
       ) : (
         <>
@@ -159,8 +182,13 @@ export default function AdminMembersPage() {
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                           member.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
                         }`}>
-                          {member.role === 'admin' ? '관리자' : '일반 교인'}
+                          {member.role === 'admin' ? '관리자' : '일반 회원'}
                         </span>
+                        {!member.is_approved && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                            승인 대기
+                          </span>
+                        )}
                         {member.is_blocked && (
                           <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
                             🚫 차단됨
@@ -185,7 +213,7 @@ export default function AdminMembersPage() {
                     </div>
                   </div>
 
-                  {/* 소그룹 */}
+                  {/* 부서 */}
                   {groups.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {groups.map((g) => (
@@ -198,6 +226,14 @@ export default function AdminMembersPage() {
 
                   {/* 버튼 */}
                   <div className="flex gap-2">
+                    {!member.is_approved && (
+                      <button
+                        onClick={() => handleApprove(member)}
+                        className="flex-1 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                      >
+                        승인
+                      </button>
+                    )}
                     <button
                       onClick={() => openEdit(member)}
                       className="flex-1 py-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
@@ -231,7 +267,7 @@ export default function AdminMembersPage() {
                     <th className="px-5 py-4 font-semibold">이메일</th>
                     <th className="px-5 py-4 font-semibold">휴대폰</th>
                     <th className="px-5 py-4 font-semibold">권한</th>
-                    <th className="px-5 py-4 font-semibold">소속 소그룹</th>
+                    <th className="px-5 py-4 font-semibold">소속 부서</th>
                     <th className="px-5 py-4 font-semibold">상태</th>
                     <th className="px-5 py-4 font-semibold">가입일</th>
                     <th className="px-5 py-4 font-semibold">관리</th>
@@ -268,7 +304,7 @@ export default function AdminMembersPage() {
                               ? 'bg-purple-100 text-purple-700'
                               : 'bg-green-100 text-green-700'
                           }`}>
-                            {member.role === 'admin' ? '관리자' : '일반 교인'}
+                            {member.role === 'admin' ? '관리자' : '일반 회원'}
                           </span>
                         </td>
                         <td className="px-5 py-4">
@@ -289,6 +325,10 @@ export default function AdminMembersPage() {
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
                               🚫 차단됨
                             </span>
+                          ) : !member.is_approved ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                              승인 대기
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
                               ✅ 정상
@@ -302,6 +342,14 @@ export default function AdminMembersPage() {
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
+                            {!member.is_approved && (
+                              <button
+                                onClick={() => handleApprove(member)}
+                                className="px-3 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                              >
+                                승인
+                              </button>
+                            )}
                             <button
                               onClick={() => openEdit(member)}
                               className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
@@ -338,7 +386,7 @@ export default function AdminMembersPage() {
         >
           <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">교인 정보 수정</h2>
+              <h2 className="text-xl font-bold text-gray-900">회원 정보 수정</h2>
               <button onClick={() => setEditTarget(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100">✕</button>
             </div>
 
@@ -386,7 +434,7 @@ export default function AdminMembersPage() {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="member">일반 교인</option>
+                  <option value="member">일반 회원</option>
                   <option value="admin">관리자</option>
                 </select>
               </div>

@@ -47,7 +47,7 @@ export default function AdminGroupsPage() {
     try {
       const res = await fetch('/api/admin/groups')
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? '소그룹 목록 조회 실패')
+      if (!res.ok) throw new Error(json.error ?? '부서 목록 조회 실패')
       setGroups(json.groups)
     } catch (e: unknown) {
       setFetchError(e instanceof Error ? e.message : '알 수 없는 오류')
@@ -71,7 +71,7 @@ export default function AdminGroupsPage() {
         body: JSON.stringify({ name, description }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? '소그룹 생성 실패')
+      if (!res.ok) throw new Error(json.error ?? '부서 생성 실패')
       setName('')
       setDescription('')
       fetchGroups()
@@ -83,7 +83,7 @@ export default function AdminGroupsPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('이 소그룹을 삭제하시겠습니까?\n게시글과 멤버십이 모두 삭제됩니다.')) return
+    if (!confirm('이 부서를 삭제하시겠습니까?\n부서 배정이 모두 삭제됩니다.')) return
     try {
       const res = await fetch(`/api/admin/groups?id=${id}`, { method: 'DELETE' })
       const json = await res.json()
@@ -108,7 +108,7 @@ export default function AdminGroupsPage() {
         profilesRes.json(),
       ])
       if (!membersRes.ok) throw new Error(membersJson.error ?? '멤버 목록 조회 실패')
-      if (!profilesRes.ok) throw new Error(profilesJson.error ?? '교인 목록 조회 실패')
+      if (!profilesRes.ok) throw new Error(profilesJson.error ?? '회원 목록 조회 실패')
       setMembers(membersJson.members)
       setAllProfiles(profilesJson.profiles)
       setSelectedUserId('')
@@ -143,7 +143,7 @@ export default function AdminGroupsPage() {
   }
 
   const handleRemoveMember = async (memberId: number) => {
-    if (!confirm('이 멤버를 소그룹에서 제외하시겠습니까?')) return
+    if (!confirm('이 멤버를 부서에서 제외하시겠습니까?')) return
     try {
       const res = await fetch(`/api/admin/groups/members?id=${memberId}`, { method: 'DELETE' })
       const json = await res.json()
@@ -164,17 +164,17 @@ export default function AdminGroupsPage() {
   return (
     <div className="max-w-[1300px] mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">소그룹 관리</h1>
-        <p className="mt-1 text-gray-500">소그룹을 만들고 교인을 배정합니다.</p>
+        <h1 className="text-2xl font-bold text-gray-900">부서 관리</h1>
+        <p className="mt-1 text-gray-500">부서를 만들고 회원을 배정합니다. 부서 게시판의 글쓰기 권한에 쓰입니다.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* 새 소그룹 폼 */}
+        {/* 새 부서 폼 */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="text-blue-500">🏘️</span> 새 소그룹 만들기
+              <span className="text-blue-500">🏘️</span> 새 부서 만들기
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -196,7 +196,7 @@ export default function AdminGroupsPage() {
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="소그룹 소개 (선택)"
+                  placeholder="부서 소개 (선택)"
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
                 />
               </div>
@@ -205,7 +205,7 @@ export default function AdminGroupsPage() {
                 type="submit"
                 className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-sm"
               >
-                {formLoading ? '생성 중...' : '소그룹 만들기'}
+                {formLoading ? '생성 중...' : '부서 만들기'}
               </button>
             </form>
           </div>
@@ -227,7 +227,7 @@ export default function AdminGroupsPage() {
             </div>
           ) : groups.length === 0 ? (
             <div className="p-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-              생성된 소그룹이 없습니다.
+              생성된 부서이 없습니다.
             </div>
           ) : (
             <div className="space-y-4">
@@ -307,7 +307,7 @@ export default function AdminGroupsPage() {
                     onChange={(e) => setSelectedUserId(e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="">교인 선택...</option>
+                    <option value="">회원 선택...</option>
                     {availableProfiles.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.email})

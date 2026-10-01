@@ -12,7 +12,7 @@ export type SermonVideo = {
     boards: { slug: string, name: string }
 }
 
-// 최근 말씀 2편 — 같은 크기 카드, 썸네일·제목 잘림 없이. 누르면 모달 재생
+// 최근 말씀 2편 (왼쪽 담임목사·오른쪽 협동목사) — 같은 크기 카드, 썸네일·제목 잘림 없이. 누르면 모달 재생
 export default function RecentSermons({ videos }: { videos: SermonVideo[] }) {
     if (videos.length === 0) return null
 

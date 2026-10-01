@@ -6,7 +6,7 @@ export default function AdminPeoplePage() {
   return (
     <AdminRecordEditor
       title="섬기는 분들"
-      description="'회원만 보기'를 체크한 항목은 로그인한 교인에게만 보이고, 사진도 비공개 저장소에 올라갑니다. 같은 구분 이름끼리 묶여 표시됩니다."
+      description="'회원만 보기'를 체크한 항목은 로그인한 회원에게만 보이고, 사진도 비공개 저장소에 올라갑니다. 같은 구분 이름끼리 묶여 표시됩니다."
       endpoint="/api/admin/people"
       idColumn="id"
       headerOf={(r) => `${r.category} · ${r.name}${r.members_only ? ' 🔒' : ''}`}

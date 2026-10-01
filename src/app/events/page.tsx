@@ -1,4 +1,5 @@
 import { createPublicClient } from '@/lib/supabase/public'
+import AdminActions from '@/components/admin/AdminActions'
 import PageHero from '@/components/site/PageHero'
 
 const eventTypeMap: Record<string, { label: string; color: string; bg: string }> = {
@@ -102,6 +103,8 @@ export default async function EventsPage() {
                                         {ev.description && (
                                             <p className="mt-2 text-sm leading-relaxed" style={{ color: '#8B7355' }}>{ev.description}</p>
                                         )}
+                                        <AdminActions className="mt-3" editHref={`/admin/events?edit=${ev.id}`}
+                                            deleteUrl={`/api/admin/events?id=${ev.id}`} deleteConfirm={`"${ev.title}" 일정을 삭제하시겠습니까?`} />
                                     </div>
                                 </div>
                             )
@@ -135,6 +138,8 @@ export default async function EventsPage() {
                                         <span className="font-medium text-gray-700">{ev.title}</span>
                                     </div>
                                     <span className="text-xs text-gray-400 flex-shrink-0">{ev.location}</span>
+                                    <AdminActions editHref={`/admin/events?edit=${ev.id}`}
+                                        deleteUrl={`/api/admin/events?id=${ev.id}`} deleteConfirm={`"${ev.title}" 일정을 삭제하시겠습니까?`} />
                                 </div>
                             )
                         })}

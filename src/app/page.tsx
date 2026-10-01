@@ -15,19 +15,23 @@ const HERO_IMAGES = [
 
 export default async function HomePage() {
   const supabase = await createClient()
+  const latestSermon = (slug: string) => supabase.from('board_posts')
+    .select('id, title, youtube_id, created_at, boards!inner(slug, name)')
+    .eq('boards.slug', slug).not('youtube_id', 'is', null)
+    .order('created_at', { ascending: false }).limit(1).maybeSingle()
   const [
     hero,
     missionFields,
-    { data: sermonVideos },
+    { data: seniorSermon },
+    { data: associateSermon },
     { data: eventPosts },
     { data: { user } },
   ] = await Promise.all([
     getBlock('home.hero'),
     getMissionFields(),
-    // 최근 말씀: '말씀' 허브 게시판의 영상 글
-    supabase.from('board_posts').select('id, title, youtube_id, created_at, boards!inner(slug, name, hub)')
-      .eq('boards.hub', 'sermons').not('youtube_id', 'is', null)
-      .order('created_at', { ascending: false }).limit(2),
+    // 최근 말씀: 왼쪽 담임목사, 오른쪽 협동목사 — 각 게시판의 최신 영상 1편
+    latestSermon('sermon-senior'),
+    latestSermon('sermon-associate'),
     // 교회 소식: '교회 행사' 게시판 최신 글
     supabase.from('board_posts').select('id, title, youtube_id, thumbnail_url, created_at, boards!inner(slug)')
       .eq('boards.slug', 'events-gallery').eq('members_only', false)
@@ -44,7 +48,7 @@ export default async function HomePage() {
         showRegister={!user}
       />
       <WorshipStrip />
-      <RecentSermons videos={(sermonVideos ?? []) as unknown as SermonVideo[]} />
+      <RecentSermons videos={[seniorSermon, associateSermon].filter(Boolean) as unknown as SermonVideo[]} />
       <MissionTeaser fields={missionFields} />
       <NewsSection posts={(eventPosts ?? []) as unknown as EventPost[]} />
       <VisitBand />
