@@ -6,8 +6,8 @@ import SplitHeading from '@/components/motion/SplitHeading'
 import { getBlocks } from '@/lib/content'
 
 export const metadata = {
-    title: '교회 소개 | 순천순동교회',
-    description: '하나님이 기뻐하시는 행복한 교회, 순천순동교회를 소개합니다.',
+    title: '비전과 목표 | 순천순동교회',
+    description: '하나님이 기뻐하시는 행복한 교회, 순천순동교회의 비전·표어·7대 목표입니다.',
 }
 
 const MORE = [
@@ -25,8 +25,8 @@ export default async function AboutPage() {
         <>
             <PageHero
                 eyebrow="교회소개"
-                title={greeting?.title ?? '순천순동교회에 오신 것을 환영합니다'}
-                description={greeting?.subtitle ?? '1946년부터 순천과 함께한 교회'}
+                title={vision?.title ?? '비전과 목표'}
+                description={vision?.subtitle ?? '하나님이 기뻐하시는 행복한 교회'}
             />
 
             {/* 인사말 (관리자가 본문을 넣었을 때만) */}
@@ -53,20 +53,10 @@ export default async function AboutPage() {
 
             {/* 비전 */}
             {vision?.body && (
-                <section className="py-16 lg:py-24 bg-white">
-                    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-12 gap-12">
-                        <div className="lg:col-span-4">
-                            <div className="lg:sticky lg:top-32">
-                                <SplitHeading className="text-4xl lg:text-5xl font-bold text-[#2D2A26]" style={{ fontFamily: 'var(--font-serif)' }}>
-                                    {vision.title ?? '비전과 목표'}
-                                </SplitHeading>
-                                {vision.subtitle && <p className="mt-5 text-[#8B7355]">{vision.subtitle}</p>}
-                            </div>
-                        </div>
-                        <Reveal className="lg:col-span-7 lg:col-start-6">
-                            <RichText html={vision.body} />
-                        </Reveal>
-                    </div>
+                <section className="py-14 lg:py-20 bg-white">
+                    <Reveal className="max-w-[840px] mx-auto px-4 sm:px-6">
+                        <RichText html={vision.body} />
+                    </Reveal>
                 </section>
             )}
 
