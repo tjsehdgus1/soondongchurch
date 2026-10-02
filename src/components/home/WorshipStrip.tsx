@@ -32,15 +32,15 @@ export default function WorshipStrip() {
                     {WORSHIPS.map((w) => {
                         const isNext = w.key === next.worship.key
                         return (
-                            <div key={w.key} className="group relative shrink-0 w-[70%] sm:w-[42%] lg:w-auto snap-start aspect-[3/4] rounded-2xl overflow-hidden bg-[#2D2A26]">
+                            <div key={w.key} className="group relative shrink-0 w-[70%] sm:w-[42%] lg:w-auto snap-start aspect-[3/4] rounded-2xl overflow-hidden bg-[#2D2A26] ring-1 ring-black/5">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={w.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-[1.4s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                {isNext && <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white text-[#2D2A26] text-xs font-bold">다음 예배</span>}
-                                <div className="absolute bottom-0 inset-x-0 p-5 text-white">
-                                    <p className="text-xs tracking-[0.2em] text-white/70">{w.dayLabel}</p>
-                                    <p className="text-lg font-bold mt-1" style={{ fontFamily: 'var(--font-serif)' }}>{w.name}</p>
-                                    <p className="text-2xl font-extrabold mt-2 text-white">{w.timeLabel}</p>
+                                <img src={w.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#171512]/90 via-[#171512]/25 via-45% to-[#171512]/5" />
+                                {isNext && <span className="absolute left-4 top-4 rounded-full border border-white/30 bg-[#FAF8F5] px-3 py-1 text-xs font-semibold text-[#2D2A26]">다음 예배</span>}
+                                <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                                    <p className="text-sm text-white/75">{w.dayLabel}</p>
+                                    <p className="mt-1 text-lg font-bold" style={{ fontFamily: 'var(--font-serif)' }}>{w.name}</p>
+                                    <p className="mt-2 text-2xl font-bold text-white">{w.timeLabel}</p>
                                 </div>
                             </div>
                         )
