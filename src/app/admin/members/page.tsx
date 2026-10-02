@@ -25,6 +25,8 @@ type EditForm = {
   email: string
   phone_number: string
   role: string
+  // 비워 두면 비밀번호는 그대로
+  new_password: string
 }
 
 export default function AdminMembersPage() {
@@ -35,7 +37,7 @@ export default function AdminMembersPage() {
 
   // 수정 모달
   const [editTarget, setEditTarget] = useState<Member | null>(null)
-  const [editForm, setEditForm] = useState<EditForm>({ name: '', email: '', phone_number: '', role: 'member' })
+  const [editForm, setEditForm] = useState<EditForm>({ name: '', email: '', phone_number: '', role: 'member', new_password: '' })
   const [saving, setSaving] = useState(false)
 
   const fetchMembers = async () => {
@@ -62,21 +64,28 @@ export default function AdminMembersPage() {
       email: member.email || '',
       phone_number: member.phone_number || '',
       role: member.role,
+      new_password: '',
     })
   }
 
   const handleSave = async () => {
     if (!editTarget) return
+    const { new_password, ...fields } = editForm
+    if (new_password && new_password.length < 6) {
+      alert('새 비밀번호는 6자 이상으로 입력해 주세요.')
+      return
+    }
     setSaving(true)
     const res = await fetch('/api/admin/members', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: editTarget.id, ...editForm }),
+      body: JSON.stringify({ id: editTarget.id, ...fields, ...(new_password ? { new_password } : {}) }),
     })
     const json = await res.json()
     if (json.error) {
       alert('오류: ' + json.error)
     } else {
+      if (new_password) alert(`${editTarget.name} 님의 비밀번호를 바꿨습니다. 새 비밀번호를 회원에게 알려 주세요.`)
       setEditTarget(null)
       fetchMembers()
     }
@@ -449,6 +458,20 @@ export default function AdminMembersPage() {
                   <option value="member">일반 회원</option>
                   <option value="admin">관리자</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  새 비밀번호 <span className="text-gray-400 font-normal">(비밀번호를 잊은 회원에게 새로 정해 줄 때만)</span>
+                </label>
+                <input
+                  type="text"
+                  autoComplete="new-password"
+                  value={editForm.new_password}
+                  onChange={(e) => setEditForm({ ...editForm, new_password: e.target.value })}
+                  placeholder="6자 이상, 비워 두면 그대로"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
               </div>
             </div>
 

@@ -168,6 +168,12 @@ export default function LoginPage() {
                         </button>
                     </form>
 
+                    <p className="mt-5 flex justify-center gap-3 text-sm" style={{ color: '#8B7355' }}>
+                        <Link href="/auth/find" className="hover:underline underline-offset-4">아이디 찾기</Link>
+                        <span aria-hidden="true">·</span>
+                        <Link href="/auth/find#password" className="hover:underline underline-offset-4">비밀번호 찾기</Link>
+                    </p>
+
                     <p className="text-center text-sm mt-6" style={{ color: '#8B7355' }}>
                         계정이 없으신가요?{' '}
                         <Link href="/auth/register" className="font-semibold hover:underline" style={{ color: '#B8860B' }}>

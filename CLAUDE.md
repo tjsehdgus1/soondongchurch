@@ -21,7 +21,6 @@
 | Supabase | `@supabase/ssr` 0.9.x (SSR 쿠키 기반) |
 | Tiptap | 3.x (게시글 에디터) |
 | React PDF | 10.x (주보 PDF 뷰어) |
-| Solapi | 5.x (SMS 인증) |
 | GSAP | 3.15 (ScrollTrigger, SplitText) + `@gsap/react` `useGSAP` |
 | Lenis | 1.3 (부드러운 스크롤) |
 | react-globe.gl / three | 2.38 / 0.186 (선교 지구본, `/mission`에서만 로드) |
@@ -52,7 +51,8 @@ src/
 │   │   └── notices/page.tsx
 │   ├── auth/
 │   │   ├── login/page.tsx
-│   │   ├── register/page.tsx       # SMS 인증 포함
+│   │   ├── register/page.tsx       # 가입 신청 (휴대폰 문자 인증 없음 → 관리자 승인)
+│   │   ├── find/page.tsx           # 아이디 찾기(이름·휴대폰) + 비밀번호는 관리자 문의 안내
 │   │   └── callback/route.ts
 │   ├── api/
 │   │   ├── admin/
@@ -65,9 +65,7 @@ src/
 │   │   │   └── upload/route.ts            # 콘텐츠 이미지 (1920px webp, 비공개 옵션)
 │   │   ├── board-images/[...path]/route.ts # 회원 전용 글 이미지 → 서명 URL 리다이렉트
 │   │   ├── auth/
-│   │   │   ├── sms/send/route.ts
-│   │   │   ├── sms/verify/route.ts
-│   │   │   ├── register/route.ts   # SMS 인증 확인 후 계정 생성 (service role)
+│   │   │   ├── register/route.ts   # 입력 검사 후 계정 생성, 승인 대기 (service role)
 │   │   │   └── logout/route.ts
 │   │   └── setup/migrate/route.ts  # DB 초기화 (MIGRATE_SECRET 필요)
 │   ├── board/                      # 게시판: 전체글, [slug] 목록, [slug]/[id] 상세, new, edit
@@ -171,8 +169,8 @@ export async function GET() {
 - events: id, title, event_date, event_time, event_type (`worship`|`event`|`meeting`), location
 - notices: id, title, content, is_pinned
 
-### sms_verifications
-- phone, code(6자리), verified, expires_at (5분)
+### sms_verifications (사용 안 함)
+- 휴대폰 문자 인증 삭제(2026-10-02)로 더 이상 쓰지 않는 테이블 — 남아 있는 데이터만 있음
 
 ### Storage Buckets
 - `bulletins/` — PDF 주보, 최대 20MB
@@ -203,7 +201,8 @@ window.location.href = '/'
 - 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin·canManageSite)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
 
-**회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 SMS 인증 기록을 확인 후 `auth.admin.createUser`로 생성.
+**회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 입력값을 검사한 뒤 `auth.admin.createUser`로 생성(승인 대기). 휴대폰 문자 인증(솔라피)은 2026-10-02 **의도적으로 삭제** — 관리자 승인제로 대체, 되살리지 말 것.
+**아이디·비밀번호 찾기** (`/auth/find`): 아이디는 가입 때 입력한 이름·휴대폰 번호(숫자만 비교)로 찾고 일부를 *로 가려 보여 줌(`src/lib/find-id.ts`, `/api/auth/find-id`). 비밀번호는 찾기 없음 → 교회 전화(061-721-6707)로 관리자 문의 → 관리자가 회원 관리 수정 창의 '새 비밀번호'로 정해 줌(`PATCH /api/admin/members` `new_password`).
 Supabase 대시보드 Authentication → Sign In / Providers → **Allow new users to sign up 끔** (우회 가입 차단).
 
 **RLS 원칙 (supabase/20261001_security_fix.sql):**
@@ -285,9 +284,6 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ACCESS_TOKEN=       # DB 초기화 migrate API 전용
-SOLAPI_API_KEY=
-SOLAPI_API_SECRET=
-SOLAPI_SENDER=               # SMS 발신 번호
 MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ```
 

@@ -67,7 +67,6 @@ export default async function RootLayout({
           initialLoggedIn={!!user}
           initialRole={initialRole}
           initialUserName={initialUserName}
-          initialCanManageSite={canManageSite}
         />
         <AdminProvider isAdmin={isAdmin} canManageSite={canManageSite}>
           <VideoModalProvider>

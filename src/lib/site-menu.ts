@@ -3,7 +3,8 @@
 export type MenuItem = { href: string, label: string }
 export type MenuSection = { label: string, href: string, items: MenuItem[] }
 
-export function buildSiteMenu({ isAdmin, canManageSite = false }: { isAdmin: boolean, canManageSite?: boolean }): MenuSection[] {
+// 관리자 화면은 메뉴에 넣지 않고 헤더 오른쪽 위 '관리자' 버튼으로 (하위 메뉴는 관리자 화면 왼쪽 메뉴)
+export function buildSiteMenu(): MenuSection[] {
     return [
         {
             label: '교회소개', href: '/about', items: [
@@ -46,25 +47,8 @@ export function buildSiteMenu({ isAdmin, canManageSite = false }: { isAdmin: boo
                 { href: '/board/free', label: '자유게시판' },
             ],
         },
-        // 관리자로 로그인하면 메뉴 오른쪽 끝에 관리 화면 묶음
-        ...(isAdmin ? [{ label: '관리자', href: '/admin', items: ADMIN_ITEMS.filter((i) => canManageSite || !i.siteOnly).map(({ href, label }) => ({ href, label })) }] : []),
     ]
 }
-
-// 관리 화면 (src/app/admin/AdminSidebar.tsx 와 같은 순서) — siteOnly는 사이트 설정 관리자만
-const ADMIN_ITEMS: (MenuItem & { siteOnly?: boolean })[] = [
-    { href: '/admin', label: '대시보드' },
-    { href: '/admin/bulletins', label: '주보' },
-    { href: '/admin/events', label: '행사일정' },
-    { href: '/admin/notices', label: '공지사항' },
-    { href: '/admin/boards', label: '게시판', siteOnly: true },
-    { href: '/admin/pages', label: '페이지 문구', siteOnly: true },
-    { href: '/admin/history', label: '연혁', siteOnly: true },
-    { href: '/admin/people', label: '섬기는 분들', siteOnly: true },
-    { href: '/admin/missions', label: '선교지', siteOnly: true },
-    { href: '/admin/groups', label: '부서' },
-    { href: '/admin/members', label: '회원' },
-]
 
 // 현재 경로가 메뉴 항목에 해당하는지 (쿼리 제외 경로 비교)
 export function isMenuActive(pathname: string, href: string): boolean {
