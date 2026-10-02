@@ -37,6 +37,7 @@ src/
 │   ├── worship/ directions/        # 예배 안내 · 오시는 길 (콘텐츠 페이지)
 │   ├── sermons/ praise/ next-gen/ fellowship/ discipleship/  # 허브 (게시판 탭 묶음)
 │   ├── mission/                    # 3D 지구본 + 선교 허브
+│   ├── account/                    # 내 정보 (가입 정보·비밀번호 변경)
 │   ├── admin/
 │   │   ├── layout.tsx              # 관리자 가드 + AdminSidebar
 │   │   ├── AdminSidebar.tsx
@@ -202,6 +203,7 @@ window.location.href = '/'
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
 
 **회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 입력값을 검사한 뒤 `auth.admin.createUser`로 생성(승인 대기). 휴대폰 문자 인증(솔라피)은 2026-10-02 **의도적으로 삭제** — 관리자 승인제로 대체, 되살리지 말 것.
+**내 정보** (`/account`, 헤더의 이름 클릭): 가입 정보 확인 + 비밀번호 변경(현재 비밀번호로 다시 로그인해 확인 후 `auth.updateUser`). 이름·휴대폰 변경은 관리자 문의.
 **아이디·비밀번호 찾기** (`/auth/find`): 아이디는 가입 때 입력한 이름·휴대폰 번호(숫자만 비교)로 찾고 일부를 *로 가려 보여 줌(`src/lib/find-id.ts`, `/api/auth/find-id`). 비밀번호는 찾기 없음 → 교회 전화(061-721-6707)로 관리자 문의 → 관리자가 회원 관리 수정 창의 '새 비밀번호'로 정해 줌(`PATCH /api/admin/members` `new_password`).
 Supabase 대시보드 Authentication → Sign In / Providers → **Allow new users to sign up 끔** (우회 가입 차단).
 
