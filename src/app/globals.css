@@ -131,6 +131,124 @@ body {
 }
 
 /* ─────────────────────────────────────────
+   관리자 페이지 문구 (RichText) — 읽기 좋은 문서 스타일
+   h2 큰 구획 · h3 번호 붙은 소제목 · blockquote 성경 구절 카드(마지막 문단 = 출처)
+   ol 번호 카드 · p.motto 표어
+───────────────────────────────────────── */
+.content-doc {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.9;
+  word-break: keep-all;
+  counter-reset: doc-h3;
+}
+.content-doc :where(p, h2, h3, ol, ul, blockquote) { margin: 0; }
+.content-doc > * + * { margin-top: 1.25rem; }
+.content-doc > p + p { margin-top: 1rem; }
+.content-doc strong { color: var(--text-primary); font-weight: 700; }
+.content-doc a { color: var(--text-primary); text-decoration: underline; text-underline-offset: 4px; }
+
+.content-doc h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 4.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--text-primary);
+}
+.content-doc > h2:first-child { margin-top: 0; }
+.content-doc h2 + * { margin-top: 1.75rem; }
+
+.content-doc h3 {
+  counter-increment: doc-h3;
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  line-height: 1.4;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2.75rem;
+}
+.content-doc h3::before {
+  content: counter(doc-h3, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  color: var(--text-tertiary);
+}
+.content-doc h2 + h3 { margin-top: 1.75rem; }
+.content-doc h3 + * { margin-top: 1rem; }
+
+/* 성경 구절 카드 */
+.content-doc blockquote {
+  padding: 1.5rem 1.75rem;
+  border-radius: 1rem;
+  border-left: 3px solid var(--text-primary);
+  background: var(--bg-subtle);
+  font-family: var(--font-serif);
+  font-size: 1.1875rem;
+  line-height: 1.85;
+  color: var(--text-primary);
+}
+.content-doc blockquote + blockquote { margin-top: 1rem; }
+.content-doc blockquote p + p { margin-top: 0.75rem; }
+.content-doc blockquote p:last-child:not(:first-child) {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--text-tertiary);
+}
+.content-doc blockquote p:last-child:not(:first-child)::before { content: '— '; }
+
+/* 표어 */
+.content-doc p.motto {
+  font-family: var(--font-serif);
+  font-size: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* 번호 카드 목록 */
+.content-doc ol {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  counter-reset: doc-ol;
+}
+@media (min-width: 640px) {
+  .content-doc ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.content-doc ol > li {
+  counter-increment: doc-ol;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg-card);
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+.content-doc ol > li::before {
+  content: counter(doc-ol, decimal-leading-zero);
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.content-doc ul { padding-left: 1.25rem; list-style: disc; }
+.content-doc ul > li + li { margin-top: 0.5rem; }
+.content-doc ul > li::marker { color: var(--text-tertiary); }
+.content-doc img { max-width: 100%; border-radius: 1rem; }
+
+/* ─────────────────────────────────────────
    Custom scrollbar — warm tone
 ───────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }

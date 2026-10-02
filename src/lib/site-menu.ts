@@ -7,7 +7,7 @@ export function buildSiteMenu({ isAdmin }: { isAdmin: boolean }): MenuSection[] 
     return [
         {
             label: '교회소개', href: '/about', items: [
-                { href: '/about', label: '환영합니다' },
+                { href: '/about', label: '비전과 목표' },
                 { href: '/about/history', label: '걸어온 길' },
                 { href: '/about/people', label: '섬기는 분들' },
                 { href: '/directions', label: '오시는 길' },

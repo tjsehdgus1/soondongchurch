@@ -12,7 +12,7 @@ export default function AdminPageBlocksPage() {
   return (
     <AdminRecordEditor
       title="페이지 문구"
-      description="각 페이지의 제목·부제·본문·사진입니다. 본문은 <p>, <strong>, <br> 같은 간단한 HTML을 쓸 수 있습니다."
+      description="각 페이지의 제목·부제·본문·사진입니다. 본문 HTML: <h2> 큰 구획, <h3> 번호 붙는 소제목, <blockquote><p>성경 구절</p><p>출처</p></blockquote> 구절 카드, <ol><li> 번호 카드, <p class=&quot;motto&quot;> 표어, <p>·<strong> 일반 글."
       endpoint="/api/admin/page-blocks"
       idColumn="key"
       headerOf={(r) => `${PAGE_LABEL[String(r.key).split('.')[0]] ?? ''} · ${r.key}`}
