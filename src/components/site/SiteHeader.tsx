@@ -165,13 +165,19 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     </a>
                     {loggedIn ? (
                         <>
+                            <Link href="/account" title="내 정보 · 비밀번호 변경" className="px-1 max-w-[150px] truncate opacity-80 hover:opacity-100 hover:underline underline-offset-4 transition">
+                                {userName ? `${userName} 님` : '내 정보'}
+                            </Link>
                             {isAdmin && (
-                                <Link href="/admin" className={`px-4 py-2 rounded-full font-semibold transition ${light ? 'bg-white text-[#2D2A26] hover:bg-[#FAF8F5]' : 'bg-[#2D2A26] text-white hover:bg-black'}`}>
+                                <Link href="/admin" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-current/30 font-semibold hover:border-current transition">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.3 4.3c.4-1.8 3-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.6-1 3.4.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 3 0 3.4a1.7 1.7 0 0 0-1.1 2.6c1 1.6-.8 3.4-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-3 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.6 1-3.4-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-3 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-1-1.6.8-3.4 2.4-2.4a1.7 1.7 0 0 0 2.6-1.1z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
                                     관리자
                                 </Link>
                             )}
-                            <span className="opacity-70 max-w-[140px] truncate">{userName}</span>
-                            <button onClick={handleLogout} className="px-4 py-2 rounded-full border border-current/20 hover:border-red-300 hover:text-red-500 transition cursor-pointer">로그아웃</button>
+                            <button onClick={handleLogout} className="px-2 py-2 opacity-70 hover:opacity-100 transition cursor-pointer">로그아웃</button>
                         </>
                     ) : (
                         <>
@@ -284,10 +290,11 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     <div data-menu-item className="pt-8 flex gap-3">
                         {loggedIn ? (
                             <>
+                                <Link href="/account" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full border border-[#E8E4DE] text-sm">내 정보</Link>
                                 {isAdmin && (
-                                    <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full bg-[#2D2A26] text-white text-sm font-semibold">관리자</Link>
+                                    <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full border border-[#2D2A26] text-[#2D2A26] text-sm font-semibold">관리자</Link>
                                 )}
-                                <button onClick={handleLogout} className="flex-1 py-3 rounded-full border border-red-200 text-red-500 text-sm cursor-pointer">로그아웃</button>
+                                <button onClick={handleLogout} className="flex-1 py-3 rounded-full border border-[#E8E4DE] text-[#5C5650] text-sm cursor-pointer">로그아웃</button>
                             </>
                         ) : (
                             <>
