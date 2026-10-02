@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useIsAdmin } from '@/components/admin/AdminContext'
+import { useCanManageSite, useIsAdmin } from '@/components/admin/AdminContext'
 import { adminLinksFor } from '@/lib/admin-links'
 
 // 관리자로 로그인했을 때 화면 오른쪽 아래: 지금 보는 화면을 고치는 관리 화면 바로가기
 export default function AdminPageBar() {
     const isAdmin = useIsAdmin()
+    const canManageSite = useCanManageSite()
     const pathname = usePathname()
-    const links = adminLinksFor(pathname)
+    const links = adminLinksFor(pathname, canManageSite)
     if (!isAdmin || links.length === 0) return null
 
     return (

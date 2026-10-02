@@ -12,7 +12,7 @@ export async function GET() {
   const { data: members, error } = await service
     .from('profiles')
     .select(`
-      id, username, name, email, phone_number, role, is_blocked, is_approved, created_at,
+      id, username, name, email, phone_number, role, is_blocked, is_approved, can_manage_site, created_at,
       group_members (
         groups ( id, name )
       )
@@ -48,6 +48,13 @@ export async function PATCH(req: Request) {
   }
 
   const service = getServiceClient()
+
+  // 사이트 설정 관리자의 정보는 사이트 설정 관리자만 바꿀 수 있음 (다른 관리자가 강등·차단하지 못하게)
+  const { data: people } = await service.from('profiles').select('id, can_manage_site').in('id', [id, admin.id])
+  const isSiteManager = (uid: string) => !!people?.find((p) => p.id === uid)?.can_manage_site
+  if (isSiteManager(id) && !isSiteManager(admin.id)) {
+    return NextResponse.json({ error: '사이트 설정 관리자의 정보는 사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
+  }
 
   const updates: Record<string, unknown> = {}
   if (username !== undefined) updates.username = username

@@ -38,16 +38,18 @@ export default async function RootLayout({
   let initialUserName = ''
   // 관리자 버튼 표시용 (실제 권한은 관리자 API·RLS가 검사)
   let isAdmin = false
+  let canManageSite = false
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role, name, is_blocked')
+      .select('role, name, is_blocked, can_manage_site')
       .eq('id', user.id)
       .single()
     if (profile) {
       initialRole = profile.role ?? 'member'
       initialUserName = profile.name ?? ''
       isAdmin = profile.role === 'admin' && !profile.is_blocked
+      canManageSite = isAdmin && !!profile.can_manage_site
     }
   }
 
@@ -65,8 +67,9 @@ export default async function RootLayout({
           initialLoggedIn={!!user}
           initialRole={initialRole}
           initialUserName={initialUserName}
+          initialCanManageSite={canManageSite}
         />
-        <AdminProvider isAdmin={isAdmin}>
+        <AdminProvider isAdmin={isAdmin} canManageSite={canManageSite}>
           <VideoModalProvider>
             <ViewTransition>
               <main className="min-h-screen pt-16 lg:pt-20">

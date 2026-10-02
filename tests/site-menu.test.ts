@@ -22,7 +22,7 @@ test('board detail pages keep their board active', () => {
 
 test('admin menu is the last section, only for admins', () => {
     assert.equal(menu.some((s) => s.label === '관리자'), false)
-    const adminMenu = buildSiteMenu({ isAdmin: true })
+    const adminMenu = buildSiteMenu({ isAdmin: true, canManageSite: true })
     const last = adminMenu[adminMenu.length - 1]
     assert.equal(last.label, '관리자')
     assert.equal(last.href, '/admin')
@@ -33,4 +33,10 @@ test('admin menu is the last section, only for admins', () => {
 
 test('no match in another section', () => {
     assert.equal(activeItemHref(items('다음세대'), '/about', ''), null)
+})
+
+test('site settings items only for site managers', () => {
+    const hrefs = (canManageSite: boolean) => buildSiteMenu({ isAdmin: true, canManageSite }).at(-1)!.items.map((i) => i.href)
+    assert.ok(hrefs(true).includes('/admin/pages'))
+    assert.deepEqual(hrefs(false), ['/admin', '/admin/bulletins', '/admin/events', '/admin/notices', '/admin/groups', '/admin/members'])
 })

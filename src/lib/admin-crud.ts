@@ -1,7 +1,7 @@
 // 콘텐츠 테이블용 관리자 CRUD 라우트 생성기
-// 기존 관리자 API 패턴: CSRF 검사 → verifyAdmin → 필드 화이트리스트·타입 검증 → service role
+// 기존 관리자 API 패턴: CSRF 검사 → verifySiteManager(사이트 설정 관리자만) → 필드 화이트리스트·타입 검증 → service role
 import { NextResponse } from 'next/server'
-import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { getServiceClient, verifySiteManager } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
 import { type FieldSpec, pickFields } from '@/lib/fields'
 
@@ -20,12 +20,12 @@ function parseId(req: Request, idColumn: 'id' | 'key'): string | number | null {
     return Number.isInteger(id) && id > 0 ? id : null
 }
 
-const forbidden = () => NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+const forbidden = () => NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 const badRequest = (error: string) => NextResponse.json({ error }, { status: 400 })
 
 export function createAdminCrud({ table, idColumn, order, fields }: CrudOptions) {
     async function GET() {
-        if (!(await verifyAdmin())) return forbidden()
+        if (!(await verifySiteManager())) return forbidden()
         let query = getServiceClient().from(table).select('*')
         for (const o of order) query = query.order(o.column, { ascending: o.ascending ?? true })
         const { data, error } = await query
@@ -35,7 +35,7 @@ export function createAdminCrud({ table, idColumn, order, fields }: CrudOptions)
 
     async function POST(req: Request) {
         if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-        if (!(await verifyAdmin())) return forbidden()
+        if (!(await verifySiteManager())) return forbidden()
         const body = await req.json()
         const picked = pickFields(body, fields, false)
         if ('error' in picked) return badRequest(picked.error)
@@ -50,7 +50,7 @@ export function createAdminCrud({ table, idColumn, order, fields }: CrudOptions)
 
     async function PATCH(req: Request) {
         if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-        if (!(await verifyAdmin())) return forbidden()
+        if (!(await verifySiteManager())) return forbidden()
         const id = parseId(req, idColumn)
         if (id === null) return badRequest(`유효한 ${idColumn}가 필요합니다.`)
         const picked = pickFields(await req.json(), fields, true)
@@ -63,7 +63,7 @@ export function createAdminCrud({ table, idColumn, order, fields }: CrudOptions)
 
     async function DELETE(req: Request) {
         if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-        if (!(await verifyAdmin())) return forbidden()
+        if (!(await verifySiteManager())) return forbidden()
         const id = parseId(req, idColumn)
         if (id === null) return badRequest(`유효한 ${idColumn}가 필요합니다.`)
         const { error } = await getServiceClient().from(table).delete().eq(idColumn, id)

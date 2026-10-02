@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { adminLinksFor } from '../src/lib/admin-links.ts'
 
-const hrefs = (path: string) => adminLinksFor(path).map((l) => l.href)
+const hrefs = (path: string) => adminLinksFor(path, true).map((l) => l.href)
 
 test('content pages link to their editors', () => {
     assert.deepEqual(hrefs('/'), ['/admin/pages'])
@@ -23,4 +23,13 @@ test('no bar on admin and auth screens or unknown pages', () => {
     assert.deepEqual(hrefs('/admin/members'), [])
     assert.deepEqual(hrefs('/auth/login'), [])
     assert.deepEqual(hrefs('/privacy'), [])
+})
+
+test('other admins only get notice, event and bulletin shortcuts', () => {
+    const plain = (path: string) => adminLinksFor(path, false).map((l) => l.href)
+    assert.deepEqual(plain('/'), [])
+    assert.deepEqual(plain('/about/history'), [])
+    assert.deepEqual(plain('/mission'), [])
+    assert.deepEqual(plain('/notices'), ['/admin/notices'])
+    assert.deepEqual(plain('/bulletins'), ['/admin/bulletins'])
 })

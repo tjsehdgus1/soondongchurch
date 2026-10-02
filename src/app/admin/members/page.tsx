@@ -14,6 +14,8 @@ type Member = {
   is_blocked: boolean
   // false면 가입 승인 대기
   is_approved: boolean
+  // 게시판 관리·페이지 문구 등 사이트 설정 권한 (SQL로만 지정)
+  can_manage_site: boolean
   created_at: string
   group_members: { groups: GroupInfo }[]
 }
@@ -184,6 +186,11 @@ export default function AdminMembersPage() {
                         }`}>
                           {member.role === 'admin' ? '관리자' : '일반 회원'}
                         </span>
+                        {member.can_manage_site && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-900 text-white">
+                            사이트 설정
+                          </span>
+                        )}
                         {!member.is_approved && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
                             승인 대기
@@ -306,6 +313,11 @@ export default function AdminMembersPage() {
                           }`}>
                             {member.role === 'admin' ? '관리자' : '일반 회원'}
                           </span>
+                          {member.can_manage_site && (
+                            <span className="ml-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-900 text-white">
+                              사이트 설정
+                            </span>
+                          )}
                         </td>
                         <td className="px-5 py-4">
                           {groups.length === 0 ? (

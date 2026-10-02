@@ -19,7 +19,7 @@ export default async function AdminLayout({
   // role + is_blocked 1회 쿼리로 통합 (middleware profiles 쿼리 제거 대응)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, name, is_blocked')
+    .select('role, name, is_blocked, can_manage_site')
     .eq('id', user.id)
     .single()
 
@@ -33,7 +33,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      <AdminSidebar name={profile?.name ?? user.email ?? ''} />
+      <AdminSidebar name={profile?.name ?? user.email ?? ''} canManageSite={!!profile?.can_manage_site} />
       <main className="flex-1 p-6 md:p-8 lg:p-10">
         {children}
       </main>

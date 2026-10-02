@@ -43,8 +43,9 @@ src/
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 회원 관리 (가입 승인/차단/권한 변경)
-│   │   ├── boards/page.tsx         # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
-│   │   ├── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
+│   │   ├── (site)/                 # 사이트 설정 관리자 전용 (layout 가드) — 주소는 /admin/boards 등 그대로
+│   │   │   ├── boards/page.tsx     # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
+│   │   │   └── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
 │   │   ├── groups/page.tsx         # 부서 관리 (부서 게시판 글쓰기 권한)
@@ -198,7 +199,8 @@ window.location.href = '/'
 - `proxy.ts`: `/admin/*` → 미로그인 시 `/auth/login` 리다이렉트
 - `admin/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
 - **가입 승인제** (`supabase/20261001_signup_approval.sql`): 새 가입자는 `profiles.is_approved = false` → 관리자가 회원 관리에서 승인해야 로그인 가능(로그인 화면이 미승인·차단 계정을 바로 로그아웃). DB에서도 `is_active_member()`·글 작성 트리거가 미승인 회원을 막음
-- 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
+- **사이트 설정 관리자** (`supabase/20261002_site_managers.sql`, `profiles.can_manage_site`): 게시판 관리·페이지 문구·연혁·섬기는 분들·선교지(+콘텐츠 사진 올리기)는 관리자 중 이 표시가 있는 사람만 (현재 선동현·노성소). 화면은 `src/app/admin/(site)/` 묶음 + layout 가드, API는 `verifySiteManager()`. 이 값은 화면에서 바꿀 수 없고 SQL로만 지정. 다른 관리자는 사이트 설정 관리자를 강등·차단할 수 없음
+- 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin·canManageSite)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
 
 **회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 SMS 인증 기록을 확인 후 `auth.admin.createUser`로 생성.
@@ -294,7 +296,7 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ## DB 변경 적용
 
 스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` 순서.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` → `supabase/20261002_site_managers.sql` 순서.
 
 리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)
 

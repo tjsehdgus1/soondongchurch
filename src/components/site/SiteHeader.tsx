@@ -16,14 +16,17 @@ interface SiteHeaderProps {
     initialLoggedIn: boolean
     initialRole: string
     initialUserName: string
+    // 사이트 설정 관리자 (관리자 메뉴의 게시판·페이지 문구·연혁·섬기는 분들·선교지)
+    initialCanManageSite: boolean
 }
 
-export default function SiteHeader({ initialLoggedIn, initialRole, initialUserName }: SiteHeaderProps) {
+export default function SiteHeader({ initialLoggedIn, initialRole, initialUserName, initialCanManageSite }: SiteHeaderProps) {
     const pathname = usePathname()
     const [supabase] = useState(() => createClient())
     const [loggedIn, setLoggedIn] = useState(initialLoggedIn)
     const [role, setRole] = useState(initialRole)
     const [userName, setUserName] = useState(initialUserName)
+    const [canManageSite, setCanManageSite] = useState(initialCanManageSite)
     const [hidden, setHidden] = useState(false)
     // 히어로(data-hero) 위에 있을 때 투명 헤더
     const [overHero, setOverHero] = useState(false)
@@ -38,7 +41,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     const [openSection, setOpenSection] = useState<string | null>(null)
     const mobileRef = useRef<HTMLDivElement>(null)
 
-    const menu = buildSiteMenu({ isAdmin: role === 'admin' })
+    const menu = buildSiteMenu({ isAdmin: role === 'admin', canManageSite })
     const currentSection = menu.find((s) => s.items.some((i) => isMenuActive(pathname, i.href)))?.label ?? null
 
     const setMegaOpen = (open: boolean) => {
@@ -59,11 +62,12 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
             const user = session?.user ?? null
             setLoggedIn(!!user)
             if (user) {
-                const { data: profile } = await supabase.from('profiles').select('role, name').eq('id', user.id).single()
-                if (profile) { setRole(profile.role); setUserName(profile.name ?? '') }
+                const { data: profile } = await supabase.from('profiles').select('role, name, can_manage_site').eq('id', user.id).single()
+                if (profile) { setRole(profile.role); setUserName(profile.name ?? ''); setCanManageSite(!!profile.can_manage_site) }
             } else {
                 setRole('member')
                 setUserName('')
+                setCanManageSite(false)
             }
         })
         return () => listener.subscription.unsubscribe()
