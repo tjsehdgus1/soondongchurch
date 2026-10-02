@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { getServiceClient, verifySiteManager } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
 import { isHubKey } from '@/lib/hubs'
 
@@ -48,8 +48,8 @@ function pickBoardFields(body: Record<string, unknown>): { updates: Record<strin
 
 // GET: 게시판 목록 + 글쓰기 부서 선택용 부서 목록 + 게시판별 글 수
 export async function GET() {
-    const admin = await verifyAdmin()
-    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+    const admin = await verifySiteManager()
+    if (!admin) return NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 
     const service = getServiceClient()
     const [{ data: boards, error }, { data: groups }, { data: posts }] = await Promise.all([
@@ -68,8 +68,8 @@ export async function GET() {
 // POST: 게시판 추가
 export async function POST(req: Request) {
     if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-    const admin = await verifyAdmin()
-    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+    const admin = await verifySiteManager()
+    if (!admin) return NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 
     const body = await req.json()
     if (typeof body.slug !== 'string' || !/^[a-z0-9-]{2,40}$/.test(body.slug)) {
@@ -91,8 +91,8 @@ export async function POST(req: Request) {
 // PATCH: 게시판 수정 (?id=)
 export async function PATCH(req: Request) {
     if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-    const admin = await verifyAdmin()
-    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+    const admin = await verifySiteManager()
+    if (!admin) return NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 
     const id = Number(new URL(req.url).searchParams.get('id'))
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ error: '유효한 id가 필요합니다.' }, { status: 400 })
@@ -109,8 +109,8 @@ export async function PATCH(req: Request) {
 // DELETE: 게시판 삭제 (?id=) — 글이 남아 있으면 거부
 export async function DELETE(req: Request) {
     if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-    const admin = await verifyAdmin()
-    if (!admin) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+    const admin = await verifySiteManager()
+    if (!admin) return NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 
     const id = Number(new URL(req.url).searchParams.get('id'))
     if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ error: '유효한 id가 필요합니다.' }, { status: 400 })

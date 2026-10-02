@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 
 export default function RegisterPage() {
@@ -10,88 +10,11 @@ export default function RegisterPage() {
     const [password, setPassword] = useState('')
     const [confirm, setConfirm] = useState('')
     const [phone, setPhone] = useState('')
-    const [smsCode, setSmsCode] = useState('')
-    const [isPhoneVerified, setIsPhoneVerified] = useState(false)
-    const [showSmsInput, setShowSmsInput] = useState(false)
-    const [timeLeft, setTimeLeft] = useState(0)
     const [agreedToTerms, setAgreedToTerms] = useState(false)
     const [agreedToPrivacy, setAgreedToPrivacy] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [loading, setLoading] = useState(false)
-    const timerRef = useRef<NodeJS.Timeout | null>(null)
-
-    // 컴포넌트 언마운트 시 타이머 정리
-    useEffect(() => {
-        return () => { if (timerRef.current) clearInterval(timerRef.current) }
-    }, [])
-
-    const formatTime = (sec: number) => {
-        const m = Math.floor(sec / 60).toString().padStart(2, '0')
-        const s = (sec % 60).toString().padStart(2, '0')
-        return `${m}:${s}`
-    }
-
-    const handleSendVerificationCode = async () => {
-        if (phone.length < 10) {
-            setError('올바른 휴대폰 번호를 입력해 주세요.')
-            return
-        }
-        setError(null)
-        setLoading(true)
-        try {
-            const res = await fetch('/api/auth/sms/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone }),
-            })
-            const data = await res.json()
-            if (!res.ok) {
-                setError(data.error || 'SMS 발송에 실패했습니다.')
-            } else {
-                setShowSmsInput(true)
-                setSmsCode('')
-                if (timerRef.current) clearInterval(timerRef.current)
-                setTimeLeft(300)
-                timerRef.current = setInterval(() => {
-                    setTimeLeft(prev => {
-                        if (prev <= 1) {
-                            if (timerRef.current) clearInterval(timerRef.current)
-                            return 0
-                        }
-                        return prev - 1
-                    })
-                }, 1000)
-            }
-        } catch {
-            setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleVerifyCode = async () => {
-        setError(null)
-        setLoading(true)
-        try {
-            const res = await fetch('/api/auth/sms/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, code: smsCode }),
-            })
-            const data = await res.json()
-            if (!res.ok) {
-                setError(data.error || '인증번호 확인에 실패했습니다.')
-            } else {
-                setIsPhoneVerified(true)
-                setShowSmsInput(false)
-            }
-        } catch {
-            setError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.')
-        } finally {
-            setLoading(false)
-        }
-    }
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -109,8 +32,8 @@ export default function RegisterPage() {
             setError('필수 약관 및 개인정보 수집에 동의해 주세요.')
             return
         }
-        if (!isPhoneVerified) {
-            setError('휴대폰 인증을 진행해 주세요.')
+        if (phone.replace(/\D/g, '').length < 10) {
+            setError('휴대폰 번호를 확인해 주세요.')
             return
         }
         if (password !== confirm) {
@@ -272,80 +195,20 @@ export default function RegisterPage() {
                             <label htmlFor="phone" className="block text-sm font-semibold mb-1.5" style={{ color: '#5C5650' }}>
                                 휴대폰 번호 <span className="text-red-500">*</span>
                             </label>
-                            <div className="flex gap-2">
+                            <div>
                                 <input
                                     id="phone"
                                     type="tel"
                                     required
                                     value={phone}
-                                    onChange={(e) => {
-                                        setPhone(e.target.value)
-                                        setIsPhoneVerified(false)
-                                    }}
-                                    disabled={isPhoneVerified}
+                                    onChange={(e) => setPhone(e.target.value)}
                                     placeholder="01012345678 (숫자만 입력)"
-                                    className={`flex-1 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow ${isPhoneVerified ? 'cursor-not-allowed opacity-60' : ''}`}
+                                    className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent transition-shadow"
                                     style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={handleSendVerificationCode}
-                                    disabled={isPhoneVerified || phone.length < 10 || loading}
-                                    className={`px-4 py-3 font-semibold rounded-xl whitespace-nowrap transition-colors text-sm ${
-                                        isPhoneVerified
-                                            ? 'bg-green-100 text-green-700 border border-green-200 cursor-not-allowed'
-                                            : 'border disabled:opacity-50 disabled:cursor-not-allowed'
-                                    }`}
-                                    style={!isPhoneVerified ? { background: '#B8860B1A', color: '#B8860B', borderColor: '#B8860B33' } : undefined}
-                                >
-                                    {isPhoneVerified ? '인증 완료' : loading ? '발송 중...' : '인증번호 받기'}
-                                </button>
+                                <p className="mt-1.5 text-xs" style={{ color: '#A09890' }}>관리자가 가입 승인할 때 본인 확인에 씁니다.</p>
                             </div>
                         </div>
-
-                        {/* SMS Verification Input */}
-                        {showSmsInput && !isPhoneVerified && (
-                            <div className="p-4 rounded-xl border mt-2" style={{ background: '#B8860B08', borderColor: '#B8860B22' }}>
-                                <div className="flex justify-between items-center mb-1.5">
-                                    <label htmlFor="smsCode" className="text-sm font-semibold" style={{ color: '#2D2A26' }}>
-                                        인증번호 입력
-                                    </label>
-                                    <span className={`text-sm font-mono font-semibold ${timeLeft <= 60 ? 'text-red-500' : ''}`} style={timeLeft > 60 ? { color: '#B8860B' } : undefined}>
-                                        {timeLeft > 0 ? formatTime(timeLeft) : '만료됨'}
-                                    </span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        id="smsCode"
-                                        type="text"
-                                        value={smsCode}
-                                        onChange={(e) => setSmsCode(e.target.value)}
-                                        placeholder="인증번호 6자리"
-                                        maxLength={6}
-                                        className="flex-1 px-4 py-2.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#B8860B] focus:border-transparent"
-                                        style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleVerifyCode}
-                                        disabled={timeLeft <= 0 || loading}
-                                        className="px-4 py-2.5 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        style={{ background: '#B8860B' }}
-                                    >
-                                        확인
-                                    </button>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={handleSendVerificationCode}
-                                    disabled={loading}
-                                    className="mt-2 text-xs hover:underline disabled:opacity-50 transition-colors"
-                                    style={{ color: '#B8860B' }}
-                                >
-                                    {loading ? '발송 중...' : '인증번호 재발송'}
-                                </button>
-                            </div>
-                        )}
 
                         {/* Terms and Privacy Checkboxes */}
                         <div className="pt-2 border-t mt-4 space-y-3" style={{ borderColor: '#E8E4DE' }}>

@@ -9,11 +9,12 @@ const adminNav = [
   { href: '/admin/bulletins', label: '주간예배일정 관리', icon: '📄' },
   { href: '/admin/events', label: '행사일정 관리', icon: '📅' },
   { href: '/admin/notices', label: '공지사항 관리', icon: '📢' },
-  { href: '/admin/boards', label: '게시판 관리', icon: '🗂️' },
-  { href: '/admin/pages', label: '페이지 문구', icon: '✏️' },
-  { href: '/admin/history', label: '연혁', icon: '🕰️' },
-  { href: '/admin/people', label: '섬기는 분들', icon: '🙏' },
-  { href: '/admin/missions', label: '선교지', icon: '🌏' },
+  // siteOnly: 사이트 설정 관리자(can_manage_site)만 — src/app/admin/(site)/layout.tsx
+  { href: '/admin/boards', label: '게시판 관리', icon: '🗂️', siteOnly: true },
+  { href: '/admin/pages', label: '페이지 문구', icon: '✏️', siteOnly: true },
+  { href: '/admin/history', label: '연혁', icon: '🕰️', siteOnly: true },
+  { href: '/admin/people', label: '섬기는 분들', icon: '🙏', siteOnly: true },
+  { href: '/admin/missions', label: '선교지', icon: '🌏', siteOnly: true },
   { href: '/admin/groups', label: '부서 관리', icon: '🏘️' },
   { href: '/admin/members', label: '회원 관리', icon: '👥' },
 ]
@@ -23,11 +24,12 @@ function isActive(navHref: string, pathname: string) {
   return pathname === navHref || pathname.startsWith(navHref + '/')
 }
 
-export default function AdminSidebar({ name }: { name: string }) {
+export default function AdminSidebar({ name, canManageSite }: { name: string, canManageSite: boolean }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const items = adminNav.filter((n) => canManageSite || !n.siteOnly)
 
-  const currentNav = adminNav.find((n) => isActive(n.href, pathname)) ?? adminNav[0]
+  const currentNav = items.find((n) => isActive(n.href, pathname)) ?? items[0]
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -36,7 +38,7 @@ export default function AdminSidebar({ name }: { name: string }) {
 
   const navLinks = (
     <>
-      {adminNav.map((nav) => (
+      {items.map((nav) => (
         <Link
           key={nav.href}
           href={nav.href}

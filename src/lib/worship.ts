@@ -13,11 +13,11 @@ export type Worship = {
 }
 
 export const WORSHIPS: Worship[] = [
-    { key: 'sun-morning', name: '주일오전예배', dayLabel: '주일', days: [0], time: '11:00', timeLabel: '오전 11:00', image: '/images/worships/sun_morning.png' },
-    { key: 'sun-afternoon', name: '주일오후예배', dayLabel: '주일', days: [0], time: '13:30', timeLabel: '오후 1:30', image: '/images/worships/sun_afternoon.png' },
-    { key: 'wed-night', name: '수요밤예배', dayLabel: '수요일', days: [3], time: '19:00', timeLabel: '오후 7:00', image: '/images/worships/wed_night.png' },
-    { key: 'fri-prayer', name: '금요기도회', dayLabel: '금요일', days: [5], time: '20:00', timeLabel: '오후 8:00', image: '/images/worships/fri_prayer.png' },
-    { key: 'dawn', name: '새벽예배', dayLabel: '매일', days: [0, 1, 2, 3, 4, 5, 6], time: '05:00', timeLabel: '오전 5:00', image: '/images/worships/dawn_prayer.png' },
+    { key: 'sun-morning', name: '주일오전예배', dayLabel: '주일', days: [0], time: '11:00', timeLabel: '오전 11:00', image: '/images/worships/sun_morning.webp' },
+    { key: 'sun-afternoon', name: '주일오후예배', dayLabel: '주일', days: [0], time: '13:30', timeLabel: '오후 1:30', image: '/images/worships/sun_afternoon.webp' },
+    { key: 'wed-night', name: '수요밤예배', dayLabel: '수요일', days: [3], time: '19:00', timeLabel: '오후 7:00', image: '/images/worships/wed_night.webp' },
+    { key: 'fri-prayer', name: '금요기도회', dayLabel: '금요일', days: [5], time: '20:00', timeLabel: '오후 8:00', image: '/images/worships/fri_prayer.webp' },
+    { key: 'dawn', name: '새벽예배', dayLabel: '매일', days: [0, 1, 2, 3, 4, 5, 6], time: '05:00', timeLabel: '오전 5:00', image: '/images/worships/dawn_prayer.webp' },
 ]
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000

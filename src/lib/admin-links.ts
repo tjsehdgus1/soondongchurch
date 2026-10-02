@@ -3,10 +3,17 @@
 
 export type AdminLink = { href: string, label: string }
 
+// 사이트 설정 관리자만 들어갈 수 있는 화면 (src/app/admin/(site))
+const SITE_ONLY = ['/admin/pages', '/admin/boards', '/admin/history', '/admin/people', '/admin/missions']
+
 const PAGES: AdminLink = { href: '/admin/pages', label: '페이지 문구 수정' }
 const BOARDS: AdminLink = { href: '/admin/boards', label: '게시판 관리' }
 
-export function adminLinksFor(pathname: string): AdminLink[] {
+export function adminLinksFor(pathname: string, canManageSite: boolean): AdminLink[] {
+    return linksFor(pathname).filter((link) => canManageSite || !SITE_ONLY.includes(link.href))
+}
+
+function linksFor(pathname: string): AdminLink[] {
     if (pathname.startsWith('/admin') || pathname.startsWith('/auth')) return []
     if (pathname === '/about/history') return [{ href: '/admin/history', label: '연혁 수정' }]
     if (pathname === '/about/people') return [{ href: '/admin/people', label: '섬기는 분들 수정' }]

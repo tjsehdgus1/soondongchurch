@@ -38,7 +38,8 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     const [openSection, setOpenSection] = useState<string | null>(null)
     const mobileRef = useRef<HTMLDivElement>(null)
 
-    const menu = buildSiteMenu({ isAdmin: role === 'admin' })
+    const menu = buildSiteMenu()
+    const isAdmin = role === 'admin'
     const currentSection = menu.find((s) => s.items.some((i) => isMenuActive(pathname, i.href)))?.label ?? null
 
     const setMegaOpen = (open: boolean) => {
@@ -164,6 +165,11 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     </a>
                     {loggedIn ? (
                         <>
+                            {isAdmin && (
+                                <Link href="/admin" className={`px-4 py-2 rounded-full font-semibold transition ${light ? 'bg-white text-[#2D2A26] hover:bg-[#FAF8F5]' : 'bg-[#2D2A26] text-white hover:bg-black'}`}>
+                                    관리자
+                                </Link>
+                            )}
                             <span className="opacity-70 max-w-[140px] truncate">{userName}</span>
                             <button onClick={handleLogout} className="px-4 py-2 rounded-full border border-current/20 hover:border-red-300 hover:text-red-500 transition cursor-pointer">로그아웃</button>
                         </>
@@ -203,7 +209,7 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                 className={`hidden lg:block absolute inset-x-0 top-full bg-[#FAF8F5] border-t border-[#E8E4DE] shadow-[0_24px_48px_-24px_rgba(45,42,38,0.25)] transition-all duration-500 ${megaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
                 onFocus={() => setMegaOpen(true)}
             >
-                <div className={`max-w-[1400px] mx-auto px-10 py-10 grid gap-8 ${menu.length > 5 ? 'grid-cols-6' : 'grid-cols-5'}`}>
+                <div className={`max-w-[1400px] mx-auto px-10 py-10 grid gap-8 grid-cols-5`}>
                     {menu.map((section) => {
                         const activeHref = activeItemHref(section.items, pathname, search)
                         return (
@@ -277,7 +283,12 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
                     </ul>
                     <div data-menu-item className="pt-8 flex gap-3">
                         {loggedIn ? (
-                            <button onClick={handleLogout} className="flex-1 py-3 rounded-full border border-red-200 text-red-500 text-sm cursor-pointer">로그아웃</button>
+                            <>
+                                {isAdmin && (
+                                    <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full bg-[#2D2A26] text-white text-sm font-semibold">관리자</Link>
+                                )}
+                                <button onClick={handleLogout} className="flex-1 py-3 rounded-full border border-red-200 text-red-500 text-sm cursor-pointer">로그아웃</button>
+                            </>
                         ) : (
                             <>
                                 <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="flex-1 py-3 text-center rounded-full border border-[#E8E4DE] text-sm">로그인</Link>

@@ -21,7 +21,6 @@
 | Supabase | `@supabase/ssr` 0.9.x (SSR 쿠키 기반) |
 | Tiptap | 3.x (게시글 에디터) |
 | React PDF | 10.x (주보 PDF 뷰어) |
-| Solapi | 5.x (SMS 인증) |
 | GSAP | 3.15 (ScrollTrigger, SplitText) + `@gsap/react` `useGSAP` |
 | Lenis | 1.3 (부드러운 스크롤) |
 | react-globe.gl / three | 2.38 / 0.186 (선교 지구본, `/mission`에서만 로드) |
@@ -43,15 +42,17 @@ src/
 │   │   ├── AdminSidebar.tsx
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 회원 관리 (가입 승인/차단/권한 변경)
-│   │   ├── boards/page.tsx         # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
-│   │   ├── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
+│   │   ├── (site)/                 # 사이트 설정 관리자 전용 (layout 가드) — 주소는 /admin/boards 등 그대로
+│   │   │   ├── boards/page.tsx     # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
+│   │   │   └── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
 │   │   ├── groups/page.tsx         # 부서 관리 (부서 게시판 글쓰기 권한)
 │   │   └── notices/page.tsx
 │   ├── auth/
 │   │   ├── login/page.tsx
-│   │   ├── register/page.tsx       # SMS 인증 포함
+│   │   ├── register/page.tsx       # 가입 신청 (휴대폰 문자 인증 없음 → 관리자 승인)
+│   │   ├── find/page.tsx           # 아이디 찾기(이름·휴대폰) + 비밀번호는 관리자 문의 안내
 │   │   └── callback/route.ts
 │   ├── api/
 │   │   ├── admin/
@@ -64,9 +65,7 @@ src/
 │   │   │   └── upload/route.ts            # 콘텐츠 이미지 (1920px webp, 비공개 옵션)
 │   │   ├── board-images/[...path]/route.ts # 회원 전용 글 이미지 → 서명 URL 리다이렉트
 │   │   ├── auth/
-│   │   │   ├── sms/send/route.ts
-│   │   │   ├── sms/verify/route.ts
-│   │   │   ├── register/route.ts   # SMS 인증 확인 후 계정 생성 (service role)
+│   │   │   ├── register/route.ts   # 입력 검사 후 계정 생성, 승인 대기 (service role)
 │   │   │   └── logout/route.ts
 │   │   └── setup/migrate/route.ts  # DB 초기화 (MIGRATE_SECRET 필요)
 │   ├── board/                      # 게시판: 전체글, [slug] 목록, [slug]/[id] 상세, new, edit
@@ -170,8 +169,8 @@ export async function GET() {
 - events: id, title, event_date, event_time, event_type (`worship`|`event`|`meeting`), location
 - notices: id, title, content, is_pinned
 
-### sms_verifications
-- phone, code(6자리), verified, expires_at (5분)
+### sms_verifications (사용 안 함)
+- 휴대폰 문자 인증 삭제(2026-10-02)로 더 이상 쓰지 않는 테이블 — 남아 있는 데이터만 있음
 
 ### Storage Buckets
 - `bulletins/` — PDF 주보, 최대 20MB
@@ -198,10 +197,12 @@ window.location.href = '/'
 - `proxy.ts`: `/admin/*` → 미로그인 시 `/auth/login` 리다이렉트
 - `admin/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
 - **가입 승인제** (`supabase/20261001_signup_approval.sql`): 새 가입자는 `profiles.is_approved = false` → 관리자가 회원 관리에서 승인해야 로그인 가능(로그인 화면이 미승인·차단 계정을 바로 로그아웃). DB에서도 `is_active_member()`·글 작성 트리거가 미승인 회원을 막음
-- 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
+- **사이트 설정 관리자** (`supabase/20261002_site_managers.sql`, `profiles.can_manage_site`): 게시판 관리·페이지 문구·연혁·섬기는 분들·선교지(+콘텐츠 사진 올리기)는 관리자 중 이 표시가 있는 사람만 (현재 선동현·노성소). 화면은 `src/app/admin/(site)/` 묶음 + layout 가드, API는 `verifySiteManager()`. 이 값은 화면에서 바꿀 수 없고 SQL로만 지정. 다른 관리자는 사이트 설정 관리자를 강등·차단할 수 없음
+- 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin·canManageSite)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
 
-**회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 SMS 인증 기록을 확인 후 `auth.admin.createUser`로 생성.
+**회원가입:** 클라이언트 `signUp` 사용 금지 — `POST /api/auth/register`가 입력값을 검사한 뒤 `auth.admin.createUser`로 생성(승인 대기). 휴대폰 문자 인증(솔라피)은 2026-10-02 **의도적으로 삭제** — 관리자 승인제로 대체, 되살리지 말 것.
+**아이디·비밀번호 찾기** (`/auth/find`): 아이디는 가입 때 입력한 이름·휴대폰 번호(숫자만 비교)로 찾고 일부를 *로 가려 보여 줌(`src/lib/find-id.ts`, `/api/auth/find-id`). 비밀번호는 찾기 없음 → 교회 전화(061-721-6707)로 관리자 문의 → 관리자가 회원 관리 수정 창의 '새 비밀번호'로 정해 줌(`PATCH /api/admin/members` `new_password`).
 Supabase 대시보드 Authentication → Sign In / Providers → **Allow new users to sign up 끔** (우회 가입 차단).
 
 **RLS 원칙 (supabase/20261001_security_fix.sql):**
@@ -283,9 +284,6 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ACCESS_TOKEN=       # DB 초기화 migrate API 전용
-SOLAPI_API_KEY=
-SOLAPI_API_SECRET=
-SOLAPI_SENDER=               # SMS 발신 번호
 MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ```
 
@@ -294,7 +292,7 @@ MIGRATE_SECRET=              # /api/setup/migrate 보호용
 ## DB 변경 적용
 
 스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` 순서.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` → `supabase/20261002_site_managers.sql` 순서.
 
 리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)
 

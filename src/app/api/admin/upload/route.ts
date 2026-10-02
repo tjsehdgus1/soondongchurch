@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import sharp from 'sharp'
-import { getServiceClient, verifyAdmin } from '@/lib/admin'
+import { getServiceClient, verifySiteManager } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
 
 const SCOPES = ['pages', 'timeline', 'people', 'missions']
@@ -10,7 +10,7 @@ const MAX_BYTES = 15 * 1024 * 1024
 // private=true(섬기는 분들만)면 비공개 버킷 + /api/board-images 경유 주소
 export async function POST(req: Request) {
     if (!checkCsrf(req)) return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 403 })
-    if (!(await verifyAdmin())) return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 401 })
+    if (!(await verifySiteManager())) return NextResponse.json({ error: '사이트 설정 관리자만 올릴 수 있습니다.' }, { status: 403 })
 
     const form = await req.formData()
     const file = form.get('file')
