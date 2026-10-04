@@ -71,13 +71,15 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     }, [supabase])
 
     // 스크롤 방향에 따라 숨김/표시, 히어로 위 투명 처리
+    // 관리자 화면은 숨기지 않음 — 관리자 상단 바·사이드바가 헤더 바로 아래(top-16)에 붙어 있어 숨기면 틈이 생김
     useEffect(() => {
+        const autoHide = !pathname.startsWith('/admin')
         let lastY = window.scrollY
         const update = () => {
             const y = window.scrollY
             const hero = document.querySelector<HTMLElement>('[data-hero]')
             setOverHero(!!hero && y < hero.offsetHeight - 80)
-            setHidden(y > 160 && y > lastY)
+            setHidden(autoHide && y > 160 && y > lastY)
             lastY = y
         }
         update()
