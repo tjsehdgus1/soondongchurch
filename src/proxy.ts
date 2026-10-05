@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { REMEMBER_COOKIE, withSessionMaxAge } from '@/lib/supabase/session'
 
 export async function proxy(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
@@ -17,10 +18,10 @@ export async function proxy(request: NextRequest) {
                         request.cookies.set(name, value)
                     )
                     supabaseResponse = NextResponse.next({ request })
+                    // 로그인 유지 기간: '로그인 상태 유지' 체크 시 30일, 아니면 12시간 (session.ts)
+                    const remember = request.cookies.get(REMEMBER_COOKIE)?.value === '1'
                     cookiesToSet.forEach(({ name, value, options }) => {
-                        // maxAge/expires 제거 → 브라우저 종료 시 자동 삭제되는 세션 쿠키
-                        const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
-                        supabaseResponse.cookies.set(name, value, sessionOptions)
+                        supabaseResponse.cookies.set(name, value, withSessionMaxAge(options ?? {}, remember))
                     })
                 },
             },
