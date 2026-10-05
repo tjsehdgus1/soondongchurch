@@ -71,13 +71,15 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
     }, [supabase])
 
     // 스크롤 방향에 따라 숨김/표시, 히어로 위 투명 처리
+    // 관리자 화면은 숨기지 않음 — 관리자 상단 바·사이드바가 헤더 바로 아래(top-16)에 붙어 있어 숨기면 틈이 생김
     useEffect(() => {
+        const autoHide = !pathname.startsWith('/admin')
         let lastY = window.scrollY
         const update = () => {
             const y = window.scrollY
             const hero = document.querySelector<HTMLElement>('[data-hero]')
             setOverHero(!!hero && y < hero.offsetHeight - 80)
-            setHidden(y > 160 && y > lastY)
+            setHidden(autoHide && y > 160 && y > lastY)
             lastY = y
         }
         update()
@@ -242,9 +244,10 @@ export default function SiteHeader({ initialLoggedIn, initialRole, initialUserNa
 
         </header>
 
-        {/* 모바일 전체 화면 메뉴 — header의 transform 밖에 둬야 fixed가 화면 기준이 됨 */}
+        {/* 모바일 전체 화면 메뉴 — header의 transform 밖에 둬야 fixed가 화면 기준이 됨
+            z-[45]: 관리자 상단 바·관리자 바로가기(z-40)보다 위, 헤더(z-50)보다 아래 */}
         {mobileOpen && (
-            <div id="mobile-menu" ref={mobileRef} className="lg:hidden fixed inset-x-0 bottom-0 top-16 z-40 bg-[#FAF8F5] overflow-y-auto overscroll-contain">
+            <div id="mobile-menu" ref={mobileRef} className="lg:hidden fixed inset-x-0 bottom-0 top-16 z-[45] bg-[#FAF8F5] overflow-y-auto overscroll-contain">
                 {/* 큰 메뉴 5개 → 누르면 하위 메뉴가 펼쳐짐 (현재 위치 묶음은 처음부터 펼침) */}
                 <nav aria-label="모바일 메뉴" className="px-6 pt-2 pb-8">
                     <ul>
