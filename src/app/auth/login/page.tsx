@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { REMEMBER_COOKIE, REMEMBER_MAX_AGE } from '@/lib/supabase/session'
 
 // [리팩토링] useRouter import 제거
 // router.refresh()는 void를 반환 — await해도 완료를 보장하지 않음
@@ -49,6 +50,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    // 로그인 상태 유지: 체크하면 30일, 아니면 12시간 동안 쓰지 않으면 로그아웃 (lib/supabase/session.ts)
+    const [remember, setRemember] = useState(false)
     // [리팩토링] 싱글톤 클라이언트 — 리렌더 시 재생성 없음
     const supabase = createClient()
 
@@ -56,6 +59,11 @@ export default function LoginPage() {
         e.preventDefault()
         setLoading(true)
         setError(null)
+
+        // 로그인 쿠키를 쓰기 전에 유지 기간 표시를 먼저 남김 (client.ts가 이 표시를 보고 유효기간을 정함)
+        document.cookie = remember
+            ? `${REMEMBER_COOKIE}=1; path=/; max-age=${REMEMBER_MAX_AGE}; samesite=lax`
+            : `${REMEMBER_COOKIE}=; path=/; max-age=0; samesite=lax`
 
         const internalEmail = `${username.trim().toLowerCase()}@internal.church`
         const { data, error } = await supabase.auth.signInWithPassword({ email: internalEmail, password })
@@ -138,6 +146,13 @@ export default function LoginPage() {
                                 style={{ borderColor: '#E8E4DE', color: '#2D2A26' }}
                             />
                         </div>
+
+                        {/* 로그인 상태 유지 */}
+                        <label className="flex items-center gap-2.5 cursor-pointer select-none" style={{ color: '#5C5650' }}>
+                            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)}
+                                className="w-[18px] h-[18px] rounded accent-[#2D2A26] cursor-pointer" />
+                            <span className="text-sm">로그인 상태 유지 <span style={{ color: '#A09890' }}>(30일 · 공용 기기에서는 체크하지 마세요)</span></span>
+                        </label>
 
                         {/* Error */}
                         {error && (
