@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import RichText from '@/components/site/RichText'
@@ -6,10 +7,11 @@ import SplitHeading from '@/components/motion/SplitHeading'
 import { getBlock } from '@/lib/content'
 import { nextWorship, WORSHIPS } from '@/lib/worship'
 
-export const metadata = {
-    title: '예배 안내 | 순천순동교회',
-    description: '순천순동교회 주일·수요·금요·새벽 예배 시간 안내',
-}
+export const metadata = pageMetadata({
+    title: '예배 안내',
+    description: '순천순동교회 예배 시간 안내 — 주일오전예배 11시, 주일오후예배 1시 30분, 수요밤예배 7시, 금요기도회 8시, 새벽예배 5시. 순천시 남신월4길 3-13.',
+    path: '/worship',
+})
 
 export default async function WorshipPage() {
     const intro = await getBlock('worship.intro')

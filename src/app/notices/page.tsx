@@ -1,13 +1,15 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import { createPublicClient } from '@/lib/supabase/public'
 
 export const revalidate = 60 // 1분 캐시
 
-export const metadata = {
-    title: '공지사항 | 순천순동교회',
-    description: '순천순동교회 공지사항 목록',
-}
+export const metadata = pageMetadata({
+    title: '공지사항',
+    description: '순천순동교회 공지사항 — 교회 소식과 안내를 전합니다.',
+    path: '/notices',
+})
 
 function formatDate(dateStr: string) {
     const d = new Date(dateStr)

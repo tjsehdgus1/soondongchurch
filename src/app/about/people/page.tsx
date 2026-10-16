@@ -1,13 +1,15 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import Reveal from '@/components/motion/Reveal'
 import SplitHeading from '@/components/motion/SplitHeading'
 import { getPeople, type Person } from '@/lib/content'
 
-export const metadata = {
-    title: '섬기는 분들 | 순천순동교회',
+export const metadata = pageMetadata({
+    title: '섬기는 분들',
     description: '순천순동교회 교역자와 역대 담임교역자',
-}
+    path: '/about/people',
+})
 
 const PASTOR_HISTORY = '역대 담임교역자'
 

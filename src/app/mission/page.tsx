@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import MissionExperience from '@/components/mission/MissionExperience'
 import HubSection from '@/components/hub/HubSection'
 import RichText from '@/components/site/RichText'
@@ -6,10 +7,11 @@ import SplitHeading from '@/components/motion/SplitHeading'
 import type { HubSearchParams } from '@/components/hub/HubPage'
 import { getBlock, getMissionFields } from '@/lib/content'
 
-export const metadata = {
-    title: '선교 | 순천순동교회',
+export const metadata = pageMetadata({
+    title: '선교',
     description: '순천에서 땅 끝까지 — 순천순동교회가 함께하는 선교지와 선교 이야기',
-}
+    path: '/mission',
+})
 
 export default async function MissionPage({ searchParams }: { searchParams: HubSearchParams }) {
     const { tab, page } = await searchParams

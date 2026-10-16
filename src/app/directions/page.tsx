@@ -1,13 +1,15 @@
+import { pageMetadata } from '@/lib/seo'
 import PageHero from '@/components/site/PageHero'
 import RichText from '@/components/site/RichText'
 import KakaoRoughMap from '@/components/site/KakaoRoughMap'
 import Reveal from '@/components/motion/Reveal'
 import { getBlock } from '@/lib/content'
 
-export const metadata = {
-    title: '오시는 길 | 순천순동교회',
-    description: '전라남도 순천시 남신월 4길 3-13 순천순동교회 오시는 길',
-}
+export const metadata = pageMetadata({
+    title: '오시는 길',
+    description: '순천순동교회 오시는 길 — 전라남도 순천시 남신월4길 3-13, 전화 061-721-6707. 지도와 주차·예배 시간 안내.',
+    path: '/directions',
+})
 
 const INFO = [
     { label: '주소', value: '전라남도 순천시 남신월 4길 3-13' },

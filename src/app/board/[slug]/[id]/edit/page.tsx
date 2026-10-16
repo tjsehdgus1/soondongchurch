@@ -1,10 +1,11 @@
+import { NOINDEX } from '@/lib/seo'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BoardPostForm from '@/components/BoardPostForm'
 import type { Board } from '@/lib/boards'
 
-export const metadata = { title: '글 수정 | 순천순동교회' }
+export const metadata = { title: '글 수정', ...NOINDEX }
 
 export default async function EditBoardPostPage({ params }: { params: Promise<{ slug: string, id: string }> }) {
     const { slug, id } = await params

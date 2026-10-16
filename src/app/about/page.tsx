@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import RichText from '@/components/site/RichText'
@@ -5,10 +6,11 @@ import Reveal from '@/components/motion/Reveal'
 import SplitHeading from '@/components/motion/SplitHeading'
 import { getBlocks } from '@/lib/content'
 
-export const metadata = {
-    title: '비전과 목표 | 순천순동교회',
+export const metadata = pageMetadata({
+    title: '비전과 목표',
     description: '하나님이 기뻐하시는 행복한 교회, 순천순동교회의 비전·표어·7대 목표입니다.',
-}
+    path: '/about',
+})
 
 const MORE = [
     { href: '/about/history', title: '걸어온 길', desc: '1946년 해촌교회에서 시작된 이야기' },

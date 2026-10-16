@@ -1,3 +1,4 @@
+import { NOINDEX, pageMetadata } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -8,6 +9,13 @@ async function getBulletin(id: string) {
     const supabase = await createClient()
     const { data } = await supabase.from('bulletins').select('*').eq('id', id).single()
     return data
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const bulletin = await getBulletin(id)
+    if (!bulletin) return { title: '주보', ...NOINDEX }
+    return pageMetadata({ title: bulletin.title, description: `순천순동교회 ${bulletin.title} — 예배 순서와 교회 소식`, path: `/bulletins/${id}` })
 }
 
 function formatDate(dateStr: string) {

@@ -1,8 +1,9 @@
+import { NOINDEX } from '@/lib/seo'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import PasswordChangeForm from './PasswordChangeForm'
 
-export const metadata = { title: '내 정보 | 순천순동교회' }
+export const metadata = { title: '내 정보', ...NOINDEX }
 
 // 내 정보: 가입 정보 확인 + 비밀번호 변경 (정보 수정은 관리자에게 문의)
 export default async function AccountPage() {

@@ -1,11 +1,13 @@
+import { pageMetadata } from '@/lib/seo'
 import PageHero from '@/components/site/PageHero'
 import DecadeScroller, { type DecadeChapter } from '@/components/about/DecadeScroller'
 import { getTimeline, type TimelineItem } from '@/lib/content'
 
-export const metadata = {
-    title: '걸어온 길 | 순천순동교회',
+export const metadata = pageMetadata({
+    title: '걸어온 길',
     description: '1946년 순천해촌교회 설립부터 오늘까지 순천순동교회의 연혁',
-}
+    path: '/about/history',
+})
 
 function groupBy<T, K>(items: T[], keyOf: (item: T) => K): Map<K, T[]> {
     const map = new Map<K, T[]>()

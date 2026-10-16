@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import { createPublicClient } from '@/lib/supabase/public'
 import AdminActions from '@/components/admin/AdminActions'
 import PageHero from '@/components/site/PageHero'
@@ -20,10 +21,11 @@ function formatTime(timeStr: string | null) {
 
 export const revalidate = 300 // 5분 캐시 — 행사 일정은 자주 바뀌지 않음
 
-export const metadata = {
-    title: '예배/행사 일정 | 순천순동교회',
-    description: '순천순동교회의 예배 및 행사 일정 안내',
-}
+export const metadata = pageMetadata({
+    title: '예배/행사 일정',
+    description: '순천순동교회 예배와 교회 행사 일정 안내.',
+    path: '/events',
+})
 
 export default async function EventsPage() {
     const supabase = createPublicClient()

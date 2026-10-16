@@ -1,3 +1,5 @@
+import { NOINDEX, pageMetadata } from '@/lib/seo'
+import { summarize } from '@/lib/site'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import AdminActions from '@/components/admin/AdminActions'
@@ -6,8 +8,13 @@ import { createClient } from '@/lib/supabase/server'
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const supabase = await createClient()
-    const { data } = await supabase.from('notices').select('title').eq('id', id).single()
-    return { title: data ? `${data.title} | 순천순동교회` : '공지사항 | 순천순동교회' }
+    const { data } = await supabase.from('notices').select('title, content').eq('id', id).single()
+    if (!data) return { title: '공지사항', ...NOINDEX }
+    return pageMetadata({
+        title: data.title,
+        description: summarize(data.content) || '순천순동교회 공지사항',
+        path: `/notices/${id}`,
+    })
 }
 
 export default async function NoticeDetailPage({ params }: { params: Promise<{ id: string }> }) {

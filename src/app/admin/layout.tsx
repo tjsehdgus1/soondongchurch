@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from './AdminSidebar'
+import { NOINDEX } from '@/lib/seo'
+
+export const metadata = { title: '관리자', ...NOINDEX }
 
 export default async function AdminLayout({
   children,
