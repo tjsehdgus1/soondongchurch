@@ -187,6 +187,8 @@ export async function GET() {
 {username}@internal.church
 ```
 
+**로그인 유지 기간** (`src/lib/supabase/session.ts`): 로그인 화면 '로그인 상태 유지' 체크 → 30일, 아니면 12시간 — 사용 중 토큰이 갱신될 때마다 다시 늘어나므로 '마지막 사용 후' 기준. 체크 여부는 `sd-remember` 쿠키. `@supabase/ssr`이 쿠키 유효기간을 400일로 덮어쓰므로 쿠키를 쓰는 세 곳(`client.ts`·`server.ts`·`proxy.ts`)에서 모두 `withSessionMaxAge()` 적용 — 새로 Supabase 클라이언트를 만들 때도 반드시 이 규칙을 따를 것
+
 **세션 후 리다이렉트:** 반드시 `window.location.href` 사용, `router.push()` 금지
 ```typescript
 // 로그인/회원가입 성공 후
