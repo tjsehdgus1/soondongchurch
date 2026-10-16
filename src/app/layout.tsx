@@ -9,6 +9,7 @@ import Footer from '@/components/Footer'
 import { AdminProvider } from '@/components/admin/AdminContext'
 import AdminPageBar from '@/components/admin/AdminPageBar'
 import { createClient } from '@/lib/supabase/server'
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site'
 
 // 제목용 세리프: 한글 글꼴은 조각 파일이 많아 미리 받지 않음(preload: false) — 본문 표시를 막지 않도록
 // 600은 700으로 대체되므로 400·700만 사용
@@ -20,10 +21,38 @@ const notoSerifKR = Noto_Serif_KR({
   preload: false,
 })
 
+// 검색·공유 미리보기 기본값 — 각 페이지는 title(짧게)·description·alternates.canonical만 정하면 됨
+// 검색 등록 확인 코드는 Vercel 환경변수로 (구글 서치 콘솔·네이버 서치어드바이저에서 발급)
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+const naverVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+
 export const metadata: Metadata = {
-  title: '순천순동교회 | Suncheon Sundong Church',
-  description: '순천순동교회 공식 홈페이지입니다.',
-  keywords: ['교회', '순천순동교회', '순천', '예배', '성경', '기도'],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: ['순천순동교회', '순동교회', '순천 교회', '순천시 교회', '순천 예배', '전남 순천 교회', '장로교회', '예배 시간'],
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: `${SITE_NAME} — ${SITE_TAGLINE}` }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og.jpg'] },
+  formatDetection: { telephone: false, address: false, email: false },
+  ...(googleVerification || naverVerification
+    ? {
+      verification: {
+        ...(googleVerification ? { google: googleVerification } : {}),
+        ...(naverVerification ? { other: { 'naver-site-verification': naverVerification } } : {}),
+      },
+    }
+    : {}),
 }
 
 export default async function RootLayout({

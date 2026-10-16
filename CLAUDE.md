@@ -287,7 +287,16 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ACCESS_TOKEN=       # DB 초기화 migrate API 전용
 MIGRATE_SECRET=              # /api/setup/migrate 보호용
+NEXT_PUBLIC_SITE_URL=        # 대표 주소 (끝에 / 없이) — 없으면 https://church.seonso.com (src/lib/site.ts)
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=   # 구글 서치 콘솔 확인 코드 (선택)
+NEXT_PUBLIC_NAVER_SITE_VERIFICATION=    # 네이버 서치어드바이저 확인 코드 (선택)
 ```
+
+## 검색(SEO)
+- 대표 주소·교회 정보: `src/lib/site.ts` (`SITE_URL`, 주소·전화, `churchJsonLd()` — 홈에 Church 구조화 데이터)
+- 페이지 메타: 각 페이지는 `pageMetadata({ title, description, path })`(`src/lib/seo.ts`) — 제목은 짧게(루트 템플릿이 ' | 순천순동교회' 붙임), `path`는 쿼리 없는 대표 주소. 공유 카드 기본 사진 `public/og.jpg`(1200×630)
+- 검색 제외: `/admin`·`/auth`·`/account`·글쓰기/수정·회원 전용 글은 `NOINDEX`, `src/app/robots.ts`도 차단
+- `src/app/sitemap.ts`: 메뉴 화면 + 공개 게시글(메뉴에 있는 게시판) + 공지 + 주보, 1시간마다 갱신
 
 ---
 

@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import { createPublicClient } from '@/lib/supabase/public'
@@ -9,6 +10,12 @@ interface Bulletin {
     file_url: string
     created_at: string
 }
+
+export const metadata = pageMetadata({
+    title: '주보',
+    description: '순천순동교회 주보 — 매주 예배 순서와 교회 소식을 PDF로 봅니다.',
+    path: '/bulletins',
+})
 
 export const revalidate = 300 // 5분 캐시 — 주보는 주 1회 업로드
 

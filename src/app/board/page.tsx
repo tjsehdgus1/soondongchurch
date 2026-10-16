@@ -1,13 +1,15 @@
+import { pageMetadata } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
 import PageHero from '@/components/site/PageHero'
 import BoardPostList from '@/components/BoardPostList'
 import Pagination from '@/components/Pagination'
 import { type BoardPostSummary, PAGE_SIZE, POST_SUMMARY_COLUMNS } from '@/lib/boards'
 
-export const metadata = {
-    title: '전체글 | 순천순동교회',
-    description: '순천순동교회 게시판 전체 최신글',
-}
+export const metadata = pageMetadata({
+    title: '전체글',
+    description: '순천순동교회 게시판의 최신 글 모음 — 교회 행사, 간증, 자유게시판.',
+    path: '/board',
+})
 
 export default async function AllPostsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const { page: pageParam } = await searchParams

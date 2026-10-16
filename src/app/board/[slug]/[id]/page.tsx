@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DeleteBoardPostButton from '@/components/DeleteBoardPostButton'
-import { type Board, formatDate } from '@/lib/boards'
+import { type Board, firstImageSrc, formatDate, postThumbnail } from '@/lib/boards'
+import { NOINDEX, pageMetadata } from '@/lib/seo'
+import { summarize } from '@/lib/site'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { hubPathForBoard } from '@/lib/hubs'
 import { splitGallery } from '@/lib/gallery'
@@ -11,10 +13,22 @@ import ImageSlider from '@/components/board/ImageSlider'
 type Params = { params: Promise<{ slug: string, id: string }> }
 
 export async function generateMetadata({ params }: Params) {
-    const { id } = await params
+    const { slug, id } = await params
     const supabase = await createClient()
-    const { data } = await supabase.from('board_posts').select('title').eq('id', id).maybeSingle()
-    return { title: data ? `${data.title} | 순천순동교회` : '게시글 | 순천순동교회' }
+    const { data } = await supabase.from('board_posts')
+        .select('title, content, thumbnail_url, youtube_id, members_only, boards!inner(name)')
+        .eq('id', id).maybeSingle()
+    // 없는 글·회원 전용 글(비로그인에게는 안 보임)은 검색 결과에서 뺌
+    if (!data) return { title: '게시글', ...NOINDEX }
+    const boardName = (data.boards as unknown as { name: string }).name
+    const image = postThumbnail(data) ?? firstImageSrc(data.content ?? '')
+    return pageMetadata({
+        title: data.title,
+        description: summarize(data.content) || `순천순동교회 ${boardName} 게시글`,
+        path: `/board/${slug}/${id}`,
+        image: image?.startsWith('/api/') ? null : image,
+        noindex: data.members_only,
+    })
 }
 
 export default async function BoardPostPage({ params }: Params) {

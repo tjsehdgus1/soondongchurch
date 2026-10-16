@@ -1,3 +1,4 @@
+import { NOINDEX, pageMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import PageHero from '@/components/site/PageHero'
 import { notFound, redirect } from 'next/navigation'
@@ -13,7 +14,8 @@ export async function generateMetadata({ params }: Params) {
     const { slug } = await params
     const supabase = await createClient()
     const { data } = await supabase.from('boards').select('name').eq('slug', slug).maybeSingle()
-    return { title: data ? `${data.name} | 순천순동교회` : '게시판 | 순천순동교회' }
+    if (!data) return { title: '게시판', ...NOINDEX }
+    return pageMetadata({ title: data.name, description: `순천순동교회 ${data.name} 게시판`, path: `/board/${slug}` })
 }
 
 export default async function BoardPage({ params, searchParams }: Params) {

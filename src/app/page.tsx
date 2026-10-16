@@ -6,6 +6,9 @@ import RecentSermons, { type SermonVideo } from '@/components/home/RecentSermons
 import MissionTeaser from '@/components/home/MissionTeaser'
 import NewsSection, { type EventPost } from '@/components/home/NewsSection'
 import VisitBand from '@/components/home/VisitBand'
+import { churchJsonLd } from '@/lib/site'
+
+export const metadata = { alternates: { canonical: '/' } }
 
 // 원본 6000px → 2400/1200px webp (모바일은 작은 파일)
 const HERO_IMAGES = [
@@ -41,6 +44,11 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 구글이 교회 정보(주소·전화·유튜브)로 알아보도록 하는 구조화 데이터 — 코드 안 고정값만 사용(사용자 입력 없음) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(churchJsonLd()) }}
+      />
       <HomeHero
         title={hero?.title ?? '하나님이 기뻐하시는\n행복한 교회'}
         subtitle={hero?.subtitle ?? '하나님의 은혜 안에서 함께 성장하는 교회'}
