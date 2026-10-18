@@ -289,7 +289,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_ACCESS_TOKEN=       # DB 초기화 migrate API 전용
 MIGRATE_SECRET=              # /api/setup/migrate 보호용
-NEXT_PUBLIC_SITE_URL=        # 대표 주소 (끝에 / 없이) — 없으면 https://church.seonso.com (src/lib/site.ts)
+NEXT_PUBLIC_SITE_URL=        # 대표 주소 (끝에 / 없이) — 운영값 https://soondong.com, 없으면 같은 값 (src/lib/site.ts)
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=   # 구글 서치 콘솔 확인 코드 (선택)
 NEXT_PUBLIC_NAVER_SITE_VERIFICATION=    # 네이버 서치어드바이저 확인 코드 (선택)
 ```
@@ -299,6 +299,9 @@ NEXT_PUBLIC_NAVER_SITE_VERIFICATION=    # 네이버 서치어드바이저 확인
 - 페이지 메타: 각 페이지는 `pageMetadata({ title, description, path })`(`src/lib/seo.ts`) — 제목은 짧게(루트 템플릿이 ' | 순천순동교회' 붙임), `path`는 쿼리 없는 대표 주소. 공유 카드 기본 사진 `public/og.jpg`(1200×630)
 - 검색 제외: `/admin`·`/auth`·`/account`·글쓰기/수정·회원 전용 글은 `NOINDEX`, `src/app/robots.ts`도 차단
 - `src/app/sitemap.ts`: 메뉴 화면 + 공개 게시글(메뉴에 있는 게시판) + 공지 + 주보, 1시간마다 갱신
+- 도메인: **soondong.com** (Cloudflare DNS → Vercel, DNS only). www.soondong.com·church.seonso.com은 Vercel에서 308로 soondong.com으로 이동. 네이버 서치어드바이저·구글 서치 콘솔 등록·사이트맵 제출 완료(확인 코드는 Vercel 환경변수)
+- 파비콘: 정사각형이어야 검색 결과에 나옴 — `src/app/favicon.ico`(16·32·48)·`icon.png`(192)·`apple-icon.png`(180)는 `node scripts/make-icons.mjs`로 `public/images/logo.svg`에서 생성. 세로로 긴 SVG를 아이콘으로 직접 쓰지 말 것
+- 사이트 이름: 홈에 WebSite 구조화 데이터(`websiteJsonLd()`, 홈 주소 끝 `/`) + og:site_name
 
 ---
 
