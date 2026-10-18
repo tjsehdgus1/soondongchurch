@@ -1,7 +1,7 @@
 // 사이트 주소·교회 기본 정보 — 검색(SEO)·공유 미리보기·구조화 데이터 공통
-// 도메인을 바꾸면 Vercel 환경변수 NEXT_PUBLIC_SITE_URL 하나만 바꾸면 됨 (끝에 / 없이, 예: https://soondong.church)
+// 대표 주소 soondong.com (church.seonso.com·www는 308로 이리 넘어옴). 바꿀 때는 Vercel 환경변수 NEXT_PUBLIC_SITE_URL (끝에 / 없이)
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://church.seonso.com').replace(/\/+$/, '')
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://soondong.com').replace(/\/+$/, '')
 export const SITE_NAME = '순천순동교회'
 export const SITE_TAGLINE = '하나님이 기뻐하시는 행복한 교회'
 export const SITE_DESCRIPTION =
@@ -32,41 +32,41 @@ export function summarize(html: string | null | undefined, max = 120): string {
     return text.length > max ? text.slice(0, max - 1).trimEnd() + '…' : text
 }
 
+// 검색 결과의 사이트 이름 — 구글 안내대로 홈에 WebSite를 단독 객체로 (홈 주소는 끝에 /)
+export function websiteJsonLd() {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        alternateName: ['순동교회', 'Suncheon Sundong Church'],
+        url: `${SITE_URL}/`,
+        inLanguage: 'ko-KR',
+    }
+}
+
 // 구글이 교회로 알아보도록 하는 구조화 데이터 (홈에 넣음)
 export function churchJsonLd() {
     return {
         '@context': 'https://schema.org',
-        '@graph': [
-            {
-                '@type': 'Church',
-                '@id': `${SITE_URL}/#church`,
-                name: SITE_NAME,
-                alternateName: ['순동교회', 'Suncheon Sundong Church'],
-                description: SITE_DESCRIPTION,
-                slogan: SITE_TAGLINE,
-                url: SITE_URL,
-                logo: `${SITE_URL}/images/logo.svg`,
-                image: `${SITE_URL}/og.jpg`,
-                telephone: CHURCH.telephone,
-                faxNumber: CHURCH.faxNumber,
-                foundingDate: '1946-07-15',
-                address: {
-                    '@type': 'PostalAddress',
-                    streetAddress: CHURCH.streetAddress,
-                    addressLocality: CHURCH.addressLocality,
-                    addressRegion: CHURCH.addressRegion,
-                    addressCountry: CHURCH.addressCountry,
-                },
-                sameAs: [CHURCH.youtube],
-            },
-            {
-                '@type': 'WebSite',
-                '@id': `${SITE_URL}/#website`,
-                name: SITE_NAME,
-                url: SITE_URL,
-                inLanguage: 'ko-KR',
-                publisher: { '@id': `${SITE_URL}/#church` },
-            },
-        ],
+        '@type': 'Church',
+        '@id': `${SITE_URL}/#church`,
+        name: SITE_NAME,
+        alternateName: ['순동교회', 'Suncheon Sundong Church'],
+        description: SITE_DESCRIPTION,
+        slogan: SITE_TAGLINE,
+        url: `${SITE_URL}/`,
+        logo: `${SITE_URL}/icon.png`,
+        image: `${SITE_URL}/og.jpg`,
+        telephone: CHURCH.telephone,
+        faxNumber: CHURCH.faxNumber,
+        foundingDate: '1946-07-15',
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: CHURCH.streetAddress,
+            addressLocality: CHURCH.addressLocality,
+            addressRegion: CHURCH.addressRegion,
+            addressCountry: CHURCH.addressCountry,
+        },
+        sameAs: [CHURCH.youtube],
     }
 }
