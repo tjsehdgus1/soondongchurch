@@ -12,9 +12,9 @@ export default function Footer() {
                         하나님이 기뻐하시는<br />
                         <span className="text-white/60">행복한 교회</span>
                     </p>
+                    {/* 오시는 길은 홈 바로 위 띠(VisitBand)와 겹쳐 빼고 예배 안내만 */}
                     <div className="flex gap-3">
                         <Link href="/worship" className="px-6 py-3 rounded-full bg-white text-[#2D2A26] text-sm hover:bg-[#FAF8F5] transition">예배 안내</Link>
-                        <Link href="/directions" className="px-6 py-3 rounded-full border border-white/20 text-[#FAF8F5] text-sm hover:border-white/50 transition">오시는 길</Link>
                     </div>
                 </div>
 
