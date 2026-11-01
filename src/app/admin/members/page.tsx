@@ -1,8 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ROLES, ROLE_LABEL, isRole } from '@/lib/roles'
 
 type GroupInfo = { id: number; name: string }
+
+// 권한 배지 색: 관리자 보라 · 운영자 파랑 · 일반 회원 초록
+const ROLE_BADGE: Record<string, string> = {
+  admin: 'bg-purple-100 text-purple-700',
+  editor: 'bg-sky-100 text-sky-700',
+  member: 'bg-green-100 text-green-700',
+}
+const roleLabel = (role: string) => (isRole(role) ? ROLE_LABEL[role] : role)
 
 type Member = {
   id: string
@@ -190,10 +199,8 @@ export default function AdminMembersPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-gray-900">{member.name}</span>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          member.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
-                        }`}>
-                          {member.role === 'admin' ? '관리자' : '일반 회원'}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${ROLE_BADGE[member.role] ?? ROLE_BADGE.member}`}>
+                          {roleLabel(member.role)}
                         </span>
                         {member.can_manage_site && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-900 text-white">
@@ -315,12 +322,8 @@ export default function AdminMembersPage() {
                           {member.phone_number || <span className="text-gray-400">미등록</span>}
                         </td>
                         <td className="px-5 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            member.role === 'admin'
-                              ? 'bg-purple-100 text-purple-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {member.role === 'admin' ? '관리자' : '일반 회원'}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${ROLE_BADGE[member.role] ?? ROLE_BADGE.member}`}>
+                            {roleLabel(member.role)}
                           </span>
                           {member.can_manage_site && (
                             <span className="ml-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-900 text-white">
@@ -455,9 +458,11 @@ export default function AdminMembersPage() {
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                  <option value="member">일반 회원</option>
-                  <option value="admin">관리자</option>
+                  {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
                 </select>
+                <p className="mt-1.5 text-xs text-gray-500 leading-relaxed">
+                  운영자: 모든 게시판에 글을 쓸 수 있고, 수정·삭제는 자기 글만 · 관리자 화면은 못 들어감
+                </p>
               </div>
 
               <div>
