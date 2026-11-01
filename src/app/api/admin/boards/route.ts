@@ -31,10 +31,6 @@ function pickBoardFields(body: Record<string, unknown>): { updates: Record<strin
         if (!WRITE_LEVELS.includes(body.write_level as string)) return { error: '잘못된 글쓰기 권한입니다.' }
         updates.write_level = body.write_level
     }
-    if ('group_id' in body) {
-        if (body.group_id !== null && !Number.isInteger(body.group_id)) return { error: '잘못된 부서입니다.' }
-        updates.group_id = body.group_id
-    }
     if ('categories' in body) {
         if (!Array.isArray(body.categories) || body.categories.some((c) => typeof c !== 'string')) return { error: '잘못된 말머리입니다.' }
         updates.categories = (body.categories as string[]).map((c) => c.trim()).filter(Boolean)
@@ -46,15 +42,15 @@ function pickBoardFields(body: Record<string, unknown>): { updates: Record<strin
     return { updates }
 }
 
-// GET: 게시판 목록 + 글쓰기 부서 선택용 부서 목록 + 게시판별 글 수
+// GET: 게시판 목록 + 게시판별 연결 부서 이름(연결은 부서 관리에서) + 게시판별 글 수
 export async function GET() {
     const admin = await verifySiteManager()
     if (!admin) return NextResponse.json({ error: '사이트 설정 관리자만 바꿀 수 있습니다.' }, { status: 403 })
 
     const service = getServiceClient()
-    const [{ data: boards, error }, { data: groups }, { data: posts }] = await Promise.all([
+    const [{ data: boards, error }, { data: links }, { data: posts }] = await Promise.all([
         service.from('boards').select('*').order('hub').order('tab_order'),
-        service.from('groups').select('id, name').order('name'),
+        service.from('board_groups').select('board_id, groups(name)'),
         service.from('board_posts').select('board_id'),
     ])
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -62,7 +58,12 @@ export async function GET() {
     const postCounts: Record<number, number> = {}
     for (const p of posts ?? []) postCounts[p.board_id] = (postCounts[p.board_id] ?? 0) + 1
 
-    return NextResponse.json({ boards, groups: groups ?? [], postCounts })
+    const groupNames: Record<number, string[]> = {}
+    for (const l of (links ?? []) as unknown as { board_id: number, groups: { name: string } | null }[]) {
+        if (l.groups) (groupNames[l.board_id] ??= []).push(l.groups.name)
+    }
+
+    return NextResponse.json({ boards, groupNames, postCounts })
 }
 
 // POST: 게시판 추가

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServiceClient, verifyAdmin } from '@/lib/admin'
 import { checkCsrf } from '@/lib/csrf'
+import { isRole } from '@/lib/roles'
 
 // GET: 전체 회원 목록 + 소속 부서 + 차단·승인 여부
 export async function GET() {
@@ -34,7 +35,7 @@ export async function PATCH(req: Request) {
   const { id, username, name, email, phone_number, role, is_blocked, is_approved, new_password } = await req.json()
   if (!id) return NextResponse.json({ error: 'id가 필요합니다.' }, { status: 400 })
 
-  if (role !== undefined && role !== 'admin' && role !== 'member') {
+  if (role !== undefined && !isRole(role)) {
     return NextResponse.json({ error: '잘못된 권한 값입니다.' }, { status: 400 })
   }
   if (is_blocked !== undefined && typeof is_blocked !== 'boolean') {
@@ -47,7 +48,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: '새 비밀번호는 6자 이상으로 입력해 주세요.' }, { status: 400 })
   }
   // 본인 계정 차단·강등으로 관리자가 사라지는 사고 방지
-  if (id === admin.id && (is_blocked === true || role === 'member')) {
+  if (id === admin.id && (is_blocked === true || (role !== undefined && role !== 'admin'))) {
     return NextResponse.json({ error: '본인 계정은 차단하거나 권한을 낮출 수 없습니다.' }, { status: 400 })
   }
 

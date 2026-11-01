@@ -4,22 +4,21 @@ import { useEffect, useState } from 'react'
 import type { Board } from '@/lib/boards'
 import { HUBS, type HubKey } from '@/lib/hubs'
 
-type Group = { id: number, name: string }
 type Draft = Omit<Board, 'id' | 'categories' | 'section'> & { categories: string, hub: HubKey | null, tab_order: number }
 type BoardRow = Board & { hub: HubKey | null, tab_order: number }
 
-const LEVEL_LABEL = { admin: '관리자만', group: '부서 멤버', member: '로그인 회원' }
+const LEVEL_LABEL = { admin: '관리자·운영자', group: '부서 (+관리자·운영자)', member: '로그인 회원' }
 const KIND_LABEL = { list: '목록형', card: '카드형(사진·영상)' }
 
 const emptyDraft: Draft = {
   slug: '', name: '', hub: 'community', tab_order: 99, kind: 'list', write_level: 'admin',
-  group_id: null, categories: '', sort_order: 100,
+  categories: '', sort_order: 100,
 }
 
 function toPayload(d: Draft) {
   return {
     name: d.name, hub: d.hub, tab_order: Number(d.tab_order) || 0, kind: d.kind, write_level: d.write_level,
-    group_id: d.group_id, sort_order: Number(d.sort_order) || 0,
+    sort_order: Number(d.sort_order) || 0,
     categories: d.categories.split(',').map((c) => c.trim()).filter(Boolean),
   }
 }
@@ -27,7 +26,8 @@ function toPayload(d: Draft) {
 export default function AdminBoardsPage() {
   const [boards, setBoards] = useState<BoardRow[]>([])
   const [drafts, setDrafts] = useState<Record<number, Draft>>({})
-  const [groups, setGroups] = useState<Group[]>([])
+  // 게시판별 연결 부서 이름 (연결은 부서 관리에서)
+  const [groupNames, setGroupNames] = useState<Record<number, string[]>>({})
   const [postCounts, setPostCounts] = useState<Record<number, number>>({})
   const [newBoard, setNewBoard] = useState<Draft>(emptyDraft)
   const [loading, setLoading] = useState(true)
@@ -40,7 +40,7 @@ export default function AdminBoardsPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? '목록 조회 실패')
       setBoards(data.boards)
-      setGroups(data.groups)
+      setGroupNames(data.groupNames)
       setPostCounts(data.postCounts)
       setDrafts(Object.fromEntries((data.boards as BoardRow[]).map((b) => [b.id, { ...b, categories: b.categories.join(', ') }])))
     } catch (e) {
@@ -127,13 +127,6 @@ export default function AdminBoardsPage() {
           {Object.entries(LEVEL_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
       </label>
-      <label className="text-xs text-gray-500">글쓰기 부서
-        <select className={fieldClass} value={d.group_id ?? ''} disabled={d.write_level !== 'group'}
-          onChange={(e) => onChange({ group_id: e.target.value ? Number(e.target.value) : null })}>
-          <option value="">(미지정 — 관리자만)</option>
-          {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-        </select>
-      </label>
       <label className="text-xs text-gray-500">말머리 (쉼표 구분)
         <input className={fieldClass} value={d.categories} onChange={(e) => onChange({ categories: e.target.value })} />
       </label>
@@ -145,13 +138,13 @@ export default function AdminBoardsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">게시판 관리</h1>
         <p className="mt-1 text-sm text-gray-500">
-          게시판이 어느 메뉴(허브)의 몇 번째 탭에 나올지 정합니다. &lsquo;부서 멤버&rsquo; 권한은 지정한 부서 멤버와 관리자만 글을 쓸 수 있습니다 (부서 멤버는 부서 관리에서 지정).
+          게시판이 어느 메뉴(허브)의 몇 번째 탭에 나올지 정합니다. 관리자·운영자는 모든 게시판에 글을 쓸 수 있고, &lsquo;부서&rsquo; 권한 게시판은 연결된 부서원도 쓸 수 있습니다 (부서 연결은 부서 관리에서).
         </p>
       </div>
 
       <form onSubmit={handleCreate} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h2 className="font-semibold text-gray-800 mb-3">게시판 추가</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 items-end">
           <label className="text-xs text-gray-500">주소 (영문)
             <input className={fieldClass} placeholder="예: choir" value={newBoard.slug}
               onChange={(e) => setNewBoard({ ...newBoard, slug: e.target.value })} />
@@ -185,9 +178,15 @@ export default function AdminBoardsPage() {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {fields(drafts[b.id], (patch) => updateDraft(b.id, patch))}
               </div>
+              {drafts[b.id].write_level === 'group' && (
+                <p className="mt-3 text-xs text-gray-500">
+                  연결된 부서: {groupNames[b.id]?.length ? groupNames[b.id].join(', ') : <span className="text-gray-400">없음 (관리자·운영자만 글쓰기)</span>}
+                  <span className="text-gray-400"> · 부서 관리에서 변경</span>
+                </p>
+              )}
             </div>
           ))}
         </div>

@@ -4,8 +4,8 @@ export type Board = {
     name: string
     section: string
     kind: 'list' | 'card'
+    // admin: 관리자·운영자 / group: 연결된 부서(board_groups) + 관리자·운영자 / member: 승인 회원 누구나
     write_level: 'admin' | 'group' | 'member'
-    group_id: number | null
     categories: string[]
     sort_order: number
     // 소속 허브(탭 화면), null이면 메뉴에서 숨김

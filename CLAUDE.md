@@ -44,11 +44,11 @@ src/
 │   │   ├── page.tsx                # 대시보드
 │   │   ├── members/page.tsx        # 회원 관리 (가입 승인/차단/권한 변경)
 │   │   ├── (site)/                 # 사이트 설정 관리자 전용 (layout 가드) — 주소는 /admin/boards 등 그대로
-│   │   │   ├── boards/page.tsx     # 게시판 관리 (허브·탭 순서·글쓰기 권한·부서)
+│   │   │   ├── boards/page.tsx     # 게시판 관리 (허브·탭 순서·글쓰기 권한, 연결된 부서는 표시만)
 │   │   │   └── pages/ history/ people/ missions/  # 콘텐츠 관리 (페이지 문구·연혁·섬기는 분들·선교지)
 │   │   ├── bulletins/page.tsx      # 주보 업로드
 │   │   ├── events/page.tsx
-│   │   ├── groups/page.tsx         # 부서 관리 (부서 게시판 글쓰기 권한)
+│   │   ├── groups/page.tsx         # 부서 관리 (부서원 배정 + 부서가 글 쓸 게시판 연결)
 │   │   └── notices/page.tsx
 │   ├── auth/
 │   │   ├── login/page.tsx
@@ -135,13 +135,14 @@ export async function GET() {
 | name | text | 이름 |
 | email | text | 실제 이메일 (선택) |
 | phone_number | text | |
-| role | text | `'admin'` \| `'member'` (기본값) |
+| role | text | `'admin'`(관리자) \| `'editor'`(운영자) \| `'member'`(기본값) — 이름은 `src/lib/roles.ts` |
 | is_blocked | boolean | true 시 접근 차단 |
 | created_at | timestamp | |
 
 ### boards / board_posts (게시판)
-- boards: slug, name, hub(허브 키, null=숨김), tab_order, kind(`list`|`card`), write_level(`admin`|`group`|`member`), group_id(부서 = groups), categories(말머리). section은 이전 메뉴용 필수 컬럼(hub 값으로 채움)
+- boards: slug, name, hub(허브 키, null=숨김), tab_order, kind(`list`|`card`), write_level(`admin` 관리자·운영자|`group` 연결된 부서+관리자·운영자|`member` 승인 회원), categories(말머리). section은 이전 메뉴용 필수 컬럼(hub 값으로 채움)
 - board_posts: board_id, author_id/author_name(트리거가 설정), category, title, content(HTML), youtube_id, thumbnail_url, is_pinned, members_only, cafe_article_id(카페 원본)
+- board_groups(board_id, group_id): 부서 ↔ 게시판 여러 개 연결 (부서 관리에서 지정, RLS 정책 없음 → 서비스 키 전용). 옛 `boards.group_id`는 삭제됨
 - 글쓰기 권한은 DB 함수 `can_write_board(bid)`, 회원 전용 글은 `members_only` + RLS
 - 이미지: `board-images`(공개), `board-private`(회원 전용 글, `/api/board-images/...`로만 접근)
 - 허브 소속 게시판의 `/board/[slug]` 목록은 허브 탭(`/sermons?tab=...`)으로 리다이렉트, 글 상세는 `/board/[slug]/[id]` 유지
@@ -200,6 +201,8 @@ window.location.href = '/'
 - `proxy.ts`: `/admin/*` → 미로그인 시 `/auth/login` 리다이렉트
 - `admin/layout.tsx`: `is_blocked = true` → `/auth/login?blocked=1` 리다이렉트
 - **가입 승인제** (`supabase/20261001_signup_approval.sql`): 새 가입자는 `profiles.is_approved = false` → 관리자가 회원 관리에서 승인해야 로그인 가능(로그인 화면이 미승인·차단 계정을 바로 로그아웃). DB에서도 `is_active_member()`·글 작성 트리거가 미승인 회원을 막음
+- **운영자** (`supabase/20261101_editor_board_groups.sql`, `profiles.role = 'editor'`): 모든 게시판에 글쓰기(`is_editor()` → `can_write_board`), 수정·삭제는 자기 글만, 상단 고정·회원 전용 지정 불가, 관리자 화면·헤더 관리자 버튼 없음. 회원 관리에서 관리자가 지정
+- **부서 게시판**: 글쓰기 '부서' 게시판은 `board_groups`로 연결된 부서의 승인 회원 + 관리자·운영자. 연결은 부서 관리(관리자 누구나), 게시판 관리는 연결된 부서를 보여 주기만 함
 - **사이트 설정 관리자** (`supabase/20261002_site_managers.sql`, `profiles.can_manage_site`): 게시판 관리·페이지 문구·연혁·섬기는 분들·선교지(+콘텐츠 사진 올리기)는 관리자 중 이 표시가 있는 사람만 (현재 선동현·노성소). 화면은 `src/app/admin/(site)/` 묶음 + layout 가드, API는 `verifySiteManager()`. 이 값은 화면에서 바꿀 수 없고 SQL로만 지정. 다른 관리자는 사이트 설정 관리자를 강등·차단할 수 없음
 - 관리자 화면 표시: 루트 레이아웃이 `AdminProvider`(isAdmin·canManageSite)를 내려 줌 → `useIsAdmin()`, 사용자 화면의 `AdminActions`(수정·삭제), `AdminPageBar`(오른쪽 아래 관리 화면 바로가기, `src/lib/admin-links.ts`). 실제 권한은 관리자 API·RLS가 검사
 - DB: 차단 회원은 관리자 권한 무효(`is_admin()`), 글·댓글 작성 불가(트리거)
@@ -308,7 +311,7 @@ NEXT_PUBLIC_NAVER_SITE_VERIFICATION=    # 네이버 서치어드바이저 확인
 ## DB 변경 적용
 
 스키마·정책 변경은 `supabase/*.sql` 파일로 작성 후 `node --env-file=.env.local scripts/run-sql.mjs supabase/파일.sql` 로 실행 (Management API, `.env.local`의 `SUPABASE_ACCESS_TOKEN` 사용). 대시보드 SQL Editor로 실행해도 됨.
-신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` → `supabase/20261002_site_managers.sql` 순서.
+신규 DB: `schema.sql` → `supabase/20261001_security_fix.sql` → `supabase/20261001_boards.sql` → `supabase/20261001_redesign.sql` → `supabase/20261001_signup_approval.sql` → `supabase/20261002_site_managers.sql` → `supabase/20261101_editor_board_groups.sql` 순서.
 
 리디자인 초기 데이터: `node --env-file=.env.local scripts/redesign-seed.mjs [--dry-run]` (테이블이 비어 있을 때만 넣음 → 관리자 수정분 보존)
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { HUBS, isHubKey } from '@/lib/hubs'
 
 type Group = {
   id: number
@@ -8,7 +9,14 @@ type Group = {
   description: string
   created_at: string
   member_count: number
+  // 이 부서원이 글을 쓸 수 있는 게시판
+  board_ids: number[]
 }
+
+// 글쓰기 권한이 '부서'인 게시판 (연결 대상)
+type BoardOption = { id: number, name: string, hub: string | null }
+
+const hubTitle = (hub: string | null) => (isHubKey(hub) ? HUBS[hub].title : '메뉴 숨김')
 
 type GroupMember = {
   id: number
@@ -41,6 +49,12 @@ export default function AdminGroupsPage() {
   const [memberLoading, setMemberLoading] = useState(false)
   const [memberError, setMemberError] = useState<string | null>(null)
 
+  // 게시판 연결 창
+  const [boards, setBoards] = useState<BoardOption[]>([])
+  const [linkGroup, setLinkGroup] = useState<Group | null>(null)
+  const [linkIds, setLinkIds] = useState<number[]>([])
+  const [linkSaving, setLinkSaving] = useState(false)
+
   const fetchGroups = async () => {
     setLoading(true)
     setFetchError(null)
@@ -49,6 +63,7 @@ export default function AdminGroupsPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? '부서 목록 조회 실패')
       setGroups(json.groups)
+      setBoards(json.boards)
     } catch (e: unknown) {
       setFetchError(e instanceof Error ? e.message : '알 수 없는 오류')
     } finally {
@@ -157,6 +172,41 @@ export default function AdminGroupsPage() {
     }
   }
 
+  const openLinkModal = (group: Group) => {
+    setLinkGroup(group)
+    setLinkIds(group.board_ids)
+  }
+
+  const toggleLink = (boardId: number) =>
+    setLinkIds((prev) => (prev.includes(boardId) ? prev.filter((id) => id !== boardId) : [...prev, boardId]))
+
+  const handleSaveLinks = async () => {
+    if (!linkGroup) return
+    setLinkSaving(true)
+    try {
+      const res = await fetch(`/api/admin/groups?id=${linkGroup.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ board_ids: linkIds }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? '저장 실패')
+      setLinkGroup(null)
+      fetchGroups()
+    } catch (e: unknown) {
+      alert('저장 중 오류: ' + (e instanceof Error ? e.message : String(e)))
+    } finally {
+      setLinkSaving(false)
+    }
+  }
+
+  const boardName = (id: number) => boards.find((b) => b.id === id)?.name
+  // 연결 창: 메뉴(허브)별로 묶어 보여 줌
+  const boardsByHub = boards.reduce<Record<string, BoardOption[]>>((acc, b) => {
+    (acc[hubTitle(b.hub)] ??= []).push(b)
+    return acc
+  }, {})
+
   const availableProfiles = allProfiles.filter(
     (p) => !members.some((m) => m.user_id === p.id)
   )
@@ -165,7 +215,7 @@ export default function AdminGroupsPage() {
     <div className="max-w-[1300px] mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">부서 관리</h1>
-        <p className="mt-1 text-gray-500">부서를 만들고 회원을 배정합니다. 부서 게시판의 글쓰기 권한에 쓰입니다.</p>
+        <p className="mt-1 text-gray-500">부서를 만들고 회원을 배정합니다. 부서마다 &lsquo;게시판 연결&rsquo;에서 고른 게시판에 그 부서원이 글을 쓸 수 있습니다 (관리자·운영자는 모든 게시판).</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -245,8 +295,26 @@ export default function AdminGroupsPage() {
                       <p className="text-xs text-gray-400 mt-2">
                         👥 멤버 {group.member_count}명
                       </p>
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs text-gray-500">글쓰기 게시판</span>
+                        {group.board_ids.length === 0 ? (
+                          <span className="text-xs text-gray-400">연결 안 됨</span>
+                        ) : (
+                          group.board_ids.map((id) => boardName(id) && (
+                            <span key={id} className="inline-block bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-md font-medium">
+                              {boardName(id)}
+                            </span>
+                          ))
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => openLinkModal(group)}
+                        className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      >
+                        게시판 연결
+                      </button>
                       <button
                         onClick={() => openMemberModal(group)}
                         className="px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
@@ -268,6 +336,53 @@ export default function AdminGroupsPage() {
           )}
         </div>
       </div>
+
+      {/* 게시판 연결 모달 */}
+      {linkGroup && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setLinkGroup(null) }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">{linkGroup.name} — 게시판 연결</h2>
+              <button onClick={() => setLinkGroup(null)} className="p-1 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100">
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 -mt-2">
+              체크한 게시판에 이 부서원이 글을 쓸 수 있습니다. 글쓰기 권한이 &lsquo;부서&rsquo;인 게시판만 나옵니다 (권한은 게시판 관리에서 변경).
+            </p>
+            {boards.length === 0 ? (
+              <p className="text-sm text-gray-400 py-4 text-center">글쓰기 권한이 &lsquo;부서&rsquo;인 게시판이 없습니다.</p>
+            ) : (
+              <div className="space-y-4 max-h-[55vh] overflow-y-auto">
+                {Object.entries(boardsByHub).map(([title, list]) => (
+                  <div key={title}>
+                    <p className="text-xs font-semibold text-gray-500 mb-1.5">{title}</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {list.map((b) => (
+                        <label key={b.id} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-100 hover:bg-gray-50 text-sm text-gray-800 cursor-pointer">
+                          <input type="checkbox" checked={linkIds.includes(b.id)} onChange={() => toggleLink(b.id)} className="w-4 h-4 accent-indigo-600" />
+                          {b.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => setLinkGroup(null)} className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                취소
+              </button>
+              <button onClick={handleSaveLinks} disabled={linkSaving} className="flex-1 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                {linkSaving ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 멤버 관리 모달 */}
       {modalGroup && (
